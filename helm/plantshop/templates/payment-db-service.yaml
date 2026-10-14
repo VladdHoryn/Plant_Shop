@@ -1,0 +1,17 @@
+# In-cluster address of the payment-service database (DB_HOST of payment-service), port 5432
+{{- $component := "payment-db" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 4 }}
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

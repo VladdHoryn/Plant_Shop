@@ -1,0 +1,17 @@
+# In-cluster address of the catalog-service database (DB_HOST of catalog-service), port 5432
+{{- $component := "catalog-db" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 4 }}
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

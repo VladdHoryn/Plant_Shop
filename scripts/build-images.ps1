@@ -1,7 +1,7 @@
 # Builds the Plant Shop images straight into minikube's Docker daemon, so the cluster
 # can use them without a registry (imagePullPolicy: IfNotPresent).
 #
-#   .\scripts\build-images.ps1                                   -> every service as 1.0.0, catalog-service also as 1.1.0
+#   .\scripts\build-images.ps1                                   -> every service as 1.0.0 and 1.1.0
 #   .\scripts\build-images.ps1 -Version 1.2.0 -Service catalog-service
 param(
     [string]$Version,
@@ -26,8 +26,8 @@ if ($Version -and $Service) {
 foreach ($name in 'config-service', 'discovery-service', 'api-gateway', 'catalog-service',
                   'inventory-service', 'order-service', 'payment-service') {
     Build-Image $name '1.0.0'
+    # Second version for update / rollback demos (same code, APP_VERSION=1.1.0; the jar layer is cached)
+    Build-Image $name '1.1.0'
 }
-# Second version for the rolling update / rollback demo (same code, APP_VERSION=1.1.0)
-Build-Image 'catalog-service' '1.1.0'
 
 docker images 'plantshop/*'

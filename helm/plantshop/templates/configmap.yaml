@@ -1,0 +1,20 @@
+# Non-sensitive settings, injected into the Spring services as environment variables (envFrom).
+# The services read them through the placeholders in config-service/src/main/resources/configurations.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "plantshop.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" "config") | nindent 4 }}
+data:
+  # Where the platform services are: this release's Service DNS names
+  CONFIG_SERVER_URL: {{ printf "http://%s:%v" (include "plantshop.componentName" (dict "root" . "component" "config-service")) .Values.configService.service.port | quote }}
+  EUREKA_URL: {{ printf "http://%s:%v/eureka" (include "plantshop.componentName" (dict "root" . "component" "discovery-service")) .Values.discoveryService.service.port | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ printf "%s:9092" (include "plantshop.componentName" (dict "root" . "component" "kafka")) | quote }}
+  DB_PORT: "5432"
+  # Business settings
+  SHOP_NAME: {{ .Values.config.shopName | quote }}
+  SHOP_CURRENCY: {{ .Values.config.shopCurrency | quote }}
+  PAYMENT_MAX_AMOUNT: {{ .Values.config.paymentMaxAmount | quote }}
+  JAVA_TOOL_OPTIONS: {{ .Values.config.javaToolOptions | quote }}
