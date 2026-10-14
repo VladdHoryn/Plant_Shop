@@ -1,0 +1,33 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5434}/inventory_db
+    username: ${plantshop.db.username}
+    password: ${plantshop.db.password}
+  flyway:
+    schemas: inventory
+    default-schema: inventory
+    create-schemas: true
+    locations: classpath:db/migration
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: inventory
+  kafka:
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: inventoryReserved:com.plantshop.inventory.event.InventoryReservedEvent,inventoryFailed:com.plantshop.inventory.event.InventoryFailedEvent
+    consumer:
+      group-id: inventory-service
+      auto-offset-reset: earliest
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: com.plantshop.*
+        spring.json.type.mapping: plantCreated:com.plantshop.inventory.event.PlantCreatedEvent,orderCreated:com.plantshop.inventory.event.OrderCreatedEvent,paymentCompleted:com.plantshop.inventory.event.PaymentCompletedEvent,paymentFailed:com.plantshop.inventory.event.PaymentFailedEvent

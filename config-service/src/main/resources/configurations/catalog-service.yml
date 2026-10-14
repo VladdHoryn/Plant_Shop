@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/catalog_db
+    username: ${plantshop.db.username}
+    password: ${plantshop.db.password}
+  flyway:
+    # Flyway creates the schema (if missing) and applies db/migration/V*__*.sql
+    schemas: catalog
+    default-schema: catalog
+    create-schemas: true
+    locations: classpath:db/migration
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: catalog
+  kafka:
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: plantCreated:com.plantshop.catalog.event.PlantCreatedEvent
