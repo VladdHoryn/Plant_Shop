@@ -1,0 +1,16 @@
+# Storage for the inventory-service PostgreSQL data (minikube's default "standard" StorageClass
+# provisions it dynamically). The data survives pod restarts and redeploys.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: inventory-db-data
+  namespace: plantshop
+  labels:
+    app: inventory-db
+    app.kubernetes.io/part-of: plantshop
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

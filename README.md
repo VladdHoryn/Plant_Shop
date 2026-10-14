@@ -64,6 +64,108 @@ for later builds); services are ready about a minute after the containers start.
 
 One `Dockerfile` at the root builds every module: `docker build --build-arg SERVICE=catalog-service .`
 
+## Running on Kubernetes (minikube)
+
+All manifests are in [`k8s/`](k8s), one object per file, everything in the `plantshop` namespace
+(`00-namespace.yaml` sorts first so a single `kubectl apply` creates it before the rest).
+
+| Component | Objects | Notes |
+|---|---|---|
+| config-service, discovery-service | Deployment (1 replica) + ClusterIP Service | Eureka runs standalone, so it stays at one replica |
+| api-gateway | Deployment (2) + **NodePort** Service `30080` + Ingress `plantshop.local` | the entry point from the host |
+| catalog-service | Deployment (2) + ClusterIP Service | used for the scaling / update / rollback demo; `GET /api/catalog/info` shows version, pod name and ConfigMap values |
+| inventory-, order-, payment-service | Deployment (1) + ClusterIP Service | |
+| `<service>-db` ×4 | Deployment (PostgreSQL 16, `Recreate`) + Service + **PVC** 1Gi | database per service, schema created by Flyway |
+| kafka | Deployment (KRaft single node, `Recreate`) + Service + **PVC** 1Gi | |
+| shared | ConfigMap `plantshop-config`, Secret `plantshop-db-secret` | |
+
+Every Spring Deployment has CPU/memory requests and limits, a startup probe and liveness/readiness probes
+(`/actuator/health/liveness` and `/readiness`), and an init container that waits for its dependencies
+(Kubernetes has no `depends_on`). Updates use `RollingUpdate` with `maxSurge: 1`, `maxUnavailable: 0` and
+`minReadySeconds: 15`, so a new pod is registered in Eureka before an old one is removed. The gateway retries
+GET requests on another instance, which keeps the API available during a rolling update.
+
+### Deployment order
+
+```bash
+# 1. Cluster (once); 6 GB is enough for the whole stack
+minikube start --driver=docker --cpus=4 --memory=6g
+minikube addons enable metrics-server
+minikube addons enable ingress
+kubectl get nodes
+kubectl get pods -n kube-system
+
+# 2. Images: built straight into minikube's Docker, tagged with versions (never "latest").
+#    All services as 1.0.0 plus catalog-service 1.1.0 for the update demo.
+./scripts/build-images.sh                  # PowerShell: .\scripts\build-images.ps1
+
+# 3. Everything at once (about 1.5 min until all pods are Ready)
+kubectl apply -f k8s/
+kubectl -n plantshop get pods -w
+
+# 4. Open the application
+minikube service api-gateway -n plantshop --url       # NodePort, prints http://127.0.0.1:<port>
+#    or: kubectl -n plantshop port-forward svc/api-gateway 8080:80   -> http://localhost:8080
+#    or: Ingress — add "127.0.0.1 plantshop.local" to the hosts file, run "minikube tunnel",
+#        then open http://plantshop.local/api/catalog/plants
+```
+
+Useful URLs (through the gateway): `/api/catalog/plants`, `/api/catalog/categories`, `/api/catalog/info`,
+`/api/inventory/1`, `/api/orders`.
+
+### ConfigMap `plantshop-config`
+
+Injected into every Spring service with `envFrom`; the services read them through the `${...}` placeholders
+in `config-service/src/main/resources/configurations`.
+
+| Key | Value | Used for |
+|---|---|---|
+| `CONFIG_SERVER_URL` | `http://config-service:8888` | where services load their configuration from |
+| `EUREKA_URL` | `http://discovery-service:8761/eureka` | service registry |
+| `KAFKA_BOOTSTRAP_SERVERS` | `kafka:9092` | Kafka broker |
+| `DB_PORT` | `5432` | PostgreSQL port (the host comes from `DB_HOST`, set per Deployment) |
+| `SHOP_NAME` | `Plant Shop on Kubernetes` | shown by `/api/catalog/info` |
+| `SHOP_CURRENCY` | `UAH` | shown by `/api/catalog/info` |
+| `PAYMENT_MAX_AMOUNT` | `10000` | payment-service declines larger payments |
+| `JAVA_TOOL_OPTIONS` | `-XX:MaxRAMPercentage=70 -XX:+UseSerialGC ...` | small JVM footprint for a laptop cluster |
+
+### Secret `plantshop-db-secret`
+
+| Key | Used by |
+|---|---|
+| `DB_USERNAME` | `POSTGRES_USER` of the 4 databases; `DB_USERNAME` of the services |
+| `DB_PASSWORD` | `POSTGRES_PASSWORD` of the 4 databases; `DB_PASSWORD` of the services |
+
+The values are lab-only demo credentials. Check them inside a container with
+`kubectl -n plantshop exec deploy/catalog-service -- printenv DB_USERNAME DB_PASSWORD SHOP_NAME`.
+
+### Lifecycle cheat sheet
+
+```bash
+kubectl -n plantshop delete pod <catalog-service-pod>                       # self-healing
+kubectl -n plantshop scale deploy/catalog-service --replicas=3              # scaling
+for i in $(seq 6); do curl -s localhost:8080/api/catalog/info; echo; done   # which pod answered
+kubectl -n plantshop set image deploy/catalog-service catalog-service=plantshop/catalog-service:1.1.0
+kubectl -n plantshop annotate deploy/catalog-service kubernetes.io/change-cause="Update image to 1.1.0" --overwrite
+kubectl -n plantshop rollout status deploy/catalog-service
+kubectl -n plantshop rollout history deploy/catalog-service
+kubectl -n plantshop rollout undo deploy/catalog-service                    # back to the previous revision
+```
+
+`./scripts/k8s-demo.sh` runs the whole demonstration (deploy, self-healing, scaling, rolling update with an
+availability probe, rollback, `ImagePullBackOff` diagnostics and the fix) and saves every command with its output
+to [`docs/k8s-report.md`](docs/k8s-report.md).
+
+### Removing everything
+
+```bash
+kubectl delete -f k8s/          # or: kubectl delete namespace plantshop
+```
+
+minikube's storage provisioner names its directories after `<namespace>/<pvc>` and does not always remove them.
+If the next deployment fails with `password authentication failed`, the databases found old data created with a
+different password: run `minikube ssh -- sudo rm -rf /tmp/hostpath-provisioner/plantshop` and apply again.
+
 ## Running the services from the IDE
 
 Prerequisites: JDK 21 (`JAVA_HOME` set). Start only the infrastructure in Docker:

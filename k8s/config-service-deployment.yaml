@@ -1,0 +1,74 @@
+# Spring Cloud Config server: serves the configuration of every other service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-service
+  namespace: plantshop
+  labels:
+    app: config-service
+    app.kubernetes.io/part-of: plantshop
+  annotations:
+    kubernetes.io/change-cause: "Initial deployment, image 1.0.0"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  # A new pod counts as available only after it has been ready for 15 s, which gives the
+  # Eureka clients (registry refresh every 5 s) time to see it before an old pod is stopped
+  minReadySeconds: 15
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: config-service
+  template:
+    metadata:
+      labels:
+        app: config-service
+        tier: backend
+        app.kubernetes.io/part-of: plantshop
+    spec:
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 45
+      containers:
+        - name: config-service
+          image: plantshop/config-service:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8888
+          envFrom:
+            - configMapRef:
+                name: plantshop-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 320Mi
+            limits:
+              cpu: "1"
+              memory: 640Mi
+          # Spring Boot exposes the liveness/readiness health groups automatically on Kubernetes.
+          # The startup probe gives the JVM up to 3 minutes before the other probes take over.
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 36
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3

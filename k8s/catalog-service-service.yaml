@@ -1,0 +1,17 @@
+# Direct in-cluster access to catalog-service (the gateway itself balances through Eureka)
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-service
+  namespace: plantshop
+  labels:
+    app: catalog-service
+    app.kubernetes.io/part-of: plantshop
+spec:
+  type: ClusterIP
+  selector:
+    app: catalog-service
+  ports:
+    - name: http
+      port: 8081
+      targetPort: http

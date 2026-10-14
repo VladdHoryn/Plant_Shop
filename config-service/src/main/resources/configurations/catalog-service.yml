@@ -24,3 +24,10 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: plantCreated:com.plantshop.catalog.event.PlantCreatedEvent
+
+# Shown by GET /api/catalog/info. APP_VERSION is baked into the image (Dockerfile build arg);
+# SHOP_NAME and SHOP_CURRENCY come from the Kubernetes ConfigMap
+plantshop:
+  version: ${APP_VERSION:dev}
+  shop-name: ${SHOP_NAME:Plant Shop}
+  currency: ${SHOP_CURRENCY:UAH}

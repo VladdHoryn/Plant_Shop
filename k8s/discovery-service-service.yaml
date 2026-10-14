@@ -1,0 +1,17 @@
+# In-cluster address of Eureka: http://discovery-service:8761/eureka (EUREKA_URL)
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-service
+  namespace: plantshop
+  labels:
+    app: discovery-service
+    app.kubernetes.io/part-of: plantshop
+spec:
+  type: ClusterIP
+  selector:
+    app: discovery-service
+  ports:
+    - name: http
+      port: 8761
+      targetPort: http

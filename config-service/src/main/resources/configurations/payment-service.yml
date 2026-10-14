@@ -34,4 +34,4 @@ spring:
 
 # Simulated payment provider: payments above this amount are declined
 payment:
-  max-amount: 10000
+  max-amount: ${PAYMENT_MAX_AMOUNT:10000}

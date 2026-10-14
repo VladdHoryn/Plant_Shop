@@ -1,0 +1,15 @@
+# Kafka log directory (topics, consumer offsets), so events survive a broker restart
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-data
+  namespace: plantshop
+  labels:
+    app: kafka
+    app.kubernetes.io/part-of: plantshop
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

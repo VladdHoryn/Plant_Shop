@@ -1,0 +1,17 @@
+# Direct in-cluster access to payment-service (the gateway itself balances through Eureka)
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: plantshop
+  labels:
+    app: payment-service
+    app.kubernetes.io/part-of: plantshop
+spec:
+  type: ClusterIP
+  selector:
+    app: payment-service
+  ports:
+    - name: http
+      port: 8084
+      targetPort: http

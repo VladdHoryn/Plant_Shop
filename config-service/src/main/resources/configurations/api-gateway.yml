@@ -12,6 +12,24 @@ spring:
                 allowed-origins: "*"
                 allowed-methods: "*"
                 allowed-headers: "*"
+          # Connecting to a pod that no longer exists hangs instead of being refused, so fail fast
+          # and let the Retry filter below pick another instance
+          httpclient:
+            connect-timeout: 1000
+          # A GET that hits an instance which has just stopped (e.g. during a Kubernetes rolling
+          # update, before Eureka drops it) is retried on another instance
+          default-filters:
+            - name: Retry
+              args:
+                retries: 3
+                methods: GET
+                series: SERVER_ERROR
+                exceptions: java.io.IOException, org.springframework.cloud.gateway.support.TimeoutException
+                backoff:
+                  firstBackoff: 100ms
+                  maxBackoff: 1s
+                  factor: 2
+                  basedOnPreviousValue: false
           routes:
             - id: catalog-service
               uri: lb://catalog-service

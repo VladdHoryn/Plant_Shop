@@ -1,0 +1,73 @@
+# PostgreSQL for inventory-service. The database is created by the image (POSTGRES_DB);
+# the schema and tables are created by Flyway when inventory-service starts.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-db
+  namespace: plantshop
+  labels:
+    app: inventory-db
+    app.kubernetes.io/part-of: plantshop
+spec:
+  replicas: 1
+  # The volume is ReadWriteOnce: the old pod must stop before the new one mounts it
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: inventory-db
+  template:
+    metadata:
+      labels:
+        app: inventory-db
+        tier: database
+        app.kubernetes.io/part-of: plantshop
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: inventory_db
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: plantshop-db-secret
+                  key: DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: plantshop-db-secret
+                  key: DB_PASSWORD
+            # A subdirectory, because the volume root may contain lost+found
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: inventory-db-data

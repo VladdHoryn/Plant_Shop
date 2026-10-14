@@ -1,0 +1,24 @@
+# HTTP access from the host through the minikube ingress-nginx addon.
+# With the docker driver on Windows/macOS run "minikube tunnel" and open http://plantshop.local/
+# (add "127.0.0.1 plantshop.local" to the hosts file).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+  namespace: plantshop
+  labels:
+    app: api-gateway
+    app.kubernetes.io/part-of: plantshop
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: plantshop.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  name: http

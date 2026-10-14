@@ -27,6 +27,10 @@ plantshop:
     username: ${DB_USERNAME:plantshop}
     password: ${DB_PASSWORD:plantshop}
 
+# On SIGTERM (how Kubernetes stops a pod) finish in-flight requests before exiting
+server:
+  shutdown: graceful
+
 management:
   endpoints:
     web:

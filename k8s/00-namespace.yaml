@@ -1,0 +1,8 @@
+# Every Plant Shop object lives in this namespace.
+# The file name starts with 00- so that "kubectl apply -f k8s/" creates it first.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: plantshop
+  labels:
+    app.kubernetes.io/part-of: plantshop

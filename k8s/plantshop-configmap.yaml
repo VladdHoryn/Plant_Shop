@@ -1,0 +1,21 @@
+# Non-sensitive settings, injected into the Spring services as environment variables (envFrom).
+# The services read them through the placeholders in config-service/src/main/resources/configurations.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: plantshop-config
+  namespace: plantshop
+  labels:
+    app.kubernetes.io/part-of: plantshop
+data:
+  # Where the platform services are (Kubernetes Service DNS names)
+  CONFIG_SERVER_URL: "http://config-service:8888"
+  EUREKA_URL: "http://discovery-service:8761/eureka"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  DB_PORT: "5432"
+  # Business settings
+  SHOP_NAME: "Plant Shop on Kubernetes"
+  SHOP_CURRENCY: "UAH"
+  PAYMENT_MAX_AMOUNT: "10000"
+  # Small JVM footprint for a laptop cluster: heap is 70% of the container memory limit
+  JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k"

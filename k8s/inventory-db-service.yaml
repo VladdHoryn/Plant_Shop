@@ -1,0 +1,17 @@
+# In-cluster address of the inventory-service database: inventory-db:5432
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-db
+  namespace: plantshop
+  labels:
+    app: inventory-db
+    app.kubernetes.io/part-of: plantshop
+spec:
+  type: ClusterIP
+  selector:
+    app: inventory-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres

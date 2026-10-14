@@ -1,0 +1,17 @@
+# In-cluster address of the config server: http://config-service:8888 (CONFIG_SERVER_URL)
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-service
+  namespace: plantshop
+  labels:
+    app: config-service
+    app.kubernetes.io/part-of: plantshop
+spec:
+  type: ClusterIP
+  selector:
+    app: config-service
+  ports:
+    - name: http
+      port: 8888
+      targetPort: http

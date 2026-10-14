@@ -1,0 +1,17 @@
+# In-cluster address of the broker: kafka:9092 (matches KAFKA_ADVERTISED_LISTENERS)
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: plantshop
+  labels:
+    app: kafka
+    app.kubernetes.io/part-of: plantshop
+spec:
+  type: ClusterIP
+  selector:
+    app: kafka
+  ports:
+    - name: kafka
+      port: 9092
+      targetPort: kafka

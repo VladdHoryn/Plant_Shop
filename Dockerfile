@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
-# One Dockerfile for every module: docker build --build-arg SERVICE=catalog-service .
+# One Dockerfile for every module:
+#   docker build --build-arg SERVICE=catalog-service --build-arg APP_VERSION=1.0.0 -t plantshop/catalog-service:1.0.0 .
 
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 ARG SERVICE
@@ -23,5 +24,9 @@ WORKDIR /app
 RUN groupadd --system spring && useradd --system --gid spring spring
 COPY --from=build /workspace/app.jar app.jar
 USER spring
-ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75"
+# Declared in the runtime stage only, so changing the version does not rebuild the jar
+ARG APP_VERSION=dev
+LABEL org.opencontainers.image.version=${APP_VERSION}
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75" \
+    APP_VERSION=${APP_VERSION}
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
