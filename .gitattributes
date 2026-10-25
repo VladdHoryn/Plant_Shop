@@ -1,6 +1,8 @@
 # Shell scripts must keep LF endings to run in bash, even with core.autocrlf=true
 *.sh text eol=lf
 mvnw text eol=lf
+# git hooks have no extension and are run by bash
+scripts/git-hooks/* text eol=lf
 mvnw.cmd text eol=crlf
 
 # Sources and configuration are always LF, on every OS. Physical metrics (bytes, file hash, diff churn)
@@ -13,4 +15,7 @@ mvnw.cmd text eol=crlf
 *.js text eol=lf
 *.md text eol=lf
 *.http text eol=lf
+*.py text eol=lf
+*.txt text eol=lf
+*.diff text eol=lf
 Dockerfile text eol=lf

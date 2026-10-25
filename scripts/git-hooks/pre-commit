@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Git pre-commit hook: blocks a commit when any method of a staged Java file has cyclomatic complexity > 10.
+# Installed into .git/hooks/pre-commit by scripts/install-hooks.sh (the source lives here, under version control).
+#
+#   1. collects the Java files staged for this commit (added, copied, modified, renamed)
+#   2. writes their STAGED content to target/precommit/ - the version that is about to be committed,
+#      not the working copy, which may differ after a partial "git add"
+#   3. scans only those files with Lizard (scripts/cc-check.sh, pinned container)
+#   4. exit code 1 (commit aborted) if a method exceeds the limit or the scanner cannot run; 0 otherwise
+set -uo pipefail
+
+CC_LIMIT=${CC_LIMIT:-10}
+SNAPSHOT=target/precommit
+RED=$'\e[1;31m'; GREEN=$'\e[1;32m'; YELLOW=$'\e[1;33m'; RESET=$'\e[0m'
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+mapfile -t FILES < <(git diff --cached --name-only --diff-filter=ACMR -- '*.java')
+if [ ${#FILES[@]} -eq 0 ]; then
+  echo "${GREEN}[pre-commit] no Java files staged, complexity check skipped${RESET}"
+  exit 0
+fi
+
+echo "${YELLOW}[pre-commit] cyclomatic complexity check (limit CC <= $CC_LIMIT) of ${#FILES[@]} staged Java file(s):${RESET}"
+printf '  %s\n' "${FILES[@]}"
+rm -rf "$SNAPSHOT"
+git checkout-index --prefix="$SNAPSHOT/" -- "${FILES[@]}"
+
+CC_LIMIT=$CC_LIMIT ./scripts/cc-check.sh --root "$SNAPSHOT" "${FILES[@]}"
+status=$?
+rm -rf "$SNAPSHOT"
+
+case $status in
+  0)
+    echo "${GREEN}[pre-commit] PASS: complexity within the limit, commit allowed${RESET}"
+    exit 0 ;;
+  1)
+    echo "${RED}[pre-commit] COMMIT BLOCKED: a method exceeds CC $CC_LIMIT (see the warning above).${RESET}"
+    echo "${RED}             Split the decision logic or replace the conditions with a lookup table, then commit again.${RESET}"
+    exit 1 ;;
+  *)
+    # fail closed: an unchecked commit is exactly what the hook exists to prevent
+    echo "${RED}[pre-commit] COMMIT BLOCKED: the complexity scanner could not run (is Docker running?)${RESET}"
+    exit 1 ;;
+esac
