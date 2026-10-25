@@ -1,0 +1,106 @@
+diff --git a/payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java b/payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+index fca9e9a..8ff8e6d 100644
+--- a/payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
++++ b/payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+@@ -16,25 +16,42 @@ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+ 
+ import java.math.BigDecimal;
++import java.util.Map;
+ import java.util.UUID;
++import java.util.stream.Stream;
+ 
+ @Slf4j
+ @Service
+ @RequiredArgsConstructor
+ public class PaymentService {
+ 
+-    /** Per-method limits of the payment provider. */
+-    static final BigDecimal WALLET_LIMIT = new BigDecimal("1000");
+-    static final BigDecimal PAYPAL_LIMIT = new BigDecimal("2500");
+-    static final BigDecimal CARD_LIMIT = new BigDecimal("5000");
++    /** A limit and the text used when an amount is above it. */
++    record LimitRule(BigDecimal limit, String declineReason) {
++
++        boolean declines(BigDecimal amount) {
++            return amount.compareTo(limit) > 0;
++        }
++    }
++
++    private static final BigDecimal WALLET_LIMIT = new BigDecimal("1000");
++    /** Below any amount: a payment method without a rule is always declined. */
++    private static final BigDecimal DECLINE_ALL = BigDecimal.ONE.negate();
++
++    /** The business rules of the payment provider as data: one entry per supported payment method. */
++    static final Map<String, LimitRule> METHOD_RULES = Map.of(
++            "CARD", new LimitRule(new BigDecimal("5000"), "Card payments are limited to 5000"),
++            "PAYPAL", new LimitRule(new BigDecimal("2500"), "PayPal payments are limited to 2500"),
++            "APPLE_PAY", new LimitRule(WALLET_LIMIT, "Wallet payments are limited to 1000"),
++            "GOOGLE_PAY", new LimitRule(WALLET_LIMIT, "Wallet payments are limited to 1000"));
+ 
+     private final PaymentRepository paymentRepository;
+     private final ApplicationEventPublisher eventPublisher;
+     private final PaymentProperties properties;
+ 
+     /**
+-     * Charges the order through a simulated provider. Declines unsupported payment methods, amounts above the
+-     * limit of the payment method, and amounts above the configured global limit.
++     * Charges the order through a simulated provider. The rule of the payment method is looked up in
++     * {@link #METHOD_RULES} and checked first, then the configured global limit; the first rule the amount
++     * breaks declines the payment.
+      */
+     @Transactional
+     public void process(InventoryReservedEvent event) {
+@@ -48,35 +65,29 @@ public class PaymentService {
+         payment.setAmount(event.totalAmount());
+         payment.setMethod(event.paymentMethod());
+ 
+-        String method = event.paymentMethod();
+-        BigDecimal amount = event.totalAmount();
+-        String declineReason = null;
+-        if ((method.equals("APPLE_PAY") || method.equals("GOOGLE_PAY")) && amount.compareTo(WALLET_LIMIT) > 0) {
+-            declineReason = "Wallet payments are limited to " + WALLET_LIMIT;
+-        } else if (method.equals("PAYPAL") && amount.compareTo(PAYPAL_LIMIT) > 0) {
+-            declineReason = "PayPal payments are limited to " + PAYPAL_LIMIT;
+-        } else if (method.equals("CARD") && amount.compareTo(CARD_LIMIT) > 0) {
+-            declineReason = "Card payments are limited to " + CARD_LIMIT;
+-        } else if (!method.equals("CARD") && !method.equals("PAYPAL")
+-                && !method.equals("APPLE_PAY") && !method.equals("GOOGLE_PAY")) {
+-            declineReason = "Unsupported payment method " + method;
+-        }
++        LimitRule methodRule = METHOD_RULES.getOrDefault(event.paymentMethod(),
++                new LimitRule(DECLINE_ALL, "Unsupported payment method " + event.paymentMethod()));
++        LimitRule globalRule = new LimitRule(properties.maxAmount(), "Amount exceeds the limit of " + properties.maxAmount());
++        Stream.of(methodRule, globalRule)
++                .filter(rule -> rule.declines(event.totalAmount()))
++                .map(LimitRule::declineReason)
++                .findFirst()
++                .ifPresentOrElse(reason -> decline(payment, reason), () -> complete(payment));
++    }
+ 
+-        if (declineReason != null || amount.compareTo(properties.maxAmount()) > 0) {
+-            payment.setStatus(PaymentStatus.FAILED);
+-            payment.setFailureReason(declineReason != null
+-                    ? declineReason
+-                    : "Amount exceeds the limit of " + properties.maxAmount());
+-            paymentRepository.save(payment);
+-            eventPublisher.publishEvent(new PaymentFailedEvent(event.orderId(), payment.getFailureReason()));
+-            return;
+-        }
++    private void decline(Payment payment, String reason) {
++        payment.setStatus(PaymentStatus.FAILED);
++        payment.setFailureReason(reason);
++        paymentRepository.save(payment);
++        eventPublisher.publishEvent(new PaymentFailedEvent(payment.getOrderId(), reason));
++    }
+ 
++    private void complete(Payment payment) {
+         payment.setStatus(PaymentStatus.COMPLETED);
+         payment.setTransactionId(UUID.randomUUID().toString());
+         Payment saved = paymentRepository.save(payment);
+         eventPublisher.publishEvent(
+-                new PaymentCompletedEvent(event.orderId(), saved.getId(), saved.getTransactionId()));
++                new PaymentCompletedEvent(payment.getOrderId(), saved.getId(), saved.getTransactionId()));
+     }
+ 
+     @Transactional(readOnly = true)
