@@ -1,3 +1,16 @@
 # Shell scripts must keep LF endings to run in bash, even with core.autocrlf=true
 *.sh text eol=lf
 mvnw text eol=lf
+mvnw.cmd text eol=crlf
+
+# Sources and configuration are always LF, on every OS. Physical metrics (bytes, file hash, diff churn)
+# would otherwise differ between Windows and Linux checkouts of the same commit (docs/reliability-report.md).
+*.java text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sql text eol=lf
+*.js text eol=lf
+*.md text eol=lf
+*.http text eol=lf
+Dockerfile text eol=lf

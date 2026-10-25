@@ -1,0 +1,64 @@
+# Quality measurements with the protections from docs/metrics-report.md (task 3):
+# pinned runner image, JDK, Maven plugins (pom.xml) and analyzer image (tools/lizard), analysis containers
+# with fixed CPU/RAM and no network, one run at a time per branch so jobs never compete for the runner.
+name: quality-gate
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  balanced-gate:
+    runs-on: ubuntu-24.04            # pinned image, never ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COVERAGE_MIN: "80"
+      MUTATION_MIN: "65"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21.0.8+9"   # exact JDK build
+          cache: maven
+      - name: Coverage (JaCoCo) and mutation score (PIT)
+        run: >
+          ./mvnw -B -Pquality verify
+          -pl secure-logging,catalog-service,inventory-service,order-service,payment-service -am
+          -Dtest='!*IntegrationTest' -Dsurefire.failIfNoSpecifiedTests=false
+      # Enforced for the modules declared critical (they handle personal data and secrets); the list only grows
+      - name: Balanced gate (coverage AND mutation score), critical modules
+        run: ./scripts/quality-gate.sh secure-logging
+      # Measured and reported for every other module until it is raised to the threshold
+      - name: Balanced gate, other modules (report only)
+        continue-on-error: true
+        run: ./scripts/quality-gate.sh catalog-service inventory-service order-service payment-service
+
+  integration-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21.0.8+9"
+          cache: maven
+      - run: ./mvnw -B test          # Testcontainers: Docker is available on the hosted runner
+
+  complexity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the pinned analyzer image
+        run: docker build -t plantshop/lizard:1.24.3-py3.13.17 tools/lizard
+      - name: Cyclomatic complexity <= 10 and function length <= 60 NLOC
+        run: >
+          docker run --rm --network none --cpus 1 --memory 256m -v "$PWD:/src:ro"
+          plantshop/lizard:1.24.3-py3.13.17 -l java -x "*/test/*" -x "*/target/*" -C 10 -L 60 -w .

@@ -415,3 +415,6 @@ To see the failure path, restock a plant generously and order more than 10 000 w
 `./mvnw test` runs the Mockito unit tests for the service layer of catalog, inventory, order and payment, the
 secure-logging tests, and the integration tests of user-service and order-service. The integration tests start
 PostgreSQL with Testcontainers, so Docker must be running.
+
+Quality measurements (coverage + mutation score gate, Goodhart crash test, reliability and stability tests of the
+metrics, protections) are described in [`docs/metrics-report.md`](docs/metrics-report.md).

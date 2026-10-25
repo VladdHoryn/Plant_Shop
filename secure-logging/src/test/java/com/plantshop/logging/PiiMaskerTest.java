@@ -127,6 +127,26 @@ class PiiMaskerTest {
     }
 
     @Test
+    void emptyInputStaysAsItIs() {
+        assertThat(PiiMasker.mask(null)).isNull();
+        assertThat(PiiMasker.mask("")).isEmpty();
+    }
+
+    /** Seven digits is the shortest value treated as a phone number; six digits are left alone. */
+    @Test
+    void phoneMaskingStartsAtSevenDigits() {
+        assertThat(PiiMasker.mask("phone=1234567")).isEqualTo("phone=*****67");
+        assertThat(PiiMasker.mask("phone: '123456'")).isEqualTo("phone: '123456'");
+    }
+
+    @Test
+    void masksPhoneInsideQuotedAndEscapedValues() {
+        assertThat(PiiMasker.mask("'phone': '+447700900123'")).isEqualTo("'phone': '+44********23'");
+        assertThat(PiiMasker.mask("{\\\"phone\\\":\\\"+447700900123\\\"}"))
+                .isEqualTo("{\\\"phone\\\":\\\"+44********23\\\"}");
+    }
+
+    @Test
     void isIdempotent() {
         String line = "user=" + EMAIL + " phone=" + PHONE + " {\"phone\":\"" + PHONE + "\",\"token\":\"" + TOKEN
                 + "\"} password=" + PASSWORD + " fullName=Olena Test";
