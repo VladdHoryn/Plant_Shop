@@ -1,0 +1,9 @@
+$ CC_LIMIT=10 ./scripts/cc-check.sh payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+  NLOC    CCN   token  PARAM  length  location  
+------------------------------------------------
+      22      3    212      1      25 PaymentService::process@31-55@payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+       5      1     36      1       5 PaymentService::findByOrderId@58-62@payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+       5      1     38      1       5 PaymentService::findById@65-69@payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+
+PASS: 1 file(s), highest CCN 3 <= 10
+[exit code 0]

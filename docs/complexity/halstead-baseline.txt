@@ -1,0 +1,83 @@
+Halstead screening, 2026-10-25 20:01, commit 8c6a605
+Tool: tools/halstead/halstead.py on Pygments 2.21.0 JavaLexer, Python 3.13.17, image plantshop/halstead:1.0-py3.13.17
+
+$ docker run --rm -v "$PWD:/src:ro" plantshop/halstead:1.0-py3.13.17 $(git ls-files '*/src/main/java/*.java')
+
+== 1. Global baseline: 189 production files, ranked by effort E (top 20 + ALL) ==
+  # file                                                           LOC  SLOC   η1    η2     N1     N2     η      N         V       D            E
+-------------------------------------------------------------------------------------------------------------------------------------------------
+  1 …a/com/plantshop/user/service/PersonalDataExportService.java   237   148   35   202    911    563   237   1474   11628.0   48.77     567153.2
+  2 …/java/com/plantshop/inventory/service/InventoryService.java   141    97   34    98    532    299   132    831    5853.9   51.87     303625.8
+  3 …rc/main/java/com/plantshop/user/service/ErasureService.java   154    97   28   113    530    338   141    868    6197.1   41.88     259511.7
+  4 …-logging/src/main/java/com/plantshop/logging/PiiMasker.java   123    75   29   101    454    307   130    761    5344.0   44.07     235533.8
+  5 …rc/main/java/com/plantshop/user/service/ConsentService.java   132    78   32   101    430    281   133    711    5016.3   44.51     223300.1
+  6 …src/main/java/com/plantshop/order/service/OrderService.java   124    79   31   107    401    225   138    626    4449.9   32.59     145038.8
+  7 …r-service/src/main/java/com/plantshop/user/entity/User.java   122    71   29    75    240    163   104    403    2700.3   31.51      85094.7
+  8 …ce/src/main/java/com/plantshop/user/entity/UserConsent.java    86    55   27    43    173    118    70    291    1783.6   37.05      66076.9
+  9 …c/main/java/com/plantshop/catalog/service/PlantService.java    87    51   23    71    241    152    94    393    2576.0   24.62      63419.2
+ 10 …service/src/main/java/com/plantshop/order/entity/Order.java    89    52   32    64    192    120    96    312    2054.5   30.00      61635.2
+ 11 …va/com/plantshop/user/exception/GlobalExceptionHandler.java    85    47   21    69    235    151    90    386    2505.9   22.98      57580.2
+ 12 …main/java/com/plantshop/user/mapper/PersonalDataMapper.java    76    40   19    74    293    145    93    438    2864.2   18.61      53315.8
+ 13 …main/java/com/plantshop/payment/service/PaymentService.java    70    43   24    58    213    115    82    328    2085.3   23.79      49615.2
+ 14 …e/src/main/java/com/plantshop/order/mapper/OrderMapper.java    51    37   16    32    215    104    48    319    1781.6   26.00      46321.7
+ 15 …main/java/com/plantshop/inventory/entity/InventoryItem.java    73    45   33    26    131     61    59    192    1129.5   38.71      43723.4
+ 16 …/java/com/plantshop/catalog/controller/PlantController.java    69    36   29    39    140     83    68    223    1357.5   30.86      41891.2
+ 17 …ing/src/main/java/com/plantshop/logging/MaskingEncoder.java    67    43   27    30    163     64    57    227    1324.1   28.80      38133.1
+ 18 …ain/java/com/plantshop/user/entity/ConsentHistoryEntry.java    60    35   20    40    155    100    60    255    1506.3   25.00      37656.4
+ 19 …ervice/src/main/java/com/plantshop/user/entity/Address.java    62    37   21    31    128     89    52    217    1237.0   30.15      37289.4
+ 20 …a/com/plantshop/catalog/repository/PlantSpecifications.java    37    23   21    35    146     90    56    236    1370.5   27.00      37004.5
+    ALL (189 files)                                               5657  3111  127  1508  13019   7889  1635  20908  223194.5  332.20   74144298.9
+
+== 2. Architecture representatives ==
+Core domain:  payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+Integration:  user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java
+Utility/DTO:  user-service/src/main/java/com/plantshop/user/dto/PersonalDataExport.java
+
+  # file                                                           LOC  SLOC   η1    η2     N1     N2     η      N         V       D            E
+-------------------------------------------------------------------------------------------------------------------------------------------------
+  1 …a/com/plantshop/user/service/PersonalDataExportService.java   237   148   35   202    911    563   237   1474   11628.0   48.77     567153.2
+  2 …main/java/com/plantshop/payment/service/PaymentService.java    70    43   24    58    213    115    82    328    2085.3   23.79      49615.2
+  3 …rc/main/java/com/plantshop/user/dto/PersonalDataExport.java    88    51   15   103    199    186   118    385    2649.8   13.54      35888.3
+    ALL (3 files)                                                  395   242   39   307   1323    864   346   2187   18446.5   54.88    1012336.1
+
+payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+  operators (24 unique, 213 total): (×49, )×49, .×37, ;×20, {×6, }×6, new×5, public×4, ,×4, return×4, =×4, +×4, private×3, final×3, @Transactional×3, if×2, ::×2, ->×2, @Slf4j×1, @Service×1, @RequiredArgsConstructor×1, class×1, void×1, >×1
+  operands (58 unique, 115 total): payment×11, event×9, orderId×8, paymentRepository×6, eventPublisher×3, properties×3, Payment×3, saved×3, id×3, totalAmount×2, maxAmount×2, setStatus×2, PaymentStatus×2, save×2, publishEvent×2, readOnly×2, true×2, PaymentResponse×2, findByOrderId×2, Long×2, map×2, PaymentMapper×2, toResponse×2, orElseThrow×2, ResourceNotFoundException×2, findById×2, PaymentService×1, PaymentRepository×1, ApplicationEventPublisher×1, PaymentProperties×1, process×1, InventoryReservedEvent×1, existsByOrderId×1, log×1, warn×1, "Payment for order {} already processed, ignoring duplicate event"×1, setOrderId×1, setAmount×1, setMethod×1, paymentMethod×1, compareTo×1, 0×1, FAILED×1, setFailureReason×1, "Amount exceeds the limit of "×1, PaymentFailedEvent×1, getFailureReason×1, COMPLETED×1, setTransactionId×1, UUID×1, randomUUID×1, toString×1, PaymentCompletedEvent×1, getId×1, getTransactionId×1, "No payment for order "×1, "Payment with id "×1, " not found"×1
+
+user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java
+  operators (35 unique, 911 total): (×168, )×168, .×165, ,×105, ;×72, =×30, <×23, >×23, new×20, private×18, {×16, }×16, final×15, this×15, ::×9, !×8, return×6, if×5, ->×4, ==×4, public×3, :×3, throw×2, ?×2, @Slf4j×1, @Service×1, class×1, static×1, try×1, catch×1, +×1, !=×1, for×1, boolean×1, record×1
+  operands (202 unique, 563 total): List×19, subjectId×16, local×16, ExportSection×14, user×12, hasData×11, null×10, stream×10, put×10, omissions×9, audit×8, actor×8, map×8, PersonalDataMapper×8, toList×8, sections×8, isEmpty×7, ExcludedField×6, export×6, toEntry×6, userRepository×5, addressRepository×5, settingsRepository×5, activityRepository×5, consentRepository×5, historyRepository×5, emailRepository×5, analyticsRepository×5, auditRepository×5, orderClient×5, accessPolicy×5, properties×5, PersonalDataExport×5, getId×5, LocalData×5, Omission×5, orders×5, settings×5, categories×5, consentHistory×5, section×5, readOnlyTransaction×4, metadata×4, User×4, consents×4, p×4, "SECURITY_CREDENTIAL"×3, record×3, PrivacyEvent×3, PERSONAL_DATA_EXPORT×3, AuditOutcome×3, OrderEntry×3, key×3, complete×3, String×3, e×3, Map×3, UserConsent×3, addresses×3, activity×3, communications×3, analytics×3, privacyRequests×3, sources×3, PersonalDataExportService×2, EXCLUDED_FIELDS×2, of×2, UserRepository×2, AddressRepository×2, UserSettingsRepository×2, UserActivityRepository×2, UserConsentRepository×2, ConsentHistoryRepository×2, EmailMessageRepository×2, AnalyticsEventRepository×2, PrivacyAuditEventRepository×2, OrderPrivacyClient×2, SubjectAccessPolicy×2, PrivacyProperties×2, PrivacyAudit×2, TransactionTemplate×2, transactionManager×2, true×2, AppUserPrincipal×2, Long×2, SubjectNotFoundException×2, status×2, loadLocalData×2, loadOrders×2, add×2, SETTINGS×2, assemble×2, log×2, findById×2, orElse×2, findByUserIdOrderById×2, findByUserIdOrderByOccurredAtDesc×2, email×2, ORDERS×2, ConsentPurpose×2, currentConsents×2, values×2, ConsentMapper×2, toResponse×2, Sections×2, LinkedHashMap×2, DataCategory×2, present×2, o×2, Metadata×2, "profile.passwordHash"×1, "profile.emailVerificationToken"×1, "profile.passwordResetToken"×1, "profile.fraudReviewFlag"×1, "INTERNAL_SECURITY_CONTROL"×1, "privacyRequests.actor"×1, "OTHER_PERSONS_DATA"×1, PlatformTransactionManager×1, setReadOnly×1, canHandleDataRequest×1, DENIED×1, execute×1, NOT_FOUND×1, ArrayList×1, getEmail×1, "NO_DATA_STORED"×1, SUCCESS×1, info×1, "Personal data export generated exportId={} categories={} complete={}"×1, exportId×1, size×1, filter×1, isActive×1, findByUserIdOrderByPurpose×1, findByUserIdOrderByCreatedAtDesc×1, findBySubjectRefOrderById×1, subjectRef×1, findOrders×1, CustomerRef×1, FeignException×1, warn×1, "Orders could not be read for a personal data export: {} status={}"×1, getClass×1, getSimpleName×1, "SOURCE_UNAVAILABLE: order-service did not answer, "×1, "repeat the request later"×1, collect×1, Collectors×1, toMap×1, getPurpose×1, Function×1, identity×1, ConsentResponse×1, Arrays×1, get×1, currentPolicyVersion×1, ConsentHistoryResponse×1, toProfile×1, toSettings×1, Consents×1, Boolean×1, PROFILE×1, ADDRESSES×1, ACTIVITY×1, CONSENTS×1, COMMUNICATIONS×1, ANALYTICS×1, PRIVACY_REQUESTS×1, Set×1, EnumSet×1, noneOf×1, class×1, forEach×1, addAll×1, source×1, noneMatch×1, reason×1, startsWith×1, "SOURCE_UNAVAILABLE"×1, SCHEMA_VERSION×1, UUID×1, randomUUID×1, Instant×1, now×1, "UTC"×1, isSubject×1, "SUBJECT"×1, "PRIVACY_OFFICER"×1, CorrelationId×1, current×1, Subject×1, getStatus×1, name×1, getCreatedAt×1, copyOf×1, Address×1, UserSettings×1, UserActivity×1, ConsentHistoryEntry×1, EmailMessage×1, AnalyticsEvent×1, PrivacyAuditEvent×1
+
+user-service/src/main/java/com/plantshop/user/dto/PersonalDataExport.java
+  operators (15 unique, 199 total): ,×62, public×18, record×17, (×17, )×17, {×17, }×17, <×13, >×13, boolean×3, static×1, final×1, =×1, ;×1, int×1
+  operands (103 unique, 186 total): String×36, List×12, Instant×11, Long×3, createdAt×3, occurredAt×3, Metadata×2, Subject×2, Sections×2, Omission×2, ExcludedField×2, Profile×2, AddressEntry×2, Settings×2, ActivityEntry×2, Consents×2, CommunicationEntry×2, AnalyticsEntry×2, OrderEntry×2, PrivacyRequestEntry×2, LinkedAccount×2, updatedAt×2, recipient×2, type×2, BigDecimal×2, OrderLine×2, reason×2, PersonalDataExport×1, metadata×1, subject×1, DataCategory×1, categories×1, Map×1, sources×1, sections×1, omissions×1, excludedFields×1, SCHEMA_VERSION×1, "1.0"×1, schemaVersion×1, UUID×1, exportId×1, generatedAt×1, timeZone×1, requestedBy×1, correlationId×1, complete×1, userId×1, accountStatus×1, accountCreatedAt×1, profile×1, addresses×1, settings×1, activity×1, consents×1, communications×1, analytics×1, orders×1, privacyRequests×1, fullName×1, email×1, phone×1, emailVerified×1, linkedAccount×1, provider×1, subjectId×1, label×1, line1×1, city×1, postalCode×1, country×1, language×1, currency×1, darkMode×1, ActivityType×1, details×1, ipAddress×1, userAgent×1, ConsentResponse×1, current×1, ConsentHistoryResponse×1, history×1, EmailCategory×1, category×1, template×1, sentAt×1, event×1, page×1, orderId×1, status×1, paymentMethod×1, totalAmount×1, shippingAddress×1, items×1, plantId×1, plantName×1, quantity×1, unitPrice×1, PrivacyEvent×1, AuditOutcome×1, outcome×1, section×1, field×1
+
+== 3. Cross-check: multimetric 2.4.5 on the same files ==
+(multimetric counts class/method names as operators and ignores Java keywords entirely)
+    "/src/payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java": {
+      "halstead_difficulty": 21.25,
+      "halstead_effort": 44211.897,
+      "halstead_volume": 2080.56,
+      "loc": 60,
+      "operands_sum": 119,
+      "operands_uniq": 56,
+      "operators_sum": 214,
+      "operators_uniq": 20,
+    "/src/user-service/src/main/java/com/plantshop/user/dto/PersonalDataExport.java": {
+      "halstead_difficulty": 21.583,
+      "halstead_effort": 54021.234,
+      "halstead_volume": 2503.008,
+      "loc": 79,
+      "operands_sum": 171,
+      "operands_uniq": 103,
+      "operators_sum": 186,
+      "operators_uniq": 26,
+    "/src/user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java": {
+      "halstead_difficulty": 33.465,
+      "halstead_effort": 388191.93,
+      "halstead_volume": 11599.938,
+      "loc": 214,
+      "operands_sum": 582,
+      "operands_uniq": 200,
+      "operators_sum": 905,
+      "operators_uniq": 23,
