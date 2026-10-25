@@ -1,0 +1,25 @@
+# Integration tests run without config-service, Eureka and Kafka. They load the very files config-service
+# serves (straight from the repository); PostgreSQL comes from Testcontainers (@ServiceConnection).
+spring:
+  application:
+    name: order-service
+  config:
+    import:
+      - file:../config-service/src/main/resources/configurations/application.yml
+      - file:../config-service/src/main/resources/configurations/order-service.yml
+  cloud:
+    config:
+      enabled: false
+      import-check:
+        enabled: false
+    discovery:
+      enabled: false
+  kafka:
+    admin:
+      auto-create: false
+    listener:
+      auto-startup: false
+
+eureka:
+  client:
+    enabled: false

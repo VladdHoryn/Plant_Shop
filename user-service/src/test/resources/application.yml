@@ -1,0 +1,25 @@
+# Integration tests run without config-service and Eureka. They load the very files config-service serves
+# (straight from the repository); PostgreSQL comes from Testcontainers (@ServiceConnection).
+spring:
+  application:
+    name: user-service
+  config:
+    import:
+      - file:../config-service/src/main/resources/configurations/application.yml
+      - file:../config-service/src/main/resources/configurations/user-service.yml
+  cloud:
+    config:
+      enabled: false
+      import-check:
+        enabled: false
+    discovery:
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+logging:
+  level:
+    # wire-level log of the mail provider (API key, tokens, recipient): what the leak tests attack
+    com.plantshop.user.notification: DEBUG

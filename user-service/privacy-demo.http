@@ -1,0 +1,84 @@
+### Privacy lab: API client for the live demo (IntelliJ HTTP Client). Requests go through the gateway.
+### Synthetic accounts from V2__seed_demo_users.sql: alice=1, bob=2, dpo=3, marketing=4, erin=5
+### (ids after `./scripts/privacy-demo.sh reset`).
+
+@gw = http://localhost:8080
+
+### Step 1 - registration: e-mail, phone, password, verification token (check `docker logs plantshop-user-service`)
+POST {{gw}}/api/users
+Content-Type: application/json
+X-Correlation-Id: demo-step1-http-client
+
+{
+  "fullName": "Log Demo",
+  "email": "log.demo.{{$random.alphanumeric(6)}}@example.test",
+  "phone": "+44 7700 900999",
+  "password": "Demo-Passw0rd-2026"
+}
+
+### Step 1 - password reset: one-time reset token (same answer for unknown accounts)
+POST {{gw}}/api/users/password-reset
+Content-Type: application/json
+X-Correlation-Id: demo-step1-http-client
+
+{ "email": "alice@example.test" }
+
+### Step 2 - Alice exports her own data
+GET {{gw}}/api/users/1/personal-data
+Authorization: Basic alice@example.test Alice-Demo-2026
+
+### Step 2 - negative: Bob asks for Alice's data -> 404, same as for a missing profile
+GET {{gw}}/api/users/1/personal-data
+Authorization: Basic bob@example.test Bob-Demo-2026
+
+### Step 2 - negative: a profile that does not exist -> identical 404
+GET {{gw}}/api/users/999999/personal-data
+Authorization: Basic bob@example.test Bob-Demo-2026
+
+### Step 2 - privacy officer exports on the customer's behalf
+GET {{gw}}/api/users/1/personal-data
+Authorization: Basic dpo@example.test Dpo-Demo-2026
+
+### Step 3 - erasure by Erin herself (POST only)
+POST {{gw}}/api/users/5/anonymize
+Authorization: Basic erin@example.test Erin-Demo-2026
+
+### Step 3 - repeat by the privacy officer -> ALREADY_ANONYMIZED, nothing changes
+POST {{gw}}/api/users/5/anonymize
+Authorization: Basic dpo@example.test Dpo-Demo-2026
+
+### Step 3 - negative: Bob tries to erase Alice -> 404
+POST {{gw}}/api/users/1/anonymize
+Authorization: Basic bob@example.test Bob-Demo-2026
+
+### Step 4 - Alice's consents and their history
+GET {{gw}}/api/users/1/consents
+Authorization: Basic alice@example.test Alice-Demo-2026
+
+### Step 4 - campaign e-mail to Alice (marketing operator): DENY before consent / after revoke, ALLOW after grant
+POST {{gw}}/api/marketing/emails
+Authorization: Basic marketing@example.test Marketing-Demo-2026
+Content-Type: application/json
+
+{ "userId": 1, "campaign": "autumn-sale" }
+
+### Step 4 - GRANT marketing e-mails (current policy version)
+POST {{gw}}/api/users/1/consents/MARKETING_EMAIL/grant
+Authorization: Basic alice@example.test Alice-Demo-2026
+Content-Type: application/json
+
+{ "policyVersion": "marketing-v2", "source": "WEB" }
+
+### Step 4 - REVOKE marketing e-mails
+POST {{gw}}/api/users/1/consents/MARKETING_EMAIL/revoke
+Authorization: Basic alice@example.test Alice-Demo-2026
+Content-Type: application/json
+
+{ "source": "WEB" }
+
+### Step 4 - optional analytics of the signed-in customer (needs OPTIONAL_ANALYTICS consent)
+POST {{gw}}/api/analytics/events
+Authorization: Basic alice@example.test Alice-Demo-2026
+Content-Type: application/json
+
+{ "event": "plant_viewed", "page": "/plants/3" }

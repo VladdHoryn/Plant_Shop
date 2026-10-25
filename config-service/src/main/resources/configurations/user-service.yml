@@ -1,0 +1,45 @@
+server:
+  port: 8085
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5437}/user_db
+    username: ${plantshop.db.username}
+    password: ${plantshop.db.password}
+  flyway:
+    schemas: users
+    default-schema: users
+    create-schemas: true
+    locations: classpath:db/migration
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: users
+  jackson:
+    serialization:
+      # readable data exports (and demo output)
+      indent-output: true
+  cloud:
+    openfeign:
+      client:
+        config:
+          order-service:
+            connect-timeout: 2000
+            read-timeout: 5000
+
+privacy:
+  # Key of the HMAC that turns user ids into the pseudonyms used in logs and the privacy audit trail
+  pseudonymization-key: ${PRIVACY_PSEUDONYMIZATION_KEY:dev-only-pseudonymization-key}
+  # Current version of each consent text. A consent given for an older version no longer passes the gate.
+  policy-versions:
+    MARKETING_EMAIL: marketing-v2
+    OPTIONAL_ANALYTICS: analytics-v1
+
+# Simulated e-mail provider; nothing is sent, messages are recorded in the email_outbox table
+email:
+  provider:
+    url: https://mail-provider.example.test/v1/messages
+    api-key: ${EMAIL_PROVIDER_API_KEY:demo-provider-api-key-not-real}

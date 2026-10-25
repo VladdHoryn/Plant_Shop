@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logging configuration shared by every service that depends on secure-logging (Spring Boot finds
+  classpath:logback-spring.xml inside this jar). The console encoder is wrapped by MaskingEncoder, so
+  every line - message, MDC, key-value pairs, stack trace - goes through PiiMasker before it is written.
+
+  Default: one text line per event with the correlation id. Profile "json-logs": structured JSON
+  (logstash format) for log shippers; it is masked by the same encoder.
+-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- key-value pairs (security events) follow the message; the replace drops the space when there are none -->
+    <property name="SECURE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p ${PID:- } --- [%15.15t] [%X{correlationId:-}] %-40.40logger{39} : %m%replace( %kvp){'^ $', ''}%n%wEx"/>
+
+    <springProfile name="!json-logs">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="com.plantshop.logging.MaskingEncoder">
+                <delegate class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <pattern>${SECURE_LOG_PATTERN}</pattern>
+                    <charset>UTF-8</charset>
+                </delegate>
+            </encoder>
+        </appender>
+    </springProfile>
+
+    <springProfile name="json-logs">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="com.plantshop.logging.MaskingEncoder">
+                <delegate class="org.springframework.boot.logging.logback.StructuredLogEncoder">
+                    <format>logstash</format>
+                    <charset>UTF-8</charset>
+                </delegate>
+            </encoder>
+        </appender>
+    </springProfile>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
