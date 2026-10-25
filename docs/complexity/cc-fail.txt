@@ -1,0 +1,10 @@
+$ CC_LIMIT=15 ./scripts/cc-check.sh payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+  NLOC    CCN   token  PARAM  length  location  
+------------------------------------------------
+      37     16    373      1      41 PaymentService::process@40-80@payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+       5      1     36      1       5 PaymentService::findByOrderId@83-87@payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+       5      1     38      1       5 PaymentService::findById@90-94@payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java
+
+FAIL: cyclomatic complexity limit CC <= 15 exceeded
+  payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java:40: warning: PaymentService::process has 37 NLOC, 16 CCN, 373 token, 1 PARAM, 41 length, 0 ND
+[exit code 1]

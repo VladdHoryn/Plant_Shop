@@ -25,9 +25,10 @@ docker image inspect "$IMAGE" > /dev/null 2>&1 || docker build -q -t "$IMAGE" to
   || { echo "cc-check: cannot build $IMAGE (is Docker running?)" >&2; exit 2; }
 host_root=$(cd "$ROOT" && (pwd -W 2>/dev/null || pwd))
 
-# -C sets the warning threshold; -w prints only the warnings, one per function over the limit
-report=$(docker run --rm --network none --cpus 1 --memory 256m -v "$host_root:/src:ro" "$IMAGE" -l java "${FILES[@]}") \
-  || { echo "cc-check: scanner failed" >&2; exit 2; }
+# -C sets the warning threshold; -w prints only the warnings, one per function over the limit. Lizard exits
+# non-zero when a function exceeds its own default threshold (15), so the report run raises it out of the way.
+report=$(docker run --rm --network none --cpus 1 --memory 256m -v "$host_root:/src:ro" "$IMAGE" \
+  -l java -C 1000 "${FILES[@]}") || { echo "cc-check: scanner failed" >&2; exit 2; }
 warnings=$(docker run --rm --network none --cpus 1 --memory 256m -v "$host_root:/src:ro" "$IMAGE" \
   -l java -C "$CC_LIMIT" -w "${FILES[@]}")
 

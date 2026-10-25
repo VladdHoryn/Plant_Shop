@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Slf4j
@@ -22,11 +23,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PaymentService {
 
+    /** Per-method limits of the payment provider. */
+    static final BigDecimal WALLET_LIMIT = new BigDecimal("1000");
+    static final BigDecimal PAYPAL_LIMIT = new BigDecimal("2500");
+    static final BigDecimal CARD_LIMIT = new BigDecimal("5000");
+
     private final PaymentRepository paymentRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final PaymentProperties properties;
 
-    /** Charges the order through a simulated provider that declines amounts above the configured limit. */
+    /**
+     * Charges the order through a simulated provider. Declines unsupported payment methods, amounts above the
+     * limit of the payment method, and amounts above the configured global limit.
+     */
     @Transactional
     public void process(InventoryReservedEvent event) {
         if (paymentRepository.existsByOrderId(event.orderId())) {
@@ -39,9 +48,25 @@ public class PaymentService {
         payment.setAmount(event.totalAmount());
         payment.setMethod(event.paymentMethod());
 
-        if (event.totalAmount().compareTo(properties.maxAmount()) > 0) {
+        String method = event.paymentMethod();
+        BigDecimal amount = event.totalAmount();
+        String declineReason = null;
+        if ((method.equals("APPLE_PAY") || method.equals("GOOGLE_PAY")) && amount.compareTo(WALLET_LIMIT) > 0) {
+            declineReason = "Wallet payments are limited to " + WALLET_LIMIT;
+        } else if (method.equals("PAYPAL") && amount.compareTo(PAYPAL_LIMIT) > 0) {
+            declineReason = "PayPal payments are limited to " + PAYPAL_LIMIT;
+        } else if (method.equals("CARD") && amount.compareTo(CARD_LIMIT) > 0) {
+            declineReason = "Card payments are limited to " + CARD_LIMIT;
+        } else if (!method.equals("CARD") && !method.equals("PAYPAL")
+                && !method.equals("APPLE_PAY") && !method.equals("GOOGLE_PAY")) {
+            declineReason = "Unsupported payment method " + method;
+        }
+
+        if (declineReason != null || amount.compareTo(properties.maxAmount()) > 0) {
             payment.setStatus(PaymentStatus.FAILED);
-            payment.setFailureReason("Amount exceeds the limit of " + properties.maxAmount());
+            payment.setFailureReason(declineReason != null
+                    ? declineReason
+                    : "Amount exceeds the limit of " + properties.maxAmount());
             paymentRepository.save(payment);
             eventPublisher.publishEvent(new PaymentFailedEvent(event.orderId(), payment.getFailureReason()));
             return;
