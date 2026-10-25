@@ -6,6 +6,7 @@ FROM maven:3.9.9-eclipse-temurin-21 AS build
 ARG SERVICE
 WORKDIR /workspace
 COPY pom.xml .
+COPY secure-logging/pom.xml secure-logging/
 COPY config-service/pom.xml config-service/
 COPY discovery-service/pom.xml discovery-service/
 COPY api-gateway/pom.xml api-gateway/
@@ -13,6 +14,9 @@ COPY catalog-service/pom.xml catalog-service/
 COPY inventory-service/pom.xml inventory-service/
 COPY order-service/pom.xml order-service/
 COPY payment-service/pom.xml payment-service/
+COPY user-service/pom.xml user-service/
+# Shared logging module (PII masking) that every service depends on
+COPY secure-logging/src secure-logging/src
 COPY ${SERVICE}/src ${SERVICE}/src
 # The Maven repository cache is shared by all service builds, so dependencies download once
 RUN --mount=type=cache,target=/root/.m2,sharing=locked \

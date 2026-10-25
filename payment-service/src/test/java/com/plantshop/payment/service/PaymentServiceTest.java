@@ -40,7 +40,7 @@ class PaymentServiceTest {
     void completesPaymentWithinLimit() {
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        paymentService.process(new InventoryReservedEvent(1L, "a@b.com", new BigDecimal("99.99"), "CARD"));
+        paymentService.process(new InventoryReservedEvent(1L, new BigDecimal("99.99"), "CARD"));
 
         ArgumentCaptor<Payment> saved = ArgumentCaptor.forClass(Payment.class);
         verify(paymentRepository).save(saved.capture());
@@ -51,7 +51,7 @@ class PaymentServiceTest {
 
     @Test
     void declinesPaymentAboveLimit() {
-        paymentService.process(new InventoryReservedEvent(1L, "a@b.com", new BigDecimal("100.01"), "CARD"));
+        paymentService.process(new InventoryReservedEvent(1L, new BigDecimal("100.01"), "CARD"));
 
         verify(eventPublisher).publishEvent(any(PaymentFailedEvent.class));
         verify(eventPublisher, never()).publishEvent(any(PaymentCompletedEvent.class));
@@ -61,7 +61,7 @@ class PaymentServiceTest {
     void ignoresDuplicateEvent() {
         when(paymentRepository.existsByOrderId(1L)).thenReturn(true);
 
-        paymentService.process(new InventoryReservedEvent(1L, "a@b.com", BigDecimal.TEN, "CARD"));
+        paymentService.process(new InventoryReservedEvent(1L, BigDecimal.TEN, "CARD"));
 
         verify(paymentRepository, never()).save(any());
         verify(eventPublisher, never()).publishEvent(any());

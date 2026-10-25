@@ -105,8 +105,7 @@ public class InventoryService {
             items.get(plantId).reserve(quantity);
             reservationRepository.save(new StockReservation(order.orderId(), plantId, quantity));
         });
-        eventPublisher.publishEvent(new InventoryReservedEvent(
-                order.orderId(), order.customerEmail(), order.totalAmount(), order.paymentMethod()));
+        eventPublisher.publishEvent(new InventoryReservedEvent(order.orderId(), order.totalAmount(), order.paymentMethod()));
     }
 
     @Transactional

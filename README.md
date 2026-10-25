@@ -11,6 +11,10 @@ Java 21 · Spring Boot 3.5 · Spring Cloud 2025.0 · PostgreSQL + Flyway · Kafk
 | inventory-service | 8082 | Stock levels and per-order reservations                              |
 | order-service     | 8083 | Order placement, saga orchestration                                  |
 | payment-service   | 8084 | Simulated payment provider (declines amounts above `payment.max-amount`) |
+| user-service      | 8085 | Customer accounts and privacy controls: data export, erasure, consents (see [Privacy controls](#privacy-controls)) |
+
+Shared library `secure-logging`: the logging configuration of every service; masks personal data and redacts
+secrets in each log line.
 
 Infrastructure (docker-compose): Kafka `9092`, Kafka UI `http://localhost:8090`, plus one PostgreSQL container per service (below).
 
@@ -26,6 +30,7 @@ Flyway creates the service's schema and applies its migrations on startup (`spri
 | inventory-service | `inventory-db` | 5434      | `inventory_db` | `inventory` | `V1__create_inventory_tables.sql`, `V2__seed_inventory.sql` (stock for plants 1–10) |
 | order-service     | `order-db`     | 5435      | `order_db`     | `orders`    | `V1__create_order_tables.sql`                  |
 | payment-service   | `payment-db`   | 5436      | `payment_db`   | `payments`  | `V1__create_payment_tables.sql`                |
+| user-service      | `user-db`      | 5437      | `user_db`      | `users`     | `V1__create_user_tables.sql`, `V2__seed_demo_users.sql` (5 synthetic accounts) |
 
 Credentials for all databases: `plantshop` / `plantshop`. Data lives in named volumes (`catalog-db-data`, ...);
 `docker compose down -v` wipes it and Flyway re-creates everything on the next start.
@@ -52,7 +57,7 @@ ignore redelivered events.
 Prerequisite: Docker Desktop running (no local JDK needed — images are built with a multi-stage `Dockerfile`).
 
 ```bash
-docker compose up -d --build     # build 7 service images and start all 13 containers
+docker compose up -d --build     # build 8 service images and start all 15 containers
 docker compose ps                # watch the health status
 docker compose logs -f order-service
 docker compose down              # stop (add -v to also delete the databases)
@@ -310,12 +315,51 @@ or `kubectl -n <ns> logs <release>-plantshop-test-api`.
 - the hook and the test, including an upgrade blocked by the hook;
 - `helm uninstall`.
 
+## Privacy controls
+
+The privacy lab (secure logging, right of access, right to erasure, consent enforcement) is documented in
+[`docs/privacy-report.md`](docs/privacy-report.md); [`docs/privacy-demo.md`](docs/privacy-demo.md) is the transcript
+of a full run of `./scripts/privacy-demo.sh`.
+
+| Endpoint (through the gateway) | Who | What |
+|---|---|---|
+| `POST /api/users` | anyone | register (sends a verification e-mail) |
+| `POST /api/users/password-reset` | anyone | reset link; the same answer whether or not the account exists |
+| `GET /api/users/{id}/personal-data` | the user, or `PRIVACY_OFFICER` | versioned export of all personal data, from every source |
+| `POST /api/users/{id}/anonymize` | the user, or `PRIVACY_OFFICER` | erasure: delete / anonymize / retain per rule, including orders |
+| `GET /api/users/{id}/consents` | the user | consent state per purpose and its history |
+| `POST /api/users/{id}/consents/{purpose}/grant` · `/revoke` | the user | `MARKETING_EMAIL`, `OPTIONAL_ANALYTICS` |
+| `POST /api/marketing/emails` | `MARKETING` | campaign e-mail, sent only if the consent policy gate allows |
+| `POST /api/analytics/events` | the user | optional analytics, recorded only with consent |
+
+Authentication is HTTP Basic with the e-mail as user name. Another user's id gets the same 404 as an id that does not
+exist. Synthetic demo accounts (seed data, demo passwords only):
+
+| Account | Password | Role |
+|---|---|---|
+| `alice@example.test` | `Alice-Demo-2026` | CUSTOMER |
+| `bob@example.test` | `Bob-Demo-2026` | CUSTOMER |
+| `dpo@example.test` | `Dpo-Demo-2026` | PRIVACY_OFFICER |
+| `marketing@example.test` | `Marketing-Demo-2026` | MARKETING |
+| `erin@example.test` | `Erin-Demo-2026` | CUSTOMER (for the erasure demo) |
+
+```bash
+./scripts/privacy-demo.sh reset     # restore the seed data of user-service
+./scripts/privacy-demo.sh 1         # one step of the demo in the terminal (1-4)
+./scripts/privacy-demo.sh           # reset + all steps, transcript to docs/privacy-demo.md
+```
+
+The same requests for the IntelliJ HTTP client are in [`user-service/privacy-demo.http`](user-service/privacy-demo.http).
+Service-to-service endpoints under `/internal/**` (order-service) are not routed by the gateway and require the
+shared `INTERNAL_API_TOKEN`. Secrets with lab-only defaults: `INTERNAL_API_TOKEN`, `PRIVACY_PSEUDONYMIZATION_KEY`,
+`EMAIL_PROVIDER_API_KEY`.
+
 ## Running the services from the IDE
 
 Prerequisites: JDK 21 (`JAVA_HOME` set). Start only the infrastructure in Docker:
 
 ```bash
-docker compose up -d catalog-db inventory-db order-db payment-db kafka kafka-ui
+docker compose up -d catalog-db inventory-db order-db payment-db user-db kafka kafka-ui
 ./mvnw clean package            # Windows: mvnw.cmd clean package
 ```
 
@@ -328,6 +372,7 @@ java -jar catalog-service/target/catalog-service-1.0.0-SNAPSHOT.jar
 java -jar inventory-service/target/inventory-service-1.0.0-SNAPSHOT.jar
 java -jar order-service/target/order-service-1.0.0-SNAPSHOT.jar
 java -jar payment-service/target/payment-service-1.0.0-SNAPSHOT.jar
+java -jar user-service/target/user-service-1.0.0-SNAPSHOT.jar
 java -jar api-gateway/target/api-gateway-1.0.0-SNAPSHOT.jar
 ```
 
@@ -367,4 +412,6 @@ To see the failure path, restock a plant generously and order more than 10 000 w
 
 ## Tests
 
-`./mvnw test` runs the Mockito unit tests for the service layer of catalog, inventory, order and payment.
+`./mvnw test` runs the Mockito unit tests for the service layer of catalog, inventory, order and payment, the
+secure-logging tests, and the integration tests of user-service and order-service. The integration tests start
+PostgreSQL with Testcontainers, so Docker must be running.

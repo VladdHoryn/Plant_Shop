@@ -44,7 +44,7 @@ class InventoryServiceTest {
     }
 
     private static OrderCreatedEvent order(int quantity) {
-        return new OrderCreatedEvent(7L, "a@b.com", new BigDecimal("50.00"), "CARD",
+        return new OrderCreatedEvent(7L, new BigDecimal("50.00"), "CARD",
                 List.of(new OrderCreatedEvent.Item(1L, quantity)));
     }
 
@@ -58,7 +58,7 @@ class InventoryServiceTest {
         assertThat(monstera.getReserved()).isEqualTo(3);
         assertThat(monstera.getAvailable()).isEqualTo(7);
         verify(reservationRepository).save(any(StockReservation.class));
-        verify(eventPublisher).publishEvent(new InventoryReservedEvent(7L, "a@b.com", new BigDecimal("50.00"), "CARD"));
+        verify(eventPublisher).publishEvent(new InventoryReservedEvent(7L, new BigDecimal("50.00"), "CARD"));
     }
 
     @Test

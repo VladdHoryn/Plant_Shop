@@ -81,8 +81,7 @@ public class OrderService {
         return transactionTemplate.execute(status -> {
             Order saved = orderRepository.save(order);
             eventPublisher.publishEvent(OrderMapper.toCreatedEvent(saved));
-            log.info("Order {} created for {} with total {}", saved.getId(), saved.getCustomerEmail(),
-                    saved.getTotalAmount());
+            log.info("Order {} created with total {}", saved.getId(), saved.getTotalAmount());
             return OrderMapper.toResponse(saved);
         });
     }

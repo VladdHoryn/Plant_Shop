@@ -1,6 +1,6 @@
 # Starts the whole Plant Shop stack:  docker compose up -d --build
 # Infrastructure only (to run the services from the IDE):
-#   docker compose up -d catalog-db inventory-db order-db payment-db kafka kafka-ui
+#   docker compose up -d catalog-db inventory-db order-db payment-db user-db kafka kafka-ui
 
 x-postgres: &postgres
   image: postgres:16-alpine
@@ -74,6 +74,15 @@ services:
       POSTGRES_DB: payment_db
     ports: ["5436:5432"]
     volumes: [payment-db-data:/var/lib/postgresql/data]
+
+  user-db:
+    <<: *postgres
+    container_name: plantshop-user-db
+    environment:
+      <<: *postgres-env
+      POSTGRES_DB: user_db
+    ports: ["5437:5432"]
+    volumes: [user-db-data:/var/lib/postgresql/data]
 
   # ---------- Messaging ----------
   kafka:
@@ -225,8 +234,28 @@ services:
       payment-db:
         condition: service_healthy
 
+  user-service:
+    <<: *business-service
+    build:
+      context: .
+      args: { SERVICE: user-service }
+    image: plantshop/user-service
+    container_name: plantshop-user-service
+    ports: ["8085:8085"]
+    environment:
+      <<: *spring-env
+      DB_HOST: user-db
+      # Wire-level log of the simulated mail provider, on for the privacy lab demo: it shows that the
+      # API key and one-time tokens are redacted and the recipient masked by secure-logging
+      LOGGING_LEVEL_COM_PLANTSHOP_USER_NOTIFICATION: DEBUG
+    depends_on:
+      <<: *business-deps
+      user-db:
+        condition: service_healthy
+
 volumes:
   catalog-db-data:
   inventory-db-data:
   order-db-data:
   payment-db-data:
+  user-db-data:

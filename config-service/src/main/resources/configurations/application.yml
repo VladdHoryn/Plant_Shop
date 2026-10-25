@@ -26,6 +26,9 @@ plantshop:
   db:
     username: ${DB_USERNAME:plantshop}
     password: ${DB_PASSWORD:plantshop}
+  # Shared secret for service-to-service endpoints under /internal/** (they are not routed by the gateway)
+  internal-api:
+    token: ${INTERNAL_API_TOKEN:dev-internal-api-token}
 
 # On SIGTERM (how Kubernetes stops a pod) finish in-flight requests before exiting
 server:
