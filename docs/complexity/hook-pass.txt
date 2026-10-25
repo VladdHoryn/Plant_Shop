@@ -1,0 +1,21 @@
+$ git add catalog-service/.../WateringPlanner.java catalog-service/.../WateringPlannerTest.java
+$ git commit -m "feat(catalog): watering interval as a lookup table"
+[pre-commit] cyclomatic complexity check (limit CC <= 10) of 2 staged Java file(s):
+  catalog-service/src/main/java/com/plantshop/catalog/service/WateringPlanner.java
+  catalog-service/src/test/java/com/plantshop/catalog/service/WateringPlannerTest.java
+  NLOC    CCN   token  PARAM  length  location  
+------------------------------------------------
+       3      1     23      2       3 WateringPlanner::wateringIntervalDays@25-27@catalog-service/src/main/java/com/plantshop/catalog/service/WateringPlanner.java
+       3      1     30      3       3 WateringPlannerTest::wateringIntervalFollowsCareAndLight@21-23@catalog-service/src/test/java/com/plantshop/catalog/service/WateringPlannerTest.java
+
+PASS: 2 file(s), highest CCN 1 <= 10
+[pre-commit] PASS: complexity within the limit, commit allowed
+[lab/Lab_6 1b0218f] feat(catalog): watering interval as a lookup table
+ 2 files changed, 52 insertions(+)
+ create mode 100644 catalog-service/src/main/java/com/plantshop/catalog/service/WateringPlanner.java
+ create mode 100644 catalog-service/src/test/java/com/plantshop/catalog/service/WateringPlannerTest.java
+[git commit exit code 0]
+
+$ git log --oneline -2
+1b0218f feat(catalog): watering interval as a lookup table
+875376d build(audit): versioned pre-commit hook that blocks methods with CC > 10

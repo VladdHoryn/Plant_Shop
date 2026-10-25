@@ -418,3 +418,11 @@ PostgreSQL with Testcontainers, so Docker must be running.
 
 Quality measurements (coverage + mutation score gate, Goodhart crash test, reliability and stability tests of the
 metrics, protections) are described in [`docs/metrics-report.md`](docs/metrics-report.md).
+
+Complexity audit (Halstead screening, control-flow graphs, lookup-table refactoring) and the local quality gate are
+in [`docs/complexity-report.md`](docs/complexity-report.md). After cloning, install the git hook that rejects commits
+with a method of cyclomatic complexity above 10 (Docker must be running):
+
+```bash
+./scripts/install-hooks.sh
+```

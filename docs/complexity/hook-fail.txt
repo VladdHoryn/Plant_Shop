@@ -1,0 +1,18 @@
+$ git add catalog-service/.../WateringPlanner.java catalog-service/.../WateringPlannerTest.java
+$ git commit -m "feat: add messy code"
+[pre-commit] cyclomatic complexity check (limit CC <= 10) of 2 staged Java file(s):
+  catalog-service/src/main/java/com/plantshop/catalog/service/WateringPlanner.java
+  catalog-service/src/test/java/com/plantshop/catalog/service/WateringPlannerTest.java
+  NLOC    CCN   token  PARAM  length  location  
+------------------------------------------------
+      33     12    175      2      33 WateringPlanner::wateringIntervalDays@11-43@catalog-service/src/main/java/com/plantshop/catalog/service/WateringPlanner.java
+       3      1     30      3       3 WateringPlannerTest::wateringIntervalFollowsCareAndLight@21-23@catalog-service/src/test/java/com/plantshop/catalog/service/WateringPlannerTest.java
+
+FAIL: cyclomatic complexity limit CC <= 10 exceeded
+  catalog-service/src/main/java/com/plantshop/catalog/service/WateringPlanner.java:11: warning: WateringPlanner::wateringIntervalDays has 33 NLOC, 12 CCN, 175 token, 2 PARAM, 33 length, 0 ND
+[pre-commit] COMMIT BLOCKED: a method exceeds CC 10 (see the warning above).
+             Split the decision logic or replace the conditions with a lookup table, then commit again.
+[git commit exit code 1]
+
+$ git log --oneline -1
+875376d build(audit): versioned pre-commit hook that blocks methods with CC > 10
