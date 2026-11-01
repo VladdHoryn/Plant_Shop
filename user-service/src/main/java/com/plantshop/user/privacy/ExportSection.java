@@ -1,6 +1,11 @@
 package com.plantshop.user.privacy;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.plantshop.user.privacy.DataCategory.ACTIVITY_HISTORY;
 import static com.plantshop.user.privacy.DataCategory.COMMUNICATIONS;
@@ -23,6 +28,11 @@ public enum ExportSection {
     ANALYTICS("analytics", "user-service: analytics_events", List.of(ACTIVITY_HISTORY)),
     ORDERS("orders", "order-service: orders, order_items", List.of(TRANSACTIONS)),
     PRIVACY_REQUESTS("privacyRequests", "user-service: privacy_audit_events", List.of(DataCategory.PRIVACY_REQUESTS));
+
+    /** Section key -> where its data comes from, in export order. The same for every export, so built once. */
+    public static final Map<String, String> SOURCES = Collections.unmodifiableMap(Arrays.stream(values())
+            .collect(Collectors.toMap(ExportSection::key, ExportSection::source, (first, second) -> first,
+                    LinkedHashMap::new)));
 
     private final String key;
     private final String source;

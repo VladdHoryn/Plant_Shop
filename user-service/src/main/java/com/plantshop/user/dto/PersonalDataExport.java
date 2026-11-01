@@ -1,5 +1,6 @@
 package com.plantshop.user.dto;
 
+import com.plantshop.logging.CorrelationId;
 import com.plantshop.user.entity.ActivityType;
 import com.plantshop.user.entity.AuditOutcome;
 import com.plantshop.user.entity.EmailCategory;
@@ -32,6 +33,12 @@ public record PersonalDataExport(
     /** @param complete false when a source could not be read; see {@code omissions} */
     public record Metadata(String schemaVersion, UUID exportId, Instant generatedAt, String timeZone,
                            String requestedBy, String correlationId, boolean complete) {
+
+        /** Metadata of an export generated now, within the current request. */
+        public static Metadata generated(String requestedBy, boolean complete) {
+            return new Metadata(SCHEMA_VERSION, UUID.randomUUID(), Instant.now(), "UTC", requestedBy,
+                    CorrelationId.current(), complete);
+        }
     }
 
     public record Subject(Long userId, String accountStatus, Instant accountCreatedAt) {
