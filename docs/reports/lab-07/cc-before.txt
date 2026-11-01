@@ -1,0 +1,11 @@
+$ CC_LIMIT=5 ./scripts/cc-check.sh user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java
+# commit cc8b76c, Lizard 1.24.3 (plantshop/lizard:1.24.3-py3.13.17)
+  NLOC    CCN   token  PARAM  length  location  
+------------------------------------------------
+      26      1    143     14      26 PersonalDataExportService::PersonalDataExportService@95-120@user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java
+      21      4    241      2      24 PersonalDataExportService::export@127-150@user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java
+      15      2    113      1      15 PersonalDataExportService::loadLocalData@152-166@user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java
+      11      2    101      2      11 PersonalDataExportService::loadOrders@169-179@user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java
+      46      5    680      4      50 PersonalDataExportService::assemble@181-230@user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java
+
+PASS: 1 file(s), highest CCN 5 <= 5

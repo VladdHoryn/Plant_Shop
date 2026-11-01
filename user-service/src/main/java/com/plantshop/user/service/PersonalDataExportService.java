@@ -215,6 +215,10 @@ public class PersonalDataExportService {
         hasData.forEach((section, present) -> {
             if (present) {
                 categories.addAll(section.categories());
+            } else {
+                // Lab 7 FAIL simulation: "an empty section discloses nothing", but the mutable set is shared by
+                // every section, so this also overwrites what an earlier section (PROFILE: CONTACT_DATA) added
+                categories.removeAll(section.categories());
             }
         });
         Map<String, String> sources = new LinkedHashMap<>();
