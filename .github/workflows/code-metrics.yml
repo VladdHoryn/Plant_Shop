@@ -1,0 +1,49 @@
+# Lab 7, task 3: complexity metrics of every push and pull request, exported as a machine-readable build
+# artifact (CSV + JSON). It only measures; enforcing the CC limit stays in quality-gate.yml.
+# Lizard is pinned to the version of tools/lizard, so the cloud report and the local one
+# (scripts/cc-check.sh) come from the same analyzer.
+# Known blind spot of Lizard 1.24.3: inside a Java record, methods after the first "new <SameRecord>(" and
+# compact constructors are not reported (docs/reports/lab-07/cc-after.txt).
+name: code-metrics
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: code-metrics-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lizard-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Lizard
+        run: pip install --disable-pip-version-check lizard==1.24.3
+
+      # Production sources of every Maven module. -C 1000: Lizard exits non-zero above its own default
+      # threshold (CC 15), and a metrics run must report every function instead of failing on one.
+      - name: Scan the repository (CSV)
+        run: lizard -l java -C 1000 --csv ./*/src/main/java > lizard-report.csv
+
+      - name: Convert to JSON
+        run: python scripts/lizard_to_json.py lizard-report.csv lizard-report.json | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lizard-report
+          path: |
+            lizard-report.csv
+            lizard-report.json
+          if-no-files-found: error
+          retention-days: 30
