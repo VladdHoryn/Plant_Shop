@@ -1,0 +1,49 @@
+# Spring Cloud Config server: serves the configuration of every other service
+{{- $c := .Values.configService }}
+{{- $component := "config-service" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+  annotations:
+    # Shown by "kubectl rollout history": which Helm revision produced this Deployment revision
+    kubernetes.io/change-cause: {{ printf "Helm revision %d, image %s" .Release.Revision (include "plantshop.image" (dict "root" . "component" $component "values" $c)) | quote }}
+spec:
+  replicas: {{ $c.replicaCount }}
+  revisionHistoryLimit: 5
+  minReadySeconds: {{ .Values.rollingUpdate.minReadySeconds }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 8 }}
+        app.kubernetes.io/part-of: {{ include "plantshop.name" . }}
+      annotations:
+        # Environment variables are read only at startup: restart the pods when the ConfigMap changes
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 45
+      containers:
+        - name: {{ $component }}
+          image: {{ include "plantshop.image" (dict "root" . "component" $component "values" $c) }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $c.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "plantshop.configMapName" . }}
+          resources:
+            {{- toYaml ($c.resources | default .Values.resources) | nindent 12 }}
+          {{- include "plantshop.springProbes" . | nindent 10 }}

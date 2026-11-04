@@ -1,0 +1,49 @@
+{{- if .Values.tests.enabled }}
+# Release test, run with "helm test <release> -n <namespace>". The pod is deleted when it passes
+# (Helm does not remove hook objects on uninstall); a failed pod is kept: kubectl logs <release>-plantshop-test-api
+# Calls the application through the gateway Service like a client would: the catalog (catalog-service
+# + PostgreSQL), the stock of plant 1 (inventory-service) and the info endpoint, whose version
+# must be the catalog-service image tag of this release.
+{{- $component := "test-api" }}
+{{- $gateway := printf "http://%s:%v" (include "plantshop.componentName" (dict "root" . "component" "api-gateway")) .Values.apiGateway.service.port }}
+{{- $catalogImage := include "plantshop.image" (dict "root" . "component" "catalog-service" "values" .Values.catalogService) }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  enableServiceLinks: false
+  containers:
+    - name: test
+      image: {{ printf "%s:%s" .Values.tests.image.repository (toString .Values.tests.image.tag) }}
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          set -e
+          check() {  # check <path> <text the response must contain>
+            body=$(curl -sf --retry 5 --retry-delay 3 --retry-all-errors "{{ $gateway }}$1")
+            echo "$body" | grep -q "$2" || { echo "FAIL $1: expected '$2' in: $body"; exit 1; }
+            echo "OK   $1 contains '$2'"
+          }
+          check /api/catalog/categories '"name":"Indoor"'
+          check '/api/catalog/plants?size=1' '"totalElements"'
+          check /api/inventory/1 '"plantId":1'
+          check /api/catalog/info '"version":"{{ (splitList ":" $catalogImage) | last }}"'
+          echo "All checks passed"
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          cpu: 200m
+          memory: 64Mi
+{{- end }}

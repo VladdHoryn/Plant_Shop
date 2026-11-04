@@ -1,0 +1,20 @@
+{{- if .Values.kafka.persistence.enabled }}
+# Kafka log directory (topics, consumer offsets), so events survive a broker restart
+{{- $component := "kafka" }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" (printf "%s-data" $component)) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- with .Values.kafka.persistence.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.kafka.persistence.size }}
+{{- end }}

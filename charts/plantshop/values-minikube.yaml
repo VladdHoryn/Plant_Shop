@@ -1,0 +1,68 @@
+# Environment managed by Argo CD (argocd-apps/plantshop.yaml) on minikube.
+# Applied on top of values.yaml. A release = a commit that changes catalogService.image.tag.
+
+# Created by hand, never stored in Git:
+#   kubectl -n plantshop create secret generic plantshop-secret \
+#     --from-literal=DB_USERNAME=plantshop --from-literal=DB_PASSWORD=<generated>
+existingSecret: plantshop-secret
+
+# Images from Docker Hub: vladyslavv648/plantshop-<module>:<tag>
+image:
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+configService:
+  replicaCount: 1
+  image:
+    repository: vladyslavv648/plantshop-config-service
+
+discoveryService:
+  replicaCount: 1
+  image:
+    repository: vladyslavv648/plantshop-discovery-service
+
+apiGateway:
+  replicaCount: 1
+  image:
+    repository: vladyslavv648/plantshop-api-gateway
+  service:
+    # Reached with: kubectl -n plantshop port-forward svc/plantshop-api-gateway 8081:80
+    type: ClusterIP
+
+catalogService:
+  replicaCount: 1
+  # A broken rollout (e.g. a missing image tag) turns the app Degraded after 2 minutes instead of 10
+  progressDeadlineSeconds: 120
+  image:
+    repository: vladyslavv648/plantshop-catalog-service
+    # Own tag, so a release (or a bad tag) touches only catalog-service
+    tag: "1.0.0"
+
+inventoryService:
+  replicaCount: 1
+  image:
+    repository: vladyslavv648/plantshop-inventory-service
+
+orderService:
+  replicaCount: 1
+  image:
+    repository: vladyslavv648/plantshop-order-service
+
+paymentService:
+  replicaCount: 1
+  image:
+    repository: vladyslavv648/plantshop-payment-service
+
+# The gateway is reached through port-forward. An Ingress without an address keeps
+# the app Progressing in Argo CD, so it is not rendered here.
+ingress:
+  enabled: false
+
+# Argo CD turns Helm "pre-upgrade" hooks into PreSync hooks that run before every sync
+# (including the first one, when the databases do not exist yet), and it does not run
+# "helm test" hooks at all, so neither is rendered in this environment.
+hooks:
+  preUpgradeCheck:
+    enabled: false
+tests:
+  enabled: false

@@ -1,0 +1,210 @@
+# Default values = the development environment (minikube), the same setup as the Lab 3 manifests in k8s/.
+# values-dev.yaml restates the environment-specific part explicitly, values-prod.yaml overrides it.
+
+nameOverride: ""
+# Replaces "<release>-plantshop" as the prefix of every object name
+fullnameOverride: ""
+
+# --- Images of the Spring services -----------------------------------------------------------
+image:
+  # Image of each service = <repositoryPrefix>/<service>, e.g. plantshop/catalog-service
+  repositoryPrefix: plantshop
+  # Tag for all services; empty = the chart's appVersion. A service's own image.tag wins.
+  tag: ""
+  # Images are built straight into minikube (scripts/build-images.sh), so never force a pull
+  pullPolicy: IfNotPresent
+
+# Default resources of every Spring service (a service's own "resources" replaces them)
+resources:
+  requests:
+    cpu: 100m
+    memory: 320Mi
+  limits:
+    cpu: "1"
+    memory: 640Mi
+
+probes:
+  # startup probe period is 5 s, so 36 = up to 3 minutes for a JVM to start
+  startupFailureThreshold: 36
+
+# Rolling updates: one extra pod at a time, never fewer ready pods than replicas.
+# A new pod counts as available after being ready this long, giving Eureka clients time to see it.
+rollingUpdate:
+  maxSurge: 1
+  maxUnavailable: 0
+  minReadySeconds: 15
+
+# --- Application configuration (rendered into the ConfigMap) ---------------------------------
+config:
+  shopName: "Plant Shop (dev)"
+  shopCurrency: UAH
+  # payment-service declines payments above this amount
+  paymentMaxAmount: 10000
+  # Small JVM footprint for a laptop cluster: heap is 70% of the container memory limit
+  javaToolOptions: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k"
+
+# --- Database credentials ------------------------------------------------------------------
+# Name of a Secret created by hand (keys DB_USERNAME, DB_PASSWORD). When set, the chart renders no
+# Secret and every Deployment uses this one; this is how the Argo CD environment keeps passwords out of Git.
+existingSecret: ""
+
+# Used only when existingSecret is empty (plain "helm install"): the chart renders its own Secret.
+# The password is never stored in values files: pass it with --set database.password=..., or leave it
+# unset to keep the one already in the release Secret / generate a random one on the first install.
+database:
+  username: plantshop
+
+# --- Spring services -------------------------------------------------------------------------
+configService:
+  replicaCount: 1
+  image:
+    repository: ""   # empty = <image.repositoryPrefix>/config-service
+    tag: ""          # empty = image.tag
+  port: 8888
+  service:
+    type: ClusterIP
+    port: 8888
+  resources: {}      # empty = the top-level "resources"
+
+discoveryService:
+  # Eureka runs standalone: a second replica would need peer replication configured
+  replicaCount: 1
+  image:
+    repository: ""
+    tag: ""
+  port: 8761
+  service:
+    type: ClusterIP
+    port: 8761
+  resources: {}
+
+apiGateway:
+  replicaCount: 2
+  image:
+    repository: ""
+    tag: ""
+  port: 8080
+  service:
+    # Entry point from the host: minikube service <release>-plantshop-api-gateway -n <namespace> --url
+    type: NodePort
+    port: 80
+    # Fixed node port (30000-32767); empty = Kubernetes picks a free one, so two releases never clash
+    nodePort: ""
+  # Seconds the gateway keeps serving after the pod is marked terminating, until it has
+  # been removed from the Service endpoints
+  preStopSleepSeconds: 5
+  resources: {}
+
+catalogService:
+  replicaCount: 2
+  # Seconds a rollout may make no progress before the Deployment is marked failed (empty = 600)
+  progressDeadlineSeconds: ""
+  image:
+    repository: ""
+    tag: ""
+  port: 8081
+  service:
+    type: ClusterIP
+    port: 8081
+  resources: {}
+
+inventoryService:
+  replicaCount: 1
+  image:
+    repository: ""
+    tag: ""
+  port: 8082
+  service:
+    type: ClusterIP
+    port: 8082
+  resources: {}
+
+orderService:
+  replicaCount: 1
+  image:
+    repository: ""
+    tag: ""
+  port: 8083
+  service:
+    type: ClusterIP
+    port: 8083
+  resources: {}
+
+paymentService:
+  replicaCount: 1
+  image:
+    repository: ""
+    tag: ""
+  port: 8084
+  service:
+    type: ClusterIP
+    port: 8084
+  resources: {}
+
+# --- Ingress in front of the API gateway (needs the minikube ingress addon) -----------------
+ingress:
+  enabled: true
+  className: nginx
+  # With the docker driver: add "127.0.0.1 plantshop.local" to the hosts file and run "minikube tunnel"
+  host: plantshop.local
+  annotations: {}
+
+# --- PostgreSQL: one instance per business service ------------------------------------------
+postgres:
+  image:
+    repository: postgres
+    tag: "16-alpine"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 96Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  persistence:
+    # false = data lives in an emptyDir and is lost when the pod is replaced
+    enabled: true
+    size: 1Gi
+    # empty = the cluster's default StorageClass
+    storageClass: ""
+
+# --- Kafka (single node, KRaft) --------------------------------------------------------------
+kafka:
+  image:
+    repository: apache/kafka
+    tag: "3.9.0"
+  # Any base64-encoded UUID; fixed so the formatted log directory matches after a restart
+  clusterId: MkU3OEVBNTcwNTJENDM2Qk
+  heapOpts: "-Xms256m -Xmx256m"
+  numPartitions: 3
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+    limits:
+      cpu: "1"
+      memory: 768Mi
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: ""
+
+# Image of the init containers that wait for dependencies
+waitImage:
+  repository: busybox
+  tag: "1.36"
+
+# --- Hook and release test -------------------------------------------------------------------
+hooks:
+  # pre-upgrade Job: refuses the upgrade unless all four databases accept the release's
+  # credentials, and logs the Flyway schema version of each
+  preUpgradeCheck:
+    enabled: true
+
+tests:
+  # Render the "helm test" pod. Argo CD does not run Helm test hooks, so values-minikube.yaml disables it
+  enabled: true
+  # Image of the "helm test" pod
+  image:
+    repository: curlimages/curl
+    tag: "8.10.1"

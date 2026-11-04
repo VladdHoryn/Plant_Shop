@@ -1,0 +1,20 @@
+{{- if .Values.postgres.persistence.enabled }}
+# Storage for the catalog-service PostgreSQL data; survives pod restarts and upgrades
+{{- $component := "catalog-db" }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" (printf "%s-data" $component)) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- with .Values.postgres.persistence.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.postgres.persistence.size }}
+{{- end }}

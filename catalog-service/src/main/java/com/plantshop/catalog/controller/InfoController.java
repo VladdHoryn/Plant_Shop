@@ -8,13 +8,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Map;
 
 /**
- * Tells which instance answered the request: shows the image version, the pod (host) name and
- * values that come from the Kubernetes ConfigMap. Used to watch load balancing and rolling updates.
+ * Tells which instance answered the request: shows the image version (APP_VERSION, baked in at build
+ * time), the pod (host) name and values that come from the Kubernetes ConfigMap. Used to watch load
+ * balancing, rolling updates and GitOps releases.
  */
 @RestController
-@RequestMapping("/api/catalog/info")
+@RequestMapping("/api/catalog")
 public class InfoController {
 
     private final String version;
@@ -29,9 +31,14 @@ public class InfoController {
         this.currency = currency;
     }
 
-    @GetMapping
+    @GetMapping("/info")
     public InfoResponse info() {
         return new InfoResponse("catalog-service", version, hostname(), shopName, currency);
+    }
+
+    @GetMapping("/version")
+    public Map<String, String> version() {
+        return Map.of("version", version);
     }
 
     private static String hostname() {
