@@ -1,0 +1,59 @@
+{{- if .Values.hooks.preUpgradeCheck.enabled }}
+# Helm hook, runs before every "helm upgrade" / "helm rollback" touches any object.
+# It connects to all four databases with the release's credentials and prints each Flyway
+# schema version. If a database is unreachable the Job fails and Helm aborts the upgrade,
+# so the new pods never start against a broken database.
+{{- $component := "pre-upgrade-check" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-upgrade,pre-rollback
+    # Removed when it succeeds; a failed Job is kept for "kubectl logs" until the next run (or
+    # ttlSecondsAfterFinished) replaces it. Helm never deletes hook objects on uninstall.
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 120
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      containers:
+        - name: check
+          image: {{ printf "%s:%s" .Values.postgres.image.repository (toString .Values.postgres.image.tag) }}
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: {{ include "plantshop.secretName" . }}
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              export PGPASSWORD="$DB_PASSWORD" PGCONNECT_TIMEOUT=5
+              echo "Pre-upgrade check of release {{ .Release.Name }} (upgrading to revision {{ .Release.Revision }})"
+              {{- range $db := list "catalog:catalog" "inventory:inventory" "order:orders" "payment:payments" }}
+              {{- $parts := splitList ":" $db }}
+              {{- $host := include "plantshop.componentName" (dict "root" $ "component" (printf "%s-db" (index $parts 0))) }}
+              version=$(psql -h {{ $host }} -U "$DB_USERNAME" -d {{ index $parts 0 }}_db -tAc \
+                "select coalesce(max(version), 'none') from {{ index $parts 1 }}.flyway_schema_history where success")
+              echo "  {{ index $parts 0 }}_db on {{ $host }}: reachable, Flyway schema version $version"
+              {{- end }}
+              echo "All databases are ready, the upgrade may continue"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
+{{- end }}

@@ -1,0 +1,21 @@
+# Root Application (App of Apps): the only manifest applied by hand, once:
+#   kubectl apply -f bootstrap/root.yaml
+# It syncs every Application in argocd-apps/.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/VladdHoryn/Plant_Shop.git
+    targetRevision: lab/DevOps_lab_5
+    path: argocd-apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

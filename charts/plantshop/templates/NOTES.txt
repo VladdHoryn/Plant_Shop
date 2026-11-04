@@ -1,0 +1,31 @@
+{{- $gateway := include "plantshop.componentName" (dict "root" . "component" "api-gateway") -}}
+Plant Shop {{ .Chart.AppVersion }} is installed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}" (revision {{ .Release.Revision }}).
+
+1. Wait until every pod is Ready (about 1.5 minutes on a fresh cluster):
+
+     kubectl -n {{ .Release.Namespace }} get pods -w
+
+2. Open the application (all requests go through the API gateway):
+{{- if .Values.ingress.enabled }}
+
+   Ingress: add "127.0.0.1 {{ .Values.ingress.host }}" to the hosts file, run "minikube tunnel", then
+     http://{{ .Values.ingress.host }}/api/catalog/plants
+{{- end }}
+{{- if eq .Values.apiGateway.service.type "NodePort" }}
+
+   NodePort:
+     minikube service {{ $gateway }} -n {{ .Release.Namespace }} --url
+{{- else if eq .Values.apiGateway.service.type "LoadBalancer" }}
+
+   LoadBalancer (on minikube run "minikube tunnel" first):
+     kubectl -n {{ .Release.Namespace }} get svc {{ $gateway }}   # EXTERNAL-IP, port {{ .Values.apiGateway.service.port }}
+{{- end }}
+
+   Port-forward (works everywhere):
+     kubectl -n {{ .Release.Namespace }} port-forward svc/{{ $gateway }} 8080:{{ .Values.apiGateway.service.port }}
+     curl http://localhost:8080/api/catalog/plants
+     curl http://localhost:8080/api/catalog/info      # version and the pod that answered
+
+3. Check the release:
+
+     helm test {{ .Release.Name }} -n {{ .Release.Namespace }}

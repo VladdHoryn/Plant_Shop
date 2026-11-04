@@ -1,0 +1,31 @@
+# Development environment (minikube). The defaults in values.yaml already describe dev; this file
+# pins the environment-specific values explicitly so that dev and prod can be compared side by side:
+#   helm install plantshop helm/plantshop -n plantshop-dev --create-namespace -f helm/plantshop/values-dev.yaml
+
+image:
+  tag: "1.0.0"
+
+config:
+  shopName: "Plant Shop (dev)"
+  # Fast JVM startup (C1 only) and a small heap
+  javaToolOptions: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 320Mi
+  limits:
+    cpu: "1"
+    memory: 640Mi
+
+apiGateway:
+  replicaCount: 2
+  service:
+    type: NodePort
+
+catalogService:
+  replicaCount: 2
+
+ingress:
+  enabled: true
+  host: plantshop.local

@@ -1,0 +1,54 @@
+# Production-like environment:
+#   helm upgrade --install plantshop helm/plantshop -n plantshop-prod --create-namespace \
+#     -f helm/plantshop/values-prod.yaml --set database.password=<from your secret store>
+#
+# Differences from dev: newer image tag, more replicas of the services that take user traffic,
+# a bigger CPU/memory budget, a production JVM, and the gateway exposed by a cloud
+# LoadBalancer Service instead of a NodePort + Ingress.
+
+image:
+  tag: "1.1.0"
+
+config:
+  shopName: "Plant Shop"
+  # Full JIT (C1 + C2) for peak throughput; slower startup is acceptable here
+  javaToolOptions: "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xss512k"
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 320Mi
+  limits:
+    cpu: "2"
+    memory: 768Mi
+
+apiGateway:
+  replicaCount: 3
+  service:
+    type: LoadBalancer
+
+catalogService:
+  replicaCount: 3
+
+# The LoadBalancer Service is the entry point in prod
+ingress:
+  enabled: false
+
+postgres:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+kafka:
+  heapOpts: "-Xms384m -Xmx384m"
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi

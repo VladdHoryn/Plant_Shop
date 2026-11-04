@@ -1,0 +1,17 @@
+# In-cluster address of the broker, port 9092 (matches KAFKA_ADVERTISED_LISTENERS)
+{{- $component := "kafka" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 4 }}
+  ports:
+    - name: kafka
+      port: 9092
+      targetPort: kafka

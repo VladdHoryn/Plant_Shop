@@ -1,0 +1,21 @@
+# Entry point of the application (NodePort in dev, see apiGateway.service in values.yaml)
+{{- $c := .Values.apiGateway }}
+{{- $component := "api-gateway" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  type: {{ $c.service.type }}
+  selector:
+    {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ $c.service.port }}
+      targetPort: http
+      {{- if and (eq $c.service.type "NodePort") $c.service.nodePort }}
+      nodePort: {{ $c.service.nodePort }}
+      {{- end }}

@@ -1,0 +1,24 @@
+# Plant Shop, rendered from charts/plantshop with values-minikube.yaml.
+# The Application name is the Helm release name, so objects are called plantshop-<component>.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: plantshop
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/VladdHoryn/Plant_Shop.git
+    targetRevision: lab/DevOps_lab_5
+    path: charts/plantshop
+    helm:
+      valueFiles:
+        - values-minikube.yaml   # relative to the chart directory
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: plantshop
+  syncPolicy:
+    automated:
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
