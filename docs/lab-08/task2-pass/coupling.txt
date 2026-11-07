@@ -1,0 +1,7 @@
+PersonalDataExportService: efferent (project classes it uses) = 10, afferent (project classes using it) = 1
+AuditedExportAccessGuard: efferent (project classes it uses) = 8, afferent (project classes using it) = 0
+JpaSubjectSnapshotSource: efferent (project classes it uses) = 9, afferent (project classes using it) = 0
+JpaCustomerChoicesSource: efferent (project classes it uses) = 6, afferent (project classes using it) = 0
+JpaActivityTraceSource: efferent (project classes it uses) = 7, afferent (project classes using it) = 0
+FeignOrderHistorySource: efferent (project classes it uses) = 8, afferent (project classes using it) = 0
+DefaultExportAssembler: efferent (project classes it uses) = 11, afferent (project classes using it) = 0

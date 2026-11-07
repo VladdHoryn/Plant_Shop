@@ -1,5 +1,6 @@
 package com.plantshop.user.privacy;
 
+import com.plantshop.user.dto.PersonalDataExport.ExcludedField;
 import com.plantshop.user.dto.PersonalDataExport.Omission;
 import com.plantshop.user.dto.PersonalDataExport.Sections;
 
@@ -14,6 +15,13 @@ import java.util.stream.Stream;
 public record ExportOmissions(List<Omission> items) {
 
     public static final String SOURCE_UNAVAILABLE = "SOURCE_UNAVAILABLE";
+    /** Held about the customer but deliberately not exported (documented in the export itself). */
+    public static final List<ExcludedField> EXCLUDED_FIELDS = List.of(
+            new ExcludedField("profile.passwordHash", "SECURITY_CREDENTIAL"),
+            new ExcludedField("profile.emailVerificationToken", "SECURITY_CREDENTIAL"),
+            new ExcludedField("profile.passwordResetToken", "SECURITY_CREDENTIAL"),
+            new ExcludedField("profile.fraudReviewFlag", "INTERNAL_SECURITY_CONTROL"),
+            new ExcludedField("privacyRequests.actor", "OTHER_PERSONS_DATA"));
     public static final ExportOmissions NONE = new ExportOmissions(List.of());
 
     private static final Omission ORDERS_UNAVAILABLE = new Omission(ExportSection.ORDERS.key(),

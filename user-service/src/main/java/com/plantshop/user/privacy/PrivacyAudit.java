@@ -35,10 +35,9 @@ public class PrivacyAudit {
     /**
      * A success joins the caller's transaction, so the event exists only if the operation committed.
      * A rejection is stored in its own transaction, because the operation's transaction rolls back.
-     * Lab 8 FAIL experiment: the subject now arrives already pseudonymized (subjectRef), a one-parameter change.
      */
-    public void record(PrivacyEvent event, Long actorId, String subjectRef, AuditOutcome outcome) {
-        PrivacyAuditEvent entry = new PrivacyAuditEvent(event, pseudonymizer.ref(actorId), subjectRef,
+    public void record(PrivacyEvent event, Long actorId, Long subjectId, AuditOutcome outcome) {
+        PrivacyAuditEvent entry = new PrivacyAuditEvent(event, pseudonymizer.ref(actorId), pseudonymizer.ref(subjectId),
                 outcome, CorrelationId.current());
         if (outcome.isRejection()) {
             independentTransaction.executeWithoutResult(status -> repository.save(entry));

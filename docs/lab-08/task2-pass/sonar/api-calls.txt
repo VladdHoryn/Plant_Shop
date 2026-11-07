@@ -1,0 +1,87 @@
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/metrics/search" --data-urlencode "ps=500"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/sonar-metrics-available.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/components/tree" --data-urlencode "component=plantshop" --data-urlencode "qualifiers=FIL" --data-urlencode "q=PaymentService"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/components-core.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java" --data-urlencode "metricKeys=class_complexity,coupling_between_objects,cohesion_in_methods,lcom4,complexity,cognitive_complexity,ncloc,functions"
+  -> HTTP 404, saved docs/lab-08/task2-pass/sonar/measures-core-lab-keys.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:payment-service/src/main/java/com/plantshop/payment/service/PaymentService.java" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-core.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/components/tree" --data-urlencode "component=plantshop" --data-urlencode "qualifiers=FIL" --data-urlencode "q=PersonalDataExportService"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/components-infra.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java" --data-urlencode "metricKeys=class_complexity,coupling_between_objects,cohesion_in_methods,lcom4,complexity,cognitive_complexity,ncloc,functions"
+  -> HTTP 404, saved docs/lab-08/task2-pass/sonar/measures-infra-lab-keys.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/PersonalDataExportService.java" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-infra.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/components/tree" --data-urlencode "component=plantshop" --data-urlencode "qualifiers=FIL" --data-urlencode "q=PersonalDataExport"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/components-dto.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/dto/PersonalDataExport.java" --data-urlencode "metricKeys=class_complexity,coupling_between_objects,cohesion_in_methods,lcom4,complexity,cognitive_complexity,ncloc,functions"
+  -> HTTP 404, saved docs/lab-08/task2-pass/sonar/measures-dto-lab-keys.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/dto/PersonalDataExport.java" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-dto.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/components/tree" --data-urlencode "component=plantshop" --data-urlencode "qualifiers=FIL" --data-urlencode "q=AuditedExportAccessGuard"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/components-guard.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/AuditedExportAccessGuard.java" --data-urlencode "metricKeys=class_complexity,coupling_between_objects,cohesion_in_methods,lcom4,complexity,cognitive_complexity,ncloc,functions"
+  -> HTTP 404, saved docs/lab-08/task2-pass/sonar/measures-guard-lab-keys.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/AuditedExportAccessGuard.java" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-guard.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/components/tree" --data-urlencode "component=plantshop" --data-urlencode "qualifiers=FIL" --data-urlencode "q=JpaSubjectSnapshotSource"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/components-snapshot.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/JpaSubjectSnapshotSource.java" --data-urlencode "metricKeys=class_complexity,coupling_between_objects,cohesion_in_methods,lcom4,complexity,cognitive_complexity,ncloc,functions"
+  -> HTTP 404, saved docs/lab-08/task2-pass/sonar/measures-snapshot-lab-keys.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/JpaSubjectSnapshotSource.java" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-snapshot.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/components/tree" --data-urlencode "component=plantshop" --data-urlencode "qualifiers=FIL" --data-urlencode "q=JpaCustomerChoicesSource"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/components-choices.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/JpaCustomerChoicesSource.java" --data-urlencode "metricKeys=class_complexity,coupling_between_objects,cohesion_in_methods,lcom4,complexity,cognitive_complexity,ncloc,functions"
+  -> HTTP 404, saved docs/lab-08/task2-pass/sonar/measures-choices-lab-keys.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/JpaCustomerChoicesSource.java" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-choices.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/components/tree" --data-urlencode "component=plantshop" --data-urlencode "qualifiers=FIL" --data-urlencode "q=JpaActivityTraceSource"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/components-trace.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/JpaActivityTraceSource.java" --data-urlencode "metricKeys=class_complexity,coupling_between_objects,cohesion_in_methods,lcom4,complexity,cognitive_complexity,ncloc,functions"
+  -> HTTP 404, saved docs/lab-08/task2-pass/sonar/measures-trace-lab-keys.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/JpaActivityTraceSource.java" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-trace.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/components/tree" --data-urlencode "component=plantshop" --data-urlencode "qualifiers=FIL" --data-urlencode "q=FeignOrderHistorySource"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/components-orders.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/FeignOrderHistorySource.java" --data-urlencode "metricKeys=class_complexity,coupling_between_objects,cohesion_in_methods,lcom4,complexity,cognitive_complexity,ncloc,functions"
+  -> HTTP 404, saved docs/lab-08/task2-pass/sonar/measures-orders-lab-keys.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/FeignOrderHistorySource.java" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-orders.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/components/tree" --data-urlencode "component=plantshop" --data-urlencode "qualifiers=FIL" --data-urlencode "q=DefaultExportAssembler"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/components-assembler.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/DefaultExportAssembler.java" --data-urlencode "metricKeys=class_complexity,coupling_between_objects,cohesion_in_methods,lcom4,complexity,cognitive_complexity,ncloc,functions"
+  -> HTTP 404, saved docs/lab-08/task2-pass/sonar/measures-assembler-lab-keys.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop:user-service/src/main/java/com/plantshop/user/service/export/DefaultExportAssembler.java" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-assembler.json
+
+$ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=plantshop" --data-urlencode "metricKeys=complexity,cognitive_complexity,ncloc,functions,classes,statements,code_smells,sqale_index,files"
+  -> HTTP 200, saved docs/lab-08/task2-pass/sonar/measures-project.json
+

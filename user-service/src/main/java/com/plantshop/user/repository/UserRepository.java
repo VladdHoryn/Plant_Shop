@@ -25,4 +25,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from User u where u.id = :id")
     Optional<User> findByIdForUpdate(Long id);
+
+    /** An erased (anonymized) account is treated like a missing one. */
+    default Optional<User> findActiveById(Long id) {
+        return findById(id).filter(User::isActive);
+    }
 }

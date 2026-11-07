@@ -1,0 +1,23 @@
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.173 s -- in com.plantshop.logging.CorrelationIdFilterTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in com.plantshop.logging.MaskingEncoderLifecycleTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.377 s -- in com.plantshop.logging.MaskingEncoderTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.086 s -- in com.plantshop.logging.PiiMaskerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.196 s -- in com.plantshop.logging.SecureLoggingAutoConfigurationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.355 s -- in com.plantshop.logging.SecureLoggingConfigurationTest
+[INFO] Tests run: 40, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 33.71 s -- in com.plantshop.user.ConsentIntegrationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.426 s -- in com.plantshop.user.ErasureIntegrationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.928 s -- in com.plantshop.user.PersonalDataExportIntegrationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in com.plantshop.user.privacy.ExportValueObjectsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.202 s -- in com.plantshop.user.SecureLoggingIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.093 s -- in com.plantshop.user.service.export.AuditedExportAccessGuardTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in com.plantshop.user.service.export.DefaultExportAssemblerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.plantshop.user.service.export.FeignOrderHistorySourceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.470 s -- in com.plantshop.user.service.export.LocalSourcesTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.323 s -- in com.plantshop.user.service.PersonalDataExportServiceTest
+[INFO] Tests run: 43, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Reactor Summary for Plant Shop 1.0.0-SNAPSHOT:
+[INFO] Plant Shop ......................................... SUCCESS [  0.006 s]
+[INFO] secure-logging ..................................... SUCCESS [  2.898 s]
+[INFO] user-service ....................................... SUCCESS [ 41.609 s]
+[INFO] BUILD SUCCESS

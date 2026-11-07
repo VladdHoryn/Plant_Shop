@@ -1,42 +1,40 @@
 package com.plantshop.user.service;
 
-import com.plantshop.user.client.OrderPrivacyClient;
 import com.plantshop.user.dto.PersonalDataExport;
-import com.plantshop.user.entity.ConsentPurpose;
 import com.plantshop.user.entity.User;
 import com.plantshop.user.entity.UserRole;
-import com.plantshop.user.privacy.PrivacyAudit;
-import com.plantshop.user.privacy.PrivacyProperties;
-import com.plantshop.user.repository.AddressRepository;
-import com.plantshop.user.repository.AnalyticsEventRepository;
-import com.plantshop.user.repository.ConsentHistoryRepository;
-import com.plantshop.user.repository.EmailMessageRepository;
-import com.plantshop.user.repository.PrivacyAuditEventRepository;
-import com.plantshop.user.repository.UserActivityRepository;
-import com.plantshop.user.repository.UserConsentRepository;
-import com.plantshop.user.repository.UserRepository;
-import com.plantshop.user.repository.UserSettingsRepository;
+import com.plantshop.user.exception.SubjectNotFoundException;
+import com.plantshop.user.privacy.ExportRequest;
+import com.plantshop.user.privacy.OrderHistory;
 import com.plantshop.user.security.AppUserPrincipal;
-import com.plantshop.user.security.SubjectAccessPolicy;
+import com.plantshop.user.service.export.ActivityTrace;
+import com.plantshop.user.service.export.CustomerChoices;
+import com.plantshop.user.service.export.ExportAccessGuard;
+import com.plantshop.user.service.export.ExportAssembler;
+import com.plantshop.user.service.export.OrderHistorySource;
+import com.plantshop.user.service.export.SubjectRecords;
+import com.plantshop.user.service.export.SubjectSnapshotSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.PlatformTransactionManager;
 
-import java.time.Instant;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
-import static com.plantshop.user.privacy.DataCategory.CONTACT_DATA;
-import static com.plantshop.user.privacy.DataCategory.DIRECT_IDENTIFIERS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * Lab 7, task 2: the categories of personal data an export declares must match the sections that hold data.
- * No Spring context and no database: every source is a mock, so the test isolates the assembly of the export.
+ * Lab 8: the coordinator after the God Object decomposition. Every collaborator is a port (interface): the access
+ * guard is a hand-written fake, the other three are Mockito mocks. No Spring context, no database, no Feign.
  */
 @ExtendWith(MockitoExtension.class)
 class PersonalDataExportServiceTest {
@@ -44,72 +42,62 @@ class PersonalDataExportServiceTest {
     private static final long SUBJECT_ID = 42L;
 
     @Mock
-    private UserRepository userRepository;
+    private SubjectSnapshotSource snapshots;
     @Mock
-    private AddressRepository addressRepository;
+    private OrderHistorySource orderHistory;
     @Mock
-    private UserSettingsRepository settingsRepository;
-    @Mock
-    private UserActivityRepository activityRepository;
-    @Mock
-    private UserConsentRepository consentRepository;
-    @Mock
-    private ConsentHistoryRepository historyRepository;
-    @Mock
-    private EmailMessageRepository emailRepository;
-    @Mock
-    private AnalyticsEventRepository analyticsRepository;
-    @Mock
-    private PrivacyAuditEventRepository auditRepository;
-    @Mock
-    private OrderPrivacyClient orderClient;
-    @Mock
-    private SubjectAccessPolicy accessPolicy;
-    @Mock
-    private PrivacyAudit audit;
-    @Mock
-    private PlatformTransactionManager transactionManager;
+    private ExportAssembler assembler;
     private PersonalDataExportService service;
+
+    /** Grants every request and turns an empty result into the same exception the real guard throws. */
+    private static final class AllowingGuard implements ExportAccessGuard {
+        @Override
+        public <T> T audited(final AppUserPrincipal actor, final Long subjectId,
+                             final Function<ExportRequest, Optional<T>> operation) {
+            return operation.apply(new ExportRequest(actor, subjectId)).orElseThrow(SubjectNotFoundException::new);
+        }
+    }
 
     @BeforeEach
     void setUp() {
-        PrivacyProperties properties = new PrivacyProperties("test-key",
-                Map.of(ConsentPurpose.MARKETING_EMAIL, "v1", ConsentPurpose.OPTIONAL_ANALYTICS, "v1"));
-        service = new PersonalDataExportService(userRepository, addressRepository, settingsRepository,
-                activityRepository, consentRepository, historyRepository, emailRepository, analyticsRepository,
-                auditRepository, orderClient, accessPolicy, properties, audit, transactionManager);
+        service = new PersonalDataExportService(new AllowingGuard(), snapshots, orderHistory, assembler);
     }
 
-    /**
-     * A customer who has only a profile (no addresses, settings, orders...). The profile holds the e-mail and
-     * the phone, so CONTACT_DATA must be declared even though the ADDRESSES section, which also holds contact
-     * data, is empty. Leaving it out would tell the customer that no contact data is processed about them.
-     */
     @Test
-    void categoriesOfAnEmptySectionDoNotEraseThoseOfASectionWithData() {
-        User user = customer();
-        AppUserPrincipal actor = new AppUserPrincipal(user);
-        when(accessPolicy.canHandleDataRequest(actor, SUBJECT_ID)).thenReturn(true);
-        when(userRepository.findById(SUBJECT_ID)).thenReturn(Optional.of(user));
+    void readsTheSnapshotThenTheOrdersThenAssemblesTheDocument() {
+        final User user = customer();
+        final SubjectRecords records = new SubjectRecords(user, List.of(),
+                new CustomerChoices(null, List.of(), List.of()), new ActivityTrace(List.of(), List.of(), List.of(),
+                List.of()));
+        final OrderHistory orders = OrderHistory.available(List.of());
+        final PersonalDataExport document = mock(PersonalDataExport.class, org.mockito.Answers.RETURNS_DEEP_STUBS);
+        when(snapshots.load(SUBJECT_ID)).thenReturn(Optional.of(records));
+        when(orderHistory.ordersOf("subject@example.test")).thenReturn(orders);
+        when(assembler.assemble("SUBJECT", records, orders)).thenReturn(document);
 
-        PersonalDataExport export = service.export(actor, SUBJECT_ID);
+        final PersonalDataExport export = service.export(new AppUserPrincipal(user), SUBJECT_ID);
 
-        assertThat(export.sections().profile().email()).isEqualTo("profile.only@example.test");
-        assertThat(export.sections().profile().phone()).isEqualTo("+380501112233");
-        assertThat(export.sections().addresses()).isEmpty();
-        assertThat(export.categories())
-                .as("categories declared for a customer whose only data is the profile (e-mail, phone)")
-                .containsExactly(DIRECT_IDENTIFIERS, CONTACT_DATA);
+        assertThat(export).isSameAs(document);
+        final InOrder order = inOrder(snapshots, orderHistory, assembler);
+        order.verify(snapshots).load(SUBJECT_ID);
+        order.verify(orderHistory).ordersOf("subject@example.test");
+        order.verify(assembler).assemble("SUBJECT", records, orders);
+    }
+
+    @Test
+    void anUnknownSubjectNeverReachesOrderServiceOrTheAssembler() {
+        when(snapshots.load(SUBJECT_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.export(new AppUserPrincipal(customer()), SUBJECT_ID))
+                .isInstanceOf(SubjectNotFoundException.class);
+        verifyNoInteractions(orderHistory, assembler);
     }
 
     private static User customer() {
-        User user = new User();
+        final User user = new User();
         user.setId(SUBJECT_ID);
-        user.setFullName("Profile Only");
-        user.setEmail("profile.only@example.test");
-        user.setPhone("+380501112233");
+        user.setEmail("subject@example.test");
         user.setRole(UserRole.CUSTOMER);
-        user.setCreatedAt(Instant.parse("2026-10-01T10:00:00Z"));
         return user;
     }
 }
