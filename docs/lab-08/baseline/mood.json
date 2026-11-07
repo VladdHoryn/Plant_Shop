@@ -1,0 +1,22 @@
+{
+  "MHF": {
+    "hiddenMethods": 42,
+    "allMethods": 308,
+    "value": 0.1364
+  },
+  "AHF": {
+    "hiddenFields": 265,
+    "allFields": 288,
+    "value": 0.9201
+  },
+  "COF": {
+    "couplings": 578,
+    "TC": 227,
+    "maxCouplings": 51302,
+    "value": 0.0113
+  },
+  "sources": {
+    "MHF/AHF": "CK class.csv (records not reported by CK 0.7.0)",
+    "COF": "jdeps -verbose:class -filter:none over */target/classes"
+  }
+}

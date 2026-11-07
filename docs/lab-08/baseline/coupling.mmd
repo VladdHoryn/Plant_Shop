@@ -1,0 +1,94 @@
+flowchart LR
+  subgraph user_client_["user.client"]
+    user_client_OrderPrivacyClient["OrderPrivacyClient"]
+    user_client_OrderPrivacyClient_CustomerOrder["OrderPrivacyClient.CustomerOrder"]
+    user_client_OrderPrivacyClient_CustomerRef["OrderPrivacyClient.CustomerRef"]
+  end
+  subgraph user_controller_["user.controller"]
+    user_controller_PrivacyController["PrivacyController"]
+  end
+  subgraph user_dto_["user.dto"]
+    user_dto_PersonalDataExport["PersonalDataExport"]
+    user_dto_PersonalDataExport_ExcludedField["PersonalDataExport.ExcludedField"]
+    user_dto_PersonalDataExport_Metadata["PersonalDataExport.Metadata"]
+    user_dto_PersonalDataExport_OrderEntry["PersonalDataExport.OrderEntry"]
+    user_dto_PersonalDataExport_Sections["PersonalDataExport.Sections"]
+    user_dto_PersonalDataExport_Subject["PersonalDataExport.Subject"]
+  end
+  subgraph user_entity_["user.entity"]
+    user_entity_AuditOutcome["AuditOutcome"]
+    user_entity_PrivacyEvent["PrivacyEvent"]
+    user_entity_User["User"]
+    user_entity_UserSettings["UserSettings"]
+  end
+  subgraph user_exception_["user.exception"]
+    user_exception_SubjectNotFoundException["SubjectNotFoundException"]
+  end
+  subgraph user_mapper_["user.mapper"]
+    user_mapper_PersonalDataMapper["PersonalDataMapper"]
+  end
+  subgraph user_privacy_["user.privacy"]
+    user_privacy_ExportCoverage["ExportCoverage"]
+    user_privacy_ExportOmissions["ExportOmissions"]
+    user_privacy_ExportRequest["ExportRequest"]
+    user_privacy_ExportSection["ExportSection"]
+    user_privacy_OrderHistory["OrderHistory"]
+    user_privacy_PrivacyAudit["PrivacyAudit"]
+    user_privacy_PrivacyProperties["PrivacyProperties"]
+  end
+  subgraph user_repository_["user.repository"]
+    user_repository_AddressRepository["AddressRepository"]
+    user_repository_AnalyticsEventRepository["AnalyticsEventRepository"]
+    user_repository_ConsentHistoryRepository["ConsentHistoryRepository"]
+    user_repository_EmailMessageRepository["EmailMessageRepository"]
+    user_repository_PrivacyAuditEventRepository["PrivacyAuditEventRepository"]
+    user_repository_UserActivityRepository["UserActivityRepository"]
+    user_repository_UserConsentRepository["UserConsentRepository"]
+    user_repository_UserRepository["UserRepository"]
+    user_repository_UserSettingsRepository["UserSettingsRepository"]
+  end
+  subgraph user_security_["user.security"]
+    user_security_AppUserPrincipal["AppUserPrincipal"]
+    user_security_SubjectAccessPolicy["SubjectAccessPolicy"]
+  end
+  subgraph user_service_["user.service"]
+    user_service_PersonalDataExportService["PersonalDataExportService"]
+    user_service_SubjectRecords["SubjectRecords"]
+  end
+  user_controller_PrivacyController --> user_service_PersonalDataExportService
+  user_service_PersonalDataExportService --> user_client_OrderPrivacyClient
+  user_service_PersonalDataExportService --> user_client_OrderPrivacyClient_CustomerOrder
+  user_service_PersonalDataExportService --> user_client_OrderPrivacyClient_CustomerRef
+  user_service_PersonalDataExportService --> user_dto_PersonalDataExport
+  user_service_PersonalDataExportService --> user_dto_PersonalDataExport_ExcludedField
+  user_service_PersonalDataExportService --> user_dto_PersonalDataExport_Metadata
+  user_service_PersonalDataExportService --> user_dto_PersonalDataExport_OrderEntry
+  user_service_PersonalDataExportService --> user_dto_PersonalDataExport_Sections
+  user_service_PersonalDataExportService --> user_dto_PersonalDataExport_Subject
+  user_service_PersonalDataExportService --> user_entity_AuditOutcome
+  user_service_PersonalDataExportService --> user_entity_PrivacyEvent
+  user_service_PersonalDataExportService --> user_entity_User
+  user_service_PersonalDataExportService --> user_entity_UserSettings
+  user_service_PersonalDataExportService --> user_exception_SubjectNotFoundException
+  user_service_PersonalDataExportService --> user_mapper_PersonalDataMapper
+  user_service_PersonalDataExportService --> user_privacy_ExportCoverage
+  user_service_PersonalDataExportService --> user_privacy_ExportOmissions
+  user_service_PersonalDataExportService --> user_privacy_ExportRequest
+  user_service_PersonalDataExportService --> user_privacy_ExportSection
+  user_service_PersonalDataExportService --> user_privacy_OrderHistory
+  user_service_PersonalDataExportService --> user_privacy_PrivacyAudit
+  user_service_PersonalDataExportService --> user_privacy_PrivacyProperties
+  user_service_PersonalDataExportService --> user_repository_AddressRepository
+  user_service_PersonalDataExportService --> user_repository_AnalyticsEventRepository
+  user_service_PersonalDataExportService --> user_repository_ConsentHistoryRepository
+  user_service_PersonalDataExportService --> user_repository_EmailMessageRepository
+  user_service_PersonalDataExportService --> user_repository_PrivacyAuditEventRepository
+  user_service_PersonalDataExportService --> user_repository_UserActivityRepository
+  user_service_PersonalDataExportService --> user_repository_UserConsentRepository
+  user_service_PersonalDataExportService --> user_repository_UserRepository
+  user_service_PersonalDataExportService --> user_repository_UserSettingsRepository
+  user_service_PersonalDataExportService --> user_security_AppUserPrincipal
+  user_service_PersonalDataExportService --> user_security_SubjectAccessPolicy
+  user_service_PersonalDataExportService --> user_service_SubjectRecords
+  classDef god fill:#e03131,color:#fff,stroke:#862e2e
+  class user_service_PersonalDataExportService god

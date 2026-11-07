@@ -1,0 +1,17 @@
+144 classes -> docs/lab-08/baseline/ck-class.json
+ CBO  WMC  LCOM*  RFC  DIT  class
+  29    9   0.60   43    1  com.plantshop.user.service.PersonalDataExportService
+  27   14   0.62   36    1  com.plantshop.user.service.ConsentService
+  26   11   0.57   38    1  com.plantshop.user.service.ErasureService
+  20    6   0.00    6    1  com.plantshop.catalog.controller.PlantController
+  20    8   0.75   24    1  com.plantshop.catalog.service.PlantService
+  20    2   0.00   26    1  com.plantshop.user.service.RegistrationService
+  19   19   0.63   49    1  com.plantshop.inventory.service.InventoryService
+  18   11   0.64   50    1  com.plantshop.order.service.OrderService
+  18   10   0.00   42    1  com.plantshop.user.mapper.PersonalDataMapper
+  17    3   0.00    3    1  com.plantshop.user.controller.ConsentController
+  17    8   0.00   18    2  com.plantshop.user.exception.GlobalExceptionHandler
+  16    0    n/a    0    1  com.plantshop.catalog.entity.Plant
+  16    4   0.00    5    1  com.plantshop.inventory.controller.InventoryController
+  16    3   0.67    6    1  com.plantshop.user.controller.UserController
+  15    5   0.83    4    1  com.plantshop.order.entity.Order

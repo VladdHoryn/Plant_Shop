@@ -1,0 +1,122 @@
+16:55:26.204 WARN  Property 'sonar.working.directory' with value '/tmp/.scannerwork' is overridden with value '.scannerwork'
+16:55:26.213 INFO  Scanner configuration file: /opt/sonar-scanner/conf/sonar-scanner.properties
+16:55:26.218 INFO  Project root configuration file: /usr/src/sonar-project.properties
+16:55:26.254 INFO  SonarScanner CLI 8.1.0.6389
+16:55:26.268 INFO  Linux 6.18.33.2-microsoft-standard-WSL2 amd64
+16:55:28.434 INFO  Communicating with SonarQube Community Build 26.10.0.133078
+16:55:28.436 INFO  JRE provisioning: os[linux], arch[x86_64]
+16:55:37.221 INFO  Starting SonarScanner Engine...
+16:55:37.221 INFO  Java 21.0.12.1 Eclipse Adoptium (64-bit)
+16:55:38.908 INFO  Load global settings
+16:55:39.072 INFO  Load global settings (done) | time=161ms
+16:55:39.074 INFO  Server id: 147B411E-AaG2tCCKRbgm1vXGhqWQ
+16:55:39.083 INFO  Loading required plugins
+16:55:39.083 INFO  Load plugins index
+16:55:39.124 INFO  Load plugins index (done) | time=40ms
+16:55:39.124 INFO  Load/download plugins
+16:55:40.683 INFO  Load/download plugins (done) | time=1559ms
+16:55:41.022 INFO  Load project settings for component key: 'plantshop'
+16:55:41.057 INFO  Process project properties
+16:55:41.117 INFO  Process project properties (done) | time=60ms
+16:55:41.129 INFO  Project key: plantshop
+16:55:41.130 INFO  Base dir: /usr/src
+16:55:41.130 INFO  Working dir: /usr/src/.scannerwork
+16:55:41.343 INFO  Load quality profiles
+16:55:41.537 INFO  Load quality profiles (done) | time=194ms
+16:55:41.581 INFO  Load active rules
+16:55:41.980 INFO  Load active rules (done) | time=398ms
+16:55:41.991 INFO  Load analysis cache
+16:55:42.006 INFO  Load analysis cache (404) | time=15ms
+16:55:42.206 INFO  Preprocessing files...
+16:55:43.759 INFO  1 language detected in 215 preprocessed files (done) | time=1551ms
+16:55:43.761 INFO  Loading plugins for detected languages
+16:55:43.761 INFO  Load/download plugins
+16:55:45.835 INFO  Load/download plugins (done) | time=2073ms
+16:55:46.096 INFO  Load project repositories
+16:55:46.111 INFO  Load project repositories (done) | time=15ms
+16:55:46.190 INFO  Indexing files...
+16:55:46.193 INFO  Project configuration:
+16:55:48.930 INFO  215 files indexed (done) | time=2741ms
+16:55:48.931 INFO  Quality profile for java: Sonar way core
+16:55:48.931 INFO  ------------- Run sensors on module Plant Shop
+16:55:49.002 INFO  Load metrics repository
+16:55:49.038 INFO  Load metrics repository (done) | time=36ms
+16:55:50.070 INFO  Sensor IaC YAML File Type Classification Sensor [iac]
+16:55:50.088 INFO  Sensor IaC YAML File Type Classification Sensor [iac] (done) | time=17ms
+16:55:50.089 INFO  Sensor JavaSensor [java]
+16:55:50.100 INFO  Configured Java source version (sonar.java.source): 21, preview features enabled (sonar.java.enablePreview): false
+16:55:50.217 INFO  Server-side caching is enabled. The Java analyzer will not try to leverage data from a previous analysis.
+16:55:50.220 INFO  Using ECJ batch to parse 195 Main java source files with batch size 102 KB.
+16:55:52.004 INFO  Starting batch processing.
+16:55:56.537 INFO  The Java analyzer cannot skip unchanged files in this context. A full analysis is performed for all files.
+16:56:02.004 INFO  26% analyzed
+16:56:22.007 INFO  100% analyzed
+16:56:22.008 INFO  Batch processing: Done.
+16:56:22.008 INFO  Did not optimize analysis for any files, performed a full analysis for all 195 files.
+16:56:22.009 WARN  Missing 'sonar.java.libraries' property. You might end up with less precise analysis results.
+16:56:22.009 WARN  Missing 'sonar.java.test.libraries' property. You might end up with less precise analysis results.
+16:56:22.010 WARN  Unresolved imports/types have been detected during analysis. Enable DEBUG mode to see them.
+16:56:22.011 WARN  Use of preview features have been detected during analysis. Enable DEBUG mode to see them.
+16:56:22.011 INFO  Using ECJ batch to parse 20 Test java source files with batch size 102 KB.
+16:56:22.199 INFO  Starting batch processing.
+16:56:24.611 INFO  100% analyzed
+16:56:24.611 INFO  Batch processing: Done.
+16:56:24.611 INFO  Did not optimize analysis for any files, performed a full analysis for all 20 files.
+16:56:24.611 WARN  Unresolved imports/types have been detected during analysis. Enable DEBUG mode to see them.
+16:56:24.612 WARN  Use of preview features have been detected during analysis. Enable DEBUG mode to see them.
+16:56:24.612 INFO  No "Generated" source files to scan.
+16:56:24.613 INFO  Sensor JavaSensor [java] (done) | time=34523ms
+16:56:24.613 INFO  Sensor JaCoCo XML Report Importer [jacoco]
+16:56:24.614 INFO  'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml
+16:56:24.617 INFO  No report imported, no coverage information will be imported by JaCoCo XML Report Importer
+16:56:24.617 INFO  Sensor JaCoCo XML Report Importer [jacoco] (done) | time=4ms
+16:56:24.617 INFO  Sensor IaC hadolint report Sensor [iac]
+16:56:24.618 INFO  Sensor IaC hadolint report Sensor [iac] (done) | time=1ms
+16:56:24.618 INFO  Sensor Java Config Sensor [iac]
+16:56:24.618 INFO  There are no files to be analyzed for the Java language
+16:56:24.618 INFO  Sensor Java Config Sensor [iac] (done) | time=0ms
+16:56:24.619 INFO  Sensor IaC Docker Sensor [iac]
+16:56:24.631 INFO  There are no files to be analyzed for the Docker language
+16:56:24.631 INFO  Sensor IaC Docker Sensor [iac] (done) | time=12ms
+16:56:24.632 INFO  Sensor SurefireSensor [java]
+16:56:24.632 INFO  parsing [/usr/src/target/surefire-reports]
+16:56:24.633 INFO  Sensor SurefireSensor [java] (done) | time=1ms
+16:56:24.633 INFO  Sensor TextAndSecretsSensor [text]
+16:56:24.648 INFO  Available processors: 16
+16:56:24.649 INFO  Using 16 threads for analysis.
+16:56:24.889 INFO  Start fetching files for the text and secrets analysis
+16:56:24.897 INFO  Using Git CLI to retrieve dirty files
+16:56:24.907 WARN  Retrieving only language associated files, make sure to run the analysis inside a git repository to make use of inclusions specified via "sonar.text.inclusions"
+16:56:24.907 INFO  Starting the text and secrets analysis
+16:56:24.908 INFO  215 source files to be analyzed for the text and secrets analysis
+16:56:25.117 INFO  215/215 source files have been analyzed for the text and secrets analysis
+16:56:25.120 INFO  Sensor TextAndSecretsSensor [text] (done) | time=486ms
+16:56:25.123 INFO  ------------- Run sensors on project
+16:56:25.222 INFO  Sensor JaCoCo Aggregate XML Report Importer [jacoco]
+16:56:25.223 INFO  Sensor JaCoCo Aggregate XML Report Importer [jacoco] (done) | time=0ms
+16:56:25.223 INFO  Sensor IaC Project Sensor [iac]
+16:56:25.224 INFO  Sensor IaC Project Sensor [iac] (done) | time=1ms
+16:56:25.225 INFO  Sensor JavaProjectSensor [java]
+16:56:25.227 INFO  Sensor JavaProjectSensor [java] (done) | time=2ms
+16:56:25.227 INFO  Sensor Zero Coverage Sensor
+16:56:25.794 INFO  Sensor Zero Coverage Sensor (done) | time=567ms
+16:56:25.794 INFO  Sensor Java CPD Block Indexer
+16:56:26.829 INFO  Sensor Java CPD Block Indexer (done) | time=1034ms
+16:56:26.829 INFO  ------------- Gather SCA dependencies on project
+16:56:26.834 INFO  Dependency analysis skipped
+16:56:26.836 INFO  SCM Publisher is disabled
+16:56:26.842 INFO  CPD Executor 124 files had no CPD blocks
+16:56:26.842 INFO  CPD Executor Calculating CPD for 71 files
+16:56:27.054 INFO  CPD Executor CPD calculation finished (done) | time=211ms
+16:56:30.635 INFO  Analysis report generated in 2239ms, dir size=738.6 kB
+16:57:14.865 INFO  Analysis report compressed in 44226ms, zip size=448.1 kB
+16:57:15.530 INFO  Analysis report uploaded in 665ms
+16:57:15.535 INFO  ANALYSIS SUCCESSFUL, you can find the results at: http://host.docker.internal:9000/dashboard?id=plantshop
+16:57:15.536 INFO  Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+16:57:15.536 INFO  More about the report processing at http://host.docker.internal:9000/api/ce/task?id=05773910-3b80-4eeb-a2b1-36ee7004bd10
+16:57:18.892 INFO  Analysis total time: 1:41.622 min
+16:57:18.896 INFO  SonarScanner Engine completed successfully
+16:57:18.930 INFO  EXECUTION SUCCESS
+16:57:18.933 INFO  Total time: 1:52.722s
+Waiting for background task 05773910-3b80-4eeb-a2b1-36ee7004bd10 ...
+Analysis processed: "status":"SUCCESS"

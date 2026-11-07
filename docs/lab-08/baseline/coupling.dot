@@ -1,0 +1,105 @@
+digraph coupling {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor=white, fontname=Helvetica];
+  subgraph cluster_0 {
+    label="user.client";
+    user_client_OrderPrivacyClient [label="OrderPrivacyClient"];
+    user_client_OrderPrivacyClient_CustomerOrder [label="OrderPrivacyClient.CustomerOrder"];
+    user_client_OrderPrivacyClient_CustomerRef [label="OrderPrivacyClient.CustomerRef"];
+  }
+  subgraph cluster_1 {
+    label="user.controller";
+    user_controller_PrivacyController [label="PrivacyController"];
+  }
+  subgraph cluster_2 {
+    label="user.dto";
+    user_dto_PersonalDataExport [label="PersonalDataExport"];
+    user_dto_PersonalDataExport_ExcludedField [label="PersonalDataExport.ExcludedField"];
+    user_dto_PersonalDataExport_Metadata [label="PersonalDataExport.Metadata"];
+    user_dto_PersonalDataExport_OrderEntry [label="PersonalDataExport.OrderEntry"];
+    user_dto_PersonalDataExport_Sections [label="PersonalDataExport.Sections"];
+    user_dto_PersonalDataExport_Subject [label="PersonalDataExport.Subject"];
+  }
+  subgraph cluster_3 {
+    label="user.entity";
+    user_entity_AuditOutcome [label="AuditOutcome"];
+    user_entity_PrivacyEvent [label="PrivacyEvent"];
+    user_entity_User [label="User"];
+    user_entity_UserSettings [label="UserSettings"];
+  }
+  subgraph cluster_4 {
+    label="user.exception";
+    user_exception_SubjectNotFoundException [label="SubjectNotFoundException"];
+  }
+  subgraph cluster_5 {
+    label="user.mapper";
+    user_mapper_PersonalDataMapper [label="PersonalDataMapper"];
+  }
+  subgraph cluster_6 {
+    label="user.privacy";
+    user_privacy_ExportCoverage [label="ExportCoverage"];
+    user_privacy_ExportOmissions [label="ExportOmissions"];
+    user_privacy_ExportRequest [label="ExportRequest"];
+    user_privacy_ExportSection [label="ExportSection"];
+    user_privacy_OrderHistory [label="OrderHistory"];
+    user_privacy_PrivacyAudit [label="PrivacyAudit"];
+    user_privacy_PrivacyProperties [label="PrivacyProperties"];
+  }
+  subgraph cluster_7 {
+    label="user.repository";
+    user_repository_AddressRepository [label="AddressRepository"];
+    user_repository_AnalyticsEventRepository [label="AnalyticsEventRepository"];
+    user_repository_ConsentHistoryRepository [label="ConsentHistoryRepository"];
+    user_repository_EmailMessageRepository [label="EmailMessageRepository"];
+    user_repository_PrivacyAuditEventRepository [label="PrivacyAuditEventRepository"];
+    user_repository_UserActivityRepository [label="UserActivityRepository"];
+    user_repository_UserConsentRepository [label="UserConsentRepository"];
+    user_repository_UserRepository [label="UserRepository"];
+    user_repository_UserSettingsRepository [label="UserSettingsRepository"];
+  }
+  subgraph cluster_8 {
+    label="user.security";
+    user_security_AppUserPrincipal [label="AppUserPrincipal"];
+    user_security_SubjectAccessPolicy [label="SubjectAccessPolicy"];
+  }
+  subgraph cluster_9 {
+    label="user.service";
+    user_service_PersonalDataExportService [label="PersonalDataExportService", fillcolor="#e03131", fontcolor=white];
+    user_service_SubjectRecords [label="SubjectRecords"];
+  }
+  user_controller_PrivacyController -> user_service_PersonalDataExportService;
+  user_service_PersonalDataExportService -> user_client_OrderPrivacyClient;
+  user_service_PersonalDataExportService -> user_client_OrderPrivacyClient_CustomerOrder;
+  user_service_PersonalDataExportService -> user_client_OrderPrivacyClient_CustomerRef;
+  user_service_PersonalDataExportService -> user_dto_PersonalDataExport;
+  user_service_PersonalDataExportService -> user_dto_PersonalDataExport_ExcludedField;
+  user_service_PersonalDataExportService -> user_dto_PersonalDataExport_Metadata;
+  user_service_PersonalDataExportService -> user_dto_PersonalDataExport_OrderEntry;
+  user_service_PersonalDataExportService -> user_dto_PersonalDataExport_Sections;
+  user_service_PersonalDataExportService -> user_dto_PersonalDataExport_Subject;
+  user_service_PersonalDataExportService -> user_entity_AuditOutcome;
+  user_service_PersonalDataExportService -> user_entity_PrivacyEvent;
+  user_service_PersonalDataExportService -> user_entity_User;
+  user_service_PersonalDataExportService -> user_entity_UserSettings;
+  user_service_PersonalDataExportService -> user_exception_SubjectNotFoundException;
+  user_service_PersonalDataExportService -> user_mapper_PersonalDataMapper;
+  user_service_PersonalDataExportService -> user_privacy_ExportCoverage;
+  user_service_PersonalDataExportService -> user_privacy_ExportOmissions;
+  user_service_PersonalDataExportService -> user_privacy_ExportRequest;
+  user_service_PersonalDataExportService -> user_privacy_ExportSection;
+  user_service_PersonalDataExportService -> user_privacy_OrderHistory;
+  user_service_PersonalDataExportService -> user_privacy_PrivacyAudit;
+  user_service_PersonalDataExportService -> user_privacy_PrivacyProperties;
+  user_service_PersonalDataExportService -> user_repository_AddressRepository;
+  user_service_PersonalDataExportService -> user_repository_AnalyticsEventRepository;
+  user_service_PersonalDataExportService -> user_repository_ConsentHistoryRepository;
+  user_service_PersonalDataExportService -> user_repository_EmailMessageRepository;
+  user_service_PersonalDataExportService -> user_repository_PrivacyAuditEventRepository;
+  user_service_PersonalDataExportService -> user_repository_UserActivityRepository;
+  user_service_PersonalDataExportService -> user_repository_UserConsentRepository;
+  user_service_PersonalDataExportService -> user_repository_UserRepository;
+  user_service_PersonalDataExportService -> user_repository_UserSettingsRepository;
+  user_service_PersonalDataExportService -> user_security_AppUserPrincipal;
+  user_service_PersonalDataExportService -> user_security_SubjectAccessPolicy;
+  user_service_PersonalDataExportService -> user_service_SubjectRecords;
+}

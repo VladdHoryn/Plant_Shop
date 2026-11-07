@@ -1,0 +1,20 @@
+# Local SonarQube Community for Lab 8 (Web API: http://localhost:9000/api/...). Versions are pinned.
+#   docker compose -f tools/sonar/docker-compose.yml up -d
+# The scanner runs as a one-off container from the repo root (see scripts/sonar-scan.sh).
+name: plantshop-sonar
+services:
+  sonarqube:
+    image: sonarqube:26.10.0.133078-community
+    container_name: plantshop-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonar-data:/opt/sonarqube/data
+      - sonar-extensions:/opt/sonarqube/extensions
+      - sonar-logs:/opt/sonarqube/logs
+volumes:
+  sonar-data:
+  sonar-extensions:
+  sonar-logs:
