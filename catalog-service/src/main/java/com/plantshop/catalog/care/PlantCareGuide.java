@@ -4,13 +4,12 @@ import java.time.Duration;
 
 /**
  * Care advice for an ordinary house plant, as shown on a plant's page in the shop.
- * Lab 8, task 3: top of a deliberately deep inheritance chain (PlantCareGuide -> TropicalCareGuide ->
- * OrchidCareGuide). {@link #summary()} and {@link #needsWater(int)} are template methods: they call methods that
- * subclasses override, so their result depends on the whole chain.
+ * Lab 8, task 3: formerly the top of a 3-level inheritance chain; since the PASS commit TropicalCareGuide holds it
+ * as a private field and delegates to it (composition), nothing extends it any more.
  */
 public class PlantCareGuide {
 
-    /** Lab 8 FAIL experiment: intervals become java.time.Duration (was: int wateringIntervalDays()). */
+    /** Since Lab 8 (FAIL commit) a Duration; it was int wateringIntervalDays(). */
     public Duration wateringInterval() {
         return Duration.ofDays(7);
     }

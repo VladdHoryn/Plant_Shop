@@ -1,33 +1,53 @@
 package com.plantshop.catalog.care;
 
-/**
- * Orchids (Phalaenopsis): a tropical plant that is watered rarely and rests after blooming. Third level of the
- * Lab 8 hierarchy; overrides half of what it inherits, and the inherited template methods silently pick up those
- * overrides (its needsWater and summary are TropicalCareGuide's code running on OrchidCareGuide's values).
- */
-public class OrchidCareGuide extends TropicalCareGuide {
+import java.time.Duration;
 
-    @Override
-    public int wateringIntervalDays() {
-        return 10;
+/**
+ * Orchids (Phalaenopsis): a tropical plant that is watered rarely and rests after blooming. Lab 8, task 3: no longer
+ * extends TropicalCareGuide; holds it as a private field and delegates. The tropical watering rule and summary
+ * are applied to the orchid's own interval explicitly ({@code tropical.isDue(days, wateringInterval())}) instead
+ * of silently, through an overridden method called from inherited code.
+ */
+public class OrchidCareGuide {
+
+    private final TropicalCareGuide tropical;
+
+    public OrchidCareGuide(final TropicalCareGuide tropical) {
+        this.tropical = tropical;
     }
 
-    @Override
+    public Duration wateringInterval() {
+        return Duration.ofDays(10);
+    }
+
     public String lightAdvice() {
         return "Bright light, no direct midday sun";
     }
 
-    @Override
+    public String humidityAdvice() {
+        return tropical.humidityAdvice();
+    }
+
+    public int minTemperatureCelsius() {
+        return tropical.minTemperatureCelsius();
+    }
+
     public int fertilizeEveryWeeks() {
         return 2;
     }
 
-    @Override
     public int repotEveryYears() {
         return 3;
     }
 
-    @Override
+    public boolean needsWater(final int daysSinceWatering) {
+        return tropical.isDue(daysSinceWatering, wateringInterval());
+    }
+
+    public String summary() {
+        return tropical.describe(wateringInterval(), lightAdvice());
+    }
+
     public int mistingPerWeek() {
         return 3;
     }

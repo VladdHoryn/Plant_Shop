@@ -1,0 +1,7 @@
+# code lines only (javadoc mentions of "extends" are ignored)
+$ grep -nE "^\s*@Override|^public class \w+ extends" catalog-service/src/main/java/com/plantshop/catalog/care/*.java | wc -l
+0
+$ git show 68dfd8d:<same files> | grep -cE "^\s*@Override|^public class \w+ extends"   # baseline
+PlantCareGuide: 0
+TropicalCareGuide: 5
+OrchidCareGuide: 6
