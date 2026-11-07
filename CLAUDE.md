@@ -126,40 +126,69 @@ and `CorrelationIdFilter`. It is a "critical module" in the quality gate; keep i
   value; if a target is unreachable honestly, stop and tell me.
 - At each "stop and ask" point in my prompt, actually stop and wait for my answer.
 
-## Current lab: Lab 7 (Chapin audit, immutability, CI metrics, Hotspots)
+## Current lab: Lab 8 (CK & MOOD audit, God Object decomposition, inheritance → composition)
 
-Assignment: `docs/lab-07.md`. Branch: `lab/Lab_7`. Report: `docs/lab-07-report.md`, raw outputs in `docs/lab-07/`.
+Assignment: `docs/lab-08.md`. Branch: `lab/Lab_8`. Report: `docs/lab-08-report.md`, raw outputs (JSON, CSV,
+compiler logs, dependency graphs) in `docs/lab-08/`.
 
-- **Method selection (task 1):** prefer integration-contour code (payment-service charging logic, Feign clients
-  in order-service, Kafka listeners/publishers, mappers) or the linear methods produced by the Lab 6 lookup-table
-  refactoring (`PaymentService`, `WateringPlanner`, see `docs/complexity-report.md`). Verify CC <= 5 with
-  `./scripts/cc-check.sh <file>` and quote the Lizard line.
-- **Chapin classification:** count every variable in the method, including parameters, locals, loop/lambda
-  variables and fields the method reads or writes. Priority when a variable has several roles: C > M > P > T.
-  Formula: `C_ch = 1·P + 2·M + 3·C + 0.5·T`. Report table columns:
-  `Змінна | Тип даних | Клас (P/M/C/T) | Обґрунтування ролі | Вага`.
-- **FAIL commit (task 2):** the mutation bug is demonstrated with a plain JUnit 5 unit test (no Spring context,
-  no Testcontainers, so it runs without Docker). The test must fail for a business reason (wrong amount, lost
-  status), not a compile error. The pre-commit hook only checks CC, so a failing test can be committed; CI will be
-  red on this commit, which is expected. Commit: `feat(audit): simulate data mutation issue, FAIL`.
-- **PASS refactoring (task 2):** all parameters and locals `final`; "changes" create new objects; related values
-  grouped into immutable Value Objects as Java `record`s with validation in the compact constructor and
-  `withX(...)` methods returning new instances (no Lombok `@Setter`/`@Data` on VOs, defensive copies for
-  collections). Validation/decision logic moves into the VO so the method loses C variables. Extract Method alone
-  does not count. All tests green. Commit:
-  `refactor(audit): reduce Chapin complexity using immutable Value Objects, PASS`.
-  Target: `C_ch_after <= C_ch_before / 2` and `C_ch_after <= 6`.
-- **CI (task 3):** add a separate workflow `.github/workflows/code-metrics.yml` (do not break
-  `quality-gate.yml`): on push and pull_request, install Lizard with the same version as pinned in `tools/lizard`,
-  scan all modules' `src/main/java`, export CSV, convert to JSON with `scripts/lizard_to_json.py`, upload both via
-  `actions/upload-artifact@v4`. Halstead Effort from `tools/halstead` may be added as an extra column.
-  Validate the YAML locally (e.g. via a Docker image with `actionlint`); I push and take the screenshots myself.
-- **Churn (task 3):** use a 90-day window and `grep -E` (not the deprecated `egrep`):
-  `git log --since="90 days ago" --format=format: --name-only | grep -Ev '^$' | sort | uniq -c | sort -nr`
-  Count only `*.java` files under `src/main` for the matrix. If history is too short, stop and ask which
-  variant (1/2/3 from the assignment) to use.
-- **Hotspot matrix:** 5+ files, columns `Файл | Max CC / Sum CC (Effort) | Комітів за 90 днів | Категорія`.
-  High complexity = any method with CC > 10 (or file Sum CC above the project median, state which); high churn =
-  above the project median commit count (state the number). End with a prioritized refactoring plan for the next
-  sprint.
+- **Metric sources (check first, never invent numbers):** current SonarQube Community / SonarCloud for Java most
+  likely does not compute `coupling_between_objects`, `lcom4` or DIT, and has never computed MOOD (MHF/AHF/COF).
+  `class_complexity` may also be deprecated or missing. Workflow:
+    1. `GET api/metrics/search?ps=500` → save as `docs/lab-08/sonar-metrics-available.json` as proof of which keys exist.
+    2. Still send the assignment's request with the lab keys plus `complexity,cognitive_complexity,ncloc,functions`
+       and save the raw response, including any "metric not found" error. This is the API evidence for the report.
+    3. Compute the missing CK metrics with the CK tool (`ck` jar → `class.csv` with `wmc, cbo, lcom*, rfc, dit, noc`
+       and visibility counts). If the jar is not in `tools/`, ask me before downloading anything. Convert CSV → JSON
+       with a script in `scripts/`, so the report still contains a JSON package.
+    4. In every metrics table, mark where each number comes from (`Sonar API` / `CK`).
+- **API calls (task 1):** the token is read only from env `SONAR_TOKEN`. Never write it into files, scripts or the
+  report; show it as `$SONAR_TOKEN`. Call pattern:
+  `curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" --data-urlencode "component=<key>" --data-urlencode "metricKeys=<keys>"`.
+  Find exact file keys via `api/components/tree?component=<projectKey>&qualifiers=FIL&q=<ClassName>`, because
+  multi-module keys contain the module path. Use the same three files (Core Domain, Infrastructure, Utility/DTO)
+  as in the Lab 6 report in `docs/`. Make one project-level call for global numbers.
+  Scanner: compile first, because `sonar-project.properties` (repo root, no token inside) must set
+  `sonar.java.binaries` for every module.
+- **MOOD:** compute with `scripts/ck_mood.py` over CK `class.csv`, `src/main` classes only:
+  MHF = non-public methods / all methods, AHF = non-public fields / all fields,
+  COF = Σ couplings to other project classes / (TC² − TC). State in the report that visibility is treated as
+  binary (a simplification of Abreu's definition).
+- **Baseline table:** `Файл | Роль | WMC | CBO | LCOM* | RFC | DIT | Джерело`, plus a row with MHF / AHF / COF and
+  a short verdict. Use CK `lcom*` (0..1, matches the PASS target ≤ 0.2). Read the assignment's garbled "LCOM1" as
+  "LCOM close to 1" and state this interpretation in the report.
+- **Coupling matrix (task 2):** SonarQube no longer has a dependency matrix. Build the class graph from
+  `jdeps -verbose:class` on compiled classes (or from CK data) as DOT/Mermaid in `docs/lab-08/`. Render it to SVG
+  if Graphviz is available, with the God Object highlighted. I take IDE screenshots (MetricsReloaded etc.) myself.
+- **God Object selection:** the class with the highest CK `cbo`. If no class has CBO > 15 together with high
+  LCOM*, stop and ask which variant to use (artificial aggregation of scattered logic into one class, or an
+  Open-Source project). Baseline commit: `chore(audit): capture OO design baseline`.
+- **FAIL (task 2, Shotgun Surgery):** make one small change to the signature or behaviour of a class the God
+  Object depends on, e.g. a Feign client, mapper or publisher method. Save the compiler output to
+  `docs/lab-08/shotgun-surgery.log` and count how many places break inside the God Object. Commit the broken
+  state: `arch(audit): capture god object coupling failure, FAIL`. The pre-commit hook only checks CC, so this
+  commit is allowed; a red build/CI on it is expected.
+- **PASS (task 2):** split into 3–4 classes with one business responsibility each. Collaborators are interfaces
+  (contracts/ports) injected through the constructor: `final` fields, no field `@Autowired`, no `new` of
+  collaborators. New concrete classes never call each other directly. Moving code (Extract Method/Class) without
+  interfaces does not count. Unit tests use fakes or Mockito against the interfaces; all tests green. Re-scan and
+  re-run CK: every new class must have CBO ≤ 8 and LCOM* ≤ 0.2. Provide a before/after CK table and a Mermaid
+  class diagram (blueprint). Commit: `refactor(audit): eliminate god object via interface decomposition, PASS`.
+- **Task 3 baseline (Lorenz–Kidd):** find an `extends` chain of our own classes. Ignore JDK/framework bases
+  (`RuntimeException`, Spring base classes, JPA repository interfaces). Report DIT, PIM (public methods including
+  inherited ones), added methods and overridden methods. CK counts `Object`, so a class without `extends` has
+  DIT = 1; say so in the report. If no chain with DIT ≥ 3 exists, create an artificial 3-level service hierarchy
+  in an existing module where the child overrides about half of the parent's methods. Commit it as
+  `chore(audit): add inheritance hierarchy baseline`.
+- **FAIL (task 3):** change the signature or logic of a method in the top base class. Capture either the cascade
+  of compile errors in the subclasses (`docs/lab-08/inheritance-crash.log`) or a failing plain JUnit 5 test for
+  the behaviour change. Commit: `arch(audit): capture inheritance fragility crash, FAIL`.
+- **PASS (task 3):** remove `extends`. The former parent becomes a `private final` field injected via the
+  constructor, and the child only delegates. Prefer plain delegation without a shared interface, so that
+  "overridden = 0" holds literally. If an interface is introduced, explain in the report that implementing an
+  abstract contract is not overriding parent logic. `equals/hashCode/toString` are not counted. Re-run CK and
+  prove DIT = 1 and overridden = 0. Include before/after code listings. Commit:
+  `refactor(audit): replace inheritance with composition pattern, PASS`.
+- **Git history:** after each task, save `git log --oneline --graph` to `docs/lab-08/`. I take the screenshots
+  myself.
+- Report headings follow the 9 items of "Вимоги до оформлення звіту" in the assignment.
 - The "Лог валідації ШІ-Техліда" section stays a TODO until I provide its instructions.
