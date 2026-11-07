@@ -1,5 +1,7 @@
 package com.plantshop.catalog.care;
 
+import java.time.Duration;
+
 /**
  * Care advice for an ordinary house plant, as shown on a plant's page in the shop.
  * Lab 8, task 3: top of a deliberately deep inheritance chain (PlantCareGuide -> TropicalCareGuide ->
@@ -8,8 +10,9 @@ package com.plantshop.catalog.care;
  */
 public class PlantCareGuide {
 
-    public int wateringIntervalDays() {
-        return 7;
+    /** Lab 8 FAIL experiment: intervals become java.time.Duration (was: int wateringIntervalDays()). */
+    public Duration wateringInterval() {
+        return Duration.ofDays(7);
     }
 
     public String lightAdvice() {
@@ -33,11 +36,11 @@ public class PlantCareGuide {
     }
 
     public boolean needsWater(final int daysSinceWatering) {
-        return daysSinceWatering >= wateringIntervalDays();
+        return daysSinceWatering >= wateringInterval().toDays();
     }
 
     public String summary() {
-        return describe(wateringIntervalDays(), lightAdvice(), minTemperatureCelsius());
+        return describe(wateringInterval().toDays(), lightAdvice(), minTemperatureCelsius());
     }
 
     public String describe(final long wateringDays, final String light, final int minTemperature) {
