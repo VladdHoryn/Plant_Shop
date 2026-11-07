@@ -1,0 +1,4 @@
+Class                  DIT NOM NMO NMA PIM  overridden
+PlantCareGuide           1   9   0   9   9  -
+TropicalCareGuide        2   5   4   1  10  humidityAdvice, minTemperatureCelsius, needsWater, summary
+OrchidCareGuide          3   6   5   1  11  fertilizeEveryWeeks, lightAdvice, mistingPerWeek, repotEveryYears, wateringIntervalDays

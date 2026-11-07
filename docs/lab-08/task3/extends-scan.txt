@@ -1,0 +1,18 @@
+$ grep -rnE "\bextends\s+\w+" --include=*.java */src/main/java | grep -vE "interface |<"
+catalog-service/src/main/java/com/plantshop/catalog/exception/DuplicateResourceException.java:3:public class DuplicateResourceException extends RuntimeException {
+catalog-service/src/main/java/com/plantshop/catalog/exception/ResourceNotFoundException.java:3:public class ResourceNotFoundException extends RuntimeException {
+inventory-service/src/main/java/com/plantshop/inventory/exception/InvalidStockException.java:3:public class InvalidStockException extends RuntimeException {
+inventory-service/src/main/java/com/plantshop/inventory/exception/ResourceNotFoundException.java:3:public class ResourceNotFoundException extends RuntimeException {
+order-service/src/main/java/com/plantshop/order/config/InternalApiTokenFilter.java:20:public class InternalApiTokenFilter extends OncePerRequestFilter {
+order-service/src/main/java/com/plantshop/order/exception/InvalidOrderException.java:3:public class InvalidOrderException extends RuntimeException {
+order-service/src/main/java/com/plantshop/order/exception/OutOfStockException.java:8:public class OutOfStockException extends RuntimeException {
+order-service/src/main/java/com/plantshop/order/exception/ResourceNotFoundException.java:3:public class ResourceNotFoundException extends RuntimeException {
+payment-service/src/main/java/com/plantshop/payment/exception/ResourceNotFoundException.java:3:public class ResourceNotFoundException extends RuntimeException {
+secure-logging/src/main/java/com/plantshop/logging/CorrelationIdFilter.java:18:public class CorrelationIdFilter extends OncePerRequestFilter {
+secure-logging/src/main/java/com/plantshop/logging/MaskingEncoder.java:16:public class MaskingEncoder extends EncoderBase<ILoggingEvent> {
+user-service/src/main/java/com/plantshop/user/exception/EmailAlreadyRegisteredException.java:3:public class EmailAlreadyRegisteredException extends RuntimeException {
+user-service/src/main/java/com/plantshop/user/exception/GlobalExceptionHandler.java:26:public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+user-service/src/main/java/com/plantshop/user/exception/InvalidRequestException.java:3:public class InvalidRequestException extends RuntimeException {
+user-service/src/main/java/com/plantshop/user/exception/PolicyVersionMismatchException.java:8:public class PolicyVersionMismatchException extends RuntimeException {
+user-service/src/main/java/com/plantshop/user/exception/SourceUnavailableException.java:4:public class SourceUnavailableException extends RuntimeException {
+user-service/src/main/java/com/plantshop/user/exception/SubjectNotFoundException.java:7:public class SubjectNotFoundException extends RuntimeException {
