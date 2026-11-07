@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """MOOD project factors (Abreu) for the Lab 8 report.
 
-    python scripts/ck_mood.py <ck class.csv> <jdeps-class.txt> <out.json>
+    python scripts/ck_mood.py <ck class.csv> <jdeps-class.txt> <out.json> [<module> <package prefix>]
+    python scripts/ck_mood.py class.csv jdeps-class.txt mood-user.json user-service com.plantshop.user.
+
+With a module the factors are computed for that module only (CK rows of /scan/<module>/, jdeps classes in the
+package prefix). This removes the dilution of COF by pairs of classes from different services, which can never be
+coupled to each other in a microservice repository.
 
 MHF = non-public methods / all methods          (from CK class.csv, src/main only)
 AHF = non-public fields  / all fields           (from CK class.csv, src/main only)
@@ -26,10 +31,12 @@ PROJECT_PREFIX = "com.plantshop."
 EDGE = re.compile(r"^\s+(\S+)\s+->\s+(\S+)\s")
 
 
-def visibility_counts(csv_path):
+def visibility_counts(csv_path, module=""):
     methods = public_methods = fields = public_fields = 0
     with open(csv_path, newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
+            if module and not row["file"].startswith(f"/scan/{module}/"):
+                continue
             total_m = int(row["totalMethodsQty"])
             pub_m = int(row["publicMethodsQty"])
             if row["type"] == "interface":
@@ -41,7 +48,7 @@ def visibility_counts(csv_path):
     return methods, public_methods, fields, public_fields
 
 
-def couplings(jdeps_path):
+def couplings(jdeps_path, prefix=PROJECT_PREFIX):
     classes, pairs = set(), set()
     with open(jdeps_path, encoding="utf-8") as handle:
         for line in handle:
@@ -49,19 +56,20 @@ def couplings(jdeps_path):
             if not match:
                 continue
             source, target = match.groups()
-            if source.startswith(PROJECT_PREFIX):
+            if source.startswith(prefix):
                 classes.add(source)
-                if target.startswith(PROJECT_PREFIX) and target != source:
+                if target.startswith(prefix) and target != source:
                     pairs.add((source, target))
     # a target outside the compiled set (e.g. a missing class) is not a project class
     return classes, {(a, b) for a, b in pairs if b in classes}
 
 
 def main(argv):
-    if len(argv) != 4:
+    if len(argv) not in (4, 6):
         sys.exit(__doc__)
-    methods, public_methods, fields, public_fields = visibility_counts(argv[1])
-    classes, pairs = couplings(argv[2])
+    module, prefix = (argv[4], argv[5]) if len(argv) == 6 else ("", PROJECT_PREFIX)
+    methods, public_methods, fields, public_fields = visibility_counts(argv[1], module)
+    classes, pairs = couplings(argv[2], prefix)
     tc = len(classes)
     hidden_m, hidden_f = methods - public_methods, fields - public_fields
     mhf, ahf = hidden_m / methods, hidden_f / fields
@@ -71,7 +79,8 @@ def main(argv):
         "AHF": {"hiddenFields": hidden_f, "allFields": fields, "value": round(ahf, 4)},
         "COF": {"couplings": len(pairs), "TC": tc, "maxCouplings": tc * tc - tc, "value": round(cof, 4)},
         "sources": {"MHF/AHF": "CK class.csv (records not reported by CK 0.7.0)",
-                    "COF": "jdeps -verbose:class -filter:none over */target/classes"},
+                    "COF": "jdeps -verbose:class -filter:none over */target/classes",
+                    "scope": module or "all modules"},
     }
     with open(argv[3], "w", encoding="utf-8", newline="\n") as out:
         json.dump(result, out, indent=2)

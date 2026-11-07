@@ -1,0 +1,18 @@
+[INFO] Tests run: 40, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 43, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Reactor Summary for Plant Shop 1.0.0-SNAPSHOT:
+[INFO] Plant Shop ......................................... SUCCESS [  0.002 s]
+[INFO] secure-logging ..................................... SUCCESS [  2.521 s]
+[INFO] config-service ..................................... SUCCESS [  0.317 s]
+[INFO] discovery-service .................................. SUCCESS [  0.353 s]
+[INFO] api-gateway ........................................ SUCCESS [  0.231 s]
+[INFO] catalog-service .................................... SUCCESS [  2.045 s]
+[INFO] inventory-service .................................. SUCCESS [  1.813 s]
+[INFO] order-service ...................................... SUCCESS [ 12.003 s]
+[INFO] payment-service .................................... SUCCESS [  1.932 s]
+[INFO] user-service ....................................... SUCCESS [ 18.611 s]
+[INFO] BUILD SUCCESS
