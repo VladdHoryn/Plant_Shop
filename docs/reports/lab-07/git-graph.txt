@@ -1,0 +1,10 @@
+* f2d4201 refactor(audit): reduce Chapin complexity using immutable Value Objects, PASS
+* 42f3690 feat(audit): simulate data mutation issue, FAIL
+* cc8b76c docs(claude): add CLAUDE.md with build commands, architecture and lab workflow
+* 8008696 docs(audit): complexity audit report, hook demo script
+* 1b0218f feat(catalog): watering interval as a lookup table
+* 875376d build(audit): versioned pre-commit hook that blocks methods with CC > 10
+* 47306c9 refactor(audit): eliminate conditional branches using lookup table, PASS
+* 53c18ab feat(audit): simulate topological CC failure, FAIL
+* 76989e6 chore(audit): baseline for the complexity audit, PaymentService.process CC=3
+* 8c6a605 Finish Testting Qual Lab_5

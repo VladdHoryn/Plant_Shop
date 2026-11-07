@@ -1,0 +1,75 @@
+# apache/commons-lang at c833cc1ef: commits of the last 90 days per matrix file
+# $ git log --since="90 days ago" --format='%h %ad %s' --date=short -- <file>
+
+== src/main/java/org/apache/commons/lang3/reflect/TypeUtils.java
+d62646495 2026-10-20 [LANG-1323] Align built type hashes with JDK reflection (#1826)
+8d428af79 2026-10-15 Strengthen TypeUtils substitution tests and Javadoc
+110683aa6 2026-10-15 Follow up: Fix TypeUtils.isAssignable rejecting Class<X> to Class<?> assignments (#1820)
+99618eb84 2026-10-16 Fix TypeUtils.isAssignable rejecting Class<X> to Class<?> assignments (#1820)
+cf50fbc49 2026-10-10 Sort members
+48bf95fb1 2026-10-10 [LANG-1836] Make TypeUtils.containsTypeVariables and unrollVariables honour the owner type of a ParameterizedType (#1812)
+43154e016 2026-10-05 Default unbounded WildcardType upper bound to Object in TypeUtils (#1807)
+ae490610f 2026-09-15 Javadoc, comments, and site documentation
+45f08d9e3 2026-09-13 Fix TypeUtils.toString() recursion and bound handling on recursive generic types (#1789).
+e1ce120c6 2026-09-14 Fix TypeUtils.toString() recursion and bound handling on recursive generic types (#1789)
+df1e91895 2026-09-08 Fix TypeUtils.isAssignable() for wildcards with multiple upper bounds (#1782)
+a6a19b3c0 2026-08-12 Comment out unused for now.
+
+== src/main/java/org/apache/commons/lang3/StringUtils.java
+eadb17a23 2026-10-25 [javadoc] Correct StringUtils example methods and overloads (#1836)
+9c86ffe30 2026-10-16 Clarify StringUtils.normalizeSpace contract and preserve NBSP handling
+4276f1ff3 2026-10-16 Prevent StringUtils padding from splitting surrogate pairs
+9e0fd0787 2026-10-07 [LANG-1655] Recompose Hangul after stripping accents (#1799)
+ed311151c 2026-09-21 Javadoc
+ace257580 2026-09-15 Javadoc, comments, and site documentation
+f13aa3d80 2026-09-04 StringUtils.replaceEachRepeatedly derives its recursion budget from the input itself - the documented StackOverflowError protection fails on large tables, and expanding rules amplify text 64x even at the default TTL (f005).
+73dadf009 2026-08-23 Keep StringUtils left, right, mid, and overlay off surrogate pair boundaries (#1776)
+8d9ada129 2026-08-17 Fix typos in Javadoc and example comments (#1774)
+c74771113 2026-08-14 keep stripStart and stripEnd off surrogate pair boundaries (#1773)
+62f6edfd9 2026-08-12 Keep chop from splitting a trailing surrogate pair (#1770)
+4ee32aa56 2026-08-12 Fix low surrogate false match in containsAny/containsNone/indexOfAny (#1771)
+
+== src/main/java/org/apache/commons/lang3/math/Fraction.java
+4c87656ee 2026-10-15 [LANG-1837] Prevent null returns from lazily initialized string caches
+a1a3bd056 2026-09-19 Javadoc.
+e992a498d 2026-09-19 LANG-1834 Fix Fraction reduction for Integer.MIN_VALUE (#1794)
+0c96ced7d 2026-09-15 Javadoc, comments, and site documentation
+284be5d6a 2026-09-09 Fraction.add and subtract return the reduced form when an operand is zero (#1787)
+e213b85ce 2026-09-08 Fix Fraction.add and subtract for operands not in lowest terms (#1784)
+7f5bbbf0a 2026-09-05 Fraction.getFraction(String) throws undeclared ArithmeticException on crafted numeric strings ('9999999999.5', '1/0', mixed-number overflow) (f021).
+10f442145 2026-08-10 Fix spurious overflow in Fraction.multiplyBy for unreduced operands (#1769)
+
+== src/main/java/org/apache/commons/lang3/time/FastDatePrinter.java
+66f930990 2026-10-15 Use standalone month names for month-only patterns in FastDatePrinter (#1815)
+6b98966dd 2026-10-16 Use standalone month names for month-only patterns in FastDatePrinter (#1815)
+c7f1a6d27 2026-10-05 Take FastDatePrinter era names from the locale's calendar (#1800)
+ed311151c 2026-09-21 Javadoc
+117a9ea79 2026-09-19 Clone the TimeZone in FastDatePrinter and FastDateParser (#1795)
+f8288a97a 2026-09-15 Javadoc, comments, and site documentation
+eae89fc69 2026-09-06 FastDateFormat static caches grow without bound per distinct pattern/zone/locale, untrusted patterns pin several KB each, forever (f033).
+
+== src/main/java/org/apache/commons/lang3/CharRange.java
+4c87656ee 2026-10-15 [LANG-1837] Prevent null returns from lazily initialized string caches
+ed311151c 2026-09-21 Javadoc
+cdd863535 2026-09-15 Javadoc, comments, and site documentation
+e66ad3dd2 2026-08-16 Internal refactoring.
+13e38e1fb 2026-08-16 Internal refactoring.
+7f8b51413 2026-08-16 Fix CharRange.contains(CharRange) for negated argument ranges (#1775).
+1d6ef29ce 2026-08-17 Fix CharRange.contains for negated argument ranges (#1775)
+
+== src/main/java/org/apache/commons/lang3/text/translate/NumericEntityUnescaper.java
+
+== src/main/java/org/apache/commons/lang3/exception/ExceptionUtils.java
+8876abff1 2026-10-25 Refactor ExceptionUtils to share throwable search logic
+78c581d85 2026-10-25 Deprecate ExceptionUtils.removeCommonFrames(), which is now used only. Root-cause stack trace generation compares StackTraceElement objects directly.
+ac026ed6e 2026-10-25 Use structured stack frames for compact root cause traces
+19a58f507 2026-10-25 Simplify ExceptionUtils.getRootCauseStackTraceList(Throwable)
+0f76857f5 2026-10-25 Clarify ExceptionUtils common-frame removal and strengthen regression coverage
+4060e60f4 2026-10-25 Stop ExceptionUtils.removeCommonFrames at the first differing frame (#1831)
+ed311151c 2026-09-21 Javadoc
+5c72dbc29 2026-09-15 Javadoc, comments, and site documentation
+99a29e5fc 2026-09-06 ExceptionUtils.getThrowableList() cycle check is O(n^2) over deep cause chains; all chain-walking consumers inherit it (f031).
+2e16df626 2026-09-05 Attacker-controlled exception message forges frames in getRootCauseStackTrace output AND suppresses all real frames, beyond cosmetic log spoofing (f025).
+
+== src/main/java/org/apache/commons/lang3/builder/ReflectionToStringBuilder.java
+654a3f2fe 2026-09-15 Javadoc, comments, and site documentation
