@@ -105,10 +105,6 @@ curl -s -G -u "$SONAR_TOKEN:" "$SONAR_URL/api/measures/component" \
 
 Усе це автоматизовано в `scripts/sonar-fetch.sh <out> core=PaymentService infra=PersonalDataExportService dto=PersonalDataExport`.
 
-> 📸 SCREENSHOT: Postman або термінал із запитом 3 (URL `api/measures/component`, Basic Auth = токен) і відповіддю 404 «metric keys are not found»
-
-> 📸 SCREENSHOT: Postman або термінал із запитом 4 і JSON-відповіддю 200 (видно `complexity`, `ncloc`, `functions`)
-
 ---
 
 ## 2. Аналітичний JSON-пакет
@@ -271,10 +267,6 @@ flowchart LR
   class GOD god
 ```
 
-> 📸 SCREENSHOT: граф залежностей PersonalDataExportService з IDE (IntelliJ: Diagrams → Show Dependencies або MetricsReloaded → Dependency metrics) з видимою «зіркою» стрілок
-
-> 📸 SCREENSHOT: MetricsReloaded (Chidamber-Kemerer metrics) для user-service, рядок PersonalDataExportService з CBO/LCOM/RFC
-
 **Базовий коміт:** `fa551f8 chore(audit): capture OO design baseline`.
 
 ---
@@ -325,8 +317,6 @@ audit.record(PrivacyEvent.PERSONAL_DATA_EXPORT, actor.getId(), subjectId, AuditO
 зафіксовано окремим комітом `831041d arch(audit): capture god object coupling failure, FAIL`. Pre-commit hook
 перевіряє лише CC, тож коміт пройшов, а червоний CI на ньому очікуваний.
 
-> 📸 SCREENSHOT: IntelliJ з відкритим PersonalDataExportService на коміті 831041d, три червоні підкреслення `audit.record(...)` і панель Problems
-
 ### 5.2. Завдання 3: каскадний злам ієрархії
 
 **Експеримент.** У базовому класі `PlantCareGuide` інтервал поливу став `java.time.Duration`, а старий
@@ -361,8 +351,6 @@ audit.record(PrivacyEvent.PERSONAL_DATA_EXPORT, actor.getId(), subjectId, AuditO
 скомпілюється, але орхідея мовчки почне поливатися раз на 7 днів замість 10: базовий `needsWater` уже викликає
 `wateringInterval()`, якого `OrchidCareGuide` не перевизначає. Це класична **проблема крихкого базового класу**.
 Коміт: `92d52c2 arch(audit): capture inheritance fragility crash, FAIL`.
-
-> 📸 SCREENSHOT: IntelliJ на коміті 92d52c2, червоні помилки в TropicalCareGuide (рядок 19) та OrchidCareGuide (рядок 10)
 
 ---
 
@@ -556,12 +544,6 @@ Mockito та фейками проти інтерфейсів, без Spring і 
 - `SubjectRecords` — record, тому CK його не міряє. За jdeps він зачеплений із 30 класами, бо мапить 9 типів
   сутностей у секції DTO. Це наступний кандидат на рефакторинг (розділ 7.5).
 
-> 📸 SCREENSHOT: SonarQube → Projects → plantshop → Overview після другого скану (Quality Gate Passed / зелений)
-
-> 📸 SCREENSHOT: MetricsReloaded для пакета `com.plantshop.user.service.export` (CBO ≤ 8 у всіх класах)
-
-> 📸 SCREENSHOT: IntelliJ → запуск тестів user-service, 43 tests passed (зелений)
-
 **Коміт PASS:** `bdf7a47 refactor(audit): eliminate god object via interface decomposition, PASS`.
 
 ---
@@ -711,10 +693,6 @@ DIT = 1 означає, що єдиний предок — `java.lang.Object` (�
 DIT неможливо довести «через Web API SonarQube», бо такої метрики на сервері немає
 (`sonar-metrics-available.json`). Тому інструмент доказу тут CK.
 
-> 📸 SCREENSHOT: IntelliJ → Type Hierarchy (Ctrl+H) на OrchidCareGuide до (3 рівні) і після (лише Object)
-
-> 📸 SCREENSHOT: MetricsReloaded → Chidamber-Kemerer → DIT для пакета `com.plantshop.catalog.care` після PASS (усі 1)
-
 **Коміт PASS:** `6f2e36a refactor(audit): replace inheritance with composition pattern, PASS`.
 
 ### 7.5. План рефакторингу на наступний спринт (за даними CK)
@@ -748,8 +726,6 @@ DIT неможливо довести «через Web API SonarQube», бо т�
 - Коміти окремі, у правильному порядку, без squash і без amend. Повідомлення FAIL/PASS дослівно взято з умови.
 - Повний прогін тестів на фінальному стані: 126 тестів, 0 failures, `BUILD SUCCESS`
   (`docs/lab-08/final-tests.txt`).
-
-> 📸 SCREENSHOT: `git log --oneline --graph -8` у терміналі (або IntelliJ → Git → Log) з шістьма комітами ЛР8
 
 ---
 
