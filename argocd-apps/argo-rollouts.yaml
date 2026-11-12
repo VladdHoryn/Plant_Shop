@@ -1,0 +1,30 @@
+# Argo Rollouts controller (Lab 6), installed from Git like the application itself.
+# The root Application picks this file up from argocd-apps/.
+# Sync wave -1: the controller and its CRDs (Rollout, AnalysisTemplate, ...) come before plantshop.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-rollouts
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  project: default
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argo-rollouts
+    targetRevision: 2.43.12     # helm search repo argo/argo-rollouts (app v1.10.2)
+    helm:
+      valuesObject:
+        dashboard:
+          enabled: false        # the dashboard is run locally: kubectl argo rollouts dashboard
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argo-rollouts
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true    # the Rollout CRD is too large for client-side apply annotations

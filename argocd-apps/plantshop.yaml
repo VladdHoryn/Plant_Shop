@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/VladdHoryn/Plant_Shop.git
-    targetRevision: lab/DevOps_lab_5
+    targetRevision: lab/DevOps_lab_6
     path: charts/plantshop
     helm:
       valueFiles:
@@ -21,5 +21,13 @@ spec:
     automated:
       prune: true
       selfHeal: true    # revert manual changes in the cluster
+    # Lab 6: if plantshop syncs before the argo-rollouts CRDs exist ("no matches for kind Rollout"),
+    # retry instead of staying SyncFailed until the next commit
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
     syncOptions:
       - CreateNamespace=true
