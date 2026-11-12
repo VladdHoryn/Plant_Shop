@@ -1,0 +1,30 @@
+# Lab 6: progressive delivery of catalog-service with Argo Rollouts.
+# Same name, selector and pod template as catalog-service-deployment.yaml (which is not rendered
+# while this is on); the update strategy comes from catalogService.rollout.strategy.
+# A new release starts only when the pod template changes (image tag, env, labels).
+{{- if .Values.catalogService.rollout.enabled }}
+{{- $c := .Values.catalogService }}
+{{- $component := "catalog-service" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  replicas: {{ $c.replicaCount }}
+  {{- with $c.progressDeadlineSeconds }}
+  # A canary step that makes no progress this long marks the Rollout (and the Argo CD app) Degraded
+  progressDeadlineSeconds: {{ . }}
+  {{- end }}
+  revisionHistoryLimit: 3
+  minReadySeconds: {{ .Values.rollingUpdate.minReadySeconds }}
+  selector:
+    matchLabels:
+      {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 6 }}
+  template:
+    {{- include "plantshop.catalogService.podTemplate" . | nindent 4 }}
+  strategy:
+    {{- required "catalogService.rollout.strategy must define canary or blueGreen" $c.rollout.strategy | toYaml | nindent 4 }}
+{{- end }}

@@ -107,6 +107,11 @@ catalogService:
     type: ClusterIP
     port: 8081
   resources: {}
+  # Lab 6: an Argo Rollout (needs the argo-rollouts controller and CRDs) instead of the Deployment
+  rollout:
+    enabled: false
+    # Rollout spec.strategy as is: {canary: {steps: [...]}} or {blueGreen: {...}}
+    strategy: {}
 
 inventoryService:
   replicaCount: 1

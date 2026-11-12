@@ -30,9 +30,25 @@ apiGateway:
     type: ClusterIP
 
 catalogService:
-  replicaCount: 1
+  # 4 pods: every 25% canary step is exactly one more pod of the new version
+  replicaCount: 4
   # A broken rollout (e.g. a missing image tag) turns the app Degraded after 2 minutes instead of 10
   progressDeadlineSeconds: 120
+  # Lab 6: canary release. No traffic router, so the weight is the share of pods of the new version;
+  # api-gateway balances over Eureka instances, which gives the same ratio.
+  rollout:
+    enabled: true
+    strategy:
+      canary:
+        maxSurge: 1          # at most one extra pod during a step (memory on minikube is tight)
+        maxUnavailable: 0
+        steps:
+          - setWeight: 25    # 1 of 4 pods on the new version
+          - pause: {}        # wait for a manual promote
+          - setWeight: 50
+          - pause: {duration: 30s}
+          - setWeight: 75
+          - pause: {duration: 30s}
   image:
     repository: vladyslavv648/plantshop-catalog-service
     # Own tag, so a release (or a bad tag) touches only catalog-service
