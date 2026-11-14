@@ -304,7 +304,13 @@ C4Container
 
 Під час опису CI знайдено реальну ваду інфраструктури (R5): `scripts/quality-gate.sh` записаний у Git з режимом
 `100644`, а workflow викликає його як `./scripts/quality-gate.sh` — на Linux-раннері це `Permission denied`.
-Нові скрипти Lab 10 записані з `100755`.
+Перевірка підтвердила ваду і показала більшу: `mvnw` теж мав `100644`, тож jobs `balanced-gate` та `integration-tests`
+падали б одразу на `./mvnw` (`docs/lab-10/ci-exec-bit-before.txt`: обидва виклики — `Permission denied`, exit 126).
+Через GitHub API видно, що workflows ще не запускались жодного разу (`"total_count": 0`): каталогу `.github/` немає
+в `origin/master`, гілки лабораторних 7–10 не запушені, тому вада лишалась непоміченою. Виправлення: режим `100755` для
+`mvnw` і 14 скриптів `scripts/*.sh`. Job `balanced-gate` повторено в Linux-контейнері `maven:3.9.9-eclipse-temurin-21`
+з виправленого дерева (`docs/lab-10/ci-exec-bit-after.txt`): `BUILD SUCCESS`; gate secure-logging — покриття 100 %,
+mutation score 96 % → PASS; решта модулів (лише звіт) — 50,9 % / 37 %, як і передбачає `continue-on-error`.
 
 ### 3.3. Кущ ADR — `docs/architecture/adr/`
 

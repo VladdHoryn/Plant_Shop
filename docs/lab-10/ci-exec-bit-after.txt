@@ -1,0 +1,47 @@
+# CI job balanced-gate of quality-gate.yml, re-run in Linux from the fixed index tree 32db3d8d0b1a92e2fd0809f955467747a1fe93a7 (git write-tree), 2026-11-14 19:23
+# image maven:3.9.9-eclipse-temurin-21 (JDK 21), steps exactly as in the workflow
+
+$ git archive 32db3d8d0b1a92e2fd0809f955467747a1fe93a7 | docker run --rm -i maven:3.9.9-eclipse-temurin-21 bash -c '...'
+Unable to find image 'maven:3.9.9-eclipse-temurin-21' locally
+3.9.9-eclipse-temurin-21: Pulling from library/maven
+Digest: sha256:3a4ab3276a087bf276f79cae96b1af04f53731bec53fb2e651aca79e4b10211e
+Status: Downloaded newer image for maven:3.9.9-eclipse-temurin-21
+-rwxrwxr-x 1 root root 11790 Nov 14 17:23 mvnw
+-rwxrwxr-x 1 root root  2369 Nov 14 17:23 scripts/quality-gate.sh
+$ ./mvnw -B -Pquality verify -pl secure-logging,catalog-service,inventory-service,order-service,payment-service -am -Dtest=!*IntegrationTest -Dsurefire.failIfNoSpecifiedTests=false
+mvn exit=0
+--
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.256 s -- in com.plantshop.order.service.OrderTrackingServiceTest
+--
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+--
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.968 s -- in com.plantshop.payment.service.PaymentServiceTest
+--
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.191 s -- in com.plantshop.payment.service.PaymentMethodRulesTest
+--
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0
+--
+[INFO] Reactor Summary for Plant Shop 1.0.0-SNAPSHOT:
+--
+[INFO] BUILD SUCCESS
+
+$ COVERAGE_MIN=80 MUTATION_MIN=65 ./scripts/quality-gate.sh secure-logging
+module                 line cov %    mutants   detected    score %
+secure-logging              100.0         50         48       96.0
+TOTAL                       100.0         50         48       96.0
+
+Gate: (Line Coverage 100.0% >= 80%) AND (Mutation Score 96.0% >= 65%)
+      true AND true  =>  PASS
+gate exit=0
+
+$ ./scripts/quality-gate.sh catalog-service inventory-service order-service payment-service   # report only (continue-on-error)
+module                 line cov %    mutants   detected    score %
+catalog-service              54.2        101         43       42.6
+inventory-service            42.8         55         15       27.3
+order-service                53.5         69         21       30.4
+payment-service              51.9         29         15       51.7
+TOTAL                        50.9        254         94       37.0
+
+Gate: (Line Coverage 50.9% >= 80%) AND (Mutation Score 37.0% >= 65%)
+      false AND false  =>  FAIL
+report exit=1

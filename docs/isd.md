@@ -165,6 +165,10 @@ flowchart LR
 
 **CD (доставка)** не автоматизована: реліз виконує людина командами розділу 7.
 
+**Фактичний стан CI на 2026-11-14:** workflows ще жодного разу не запускались на GitHub — GitHub API повертає
+`"total_count": 0` запусків, а в `origin/master` каталогу `.github/` немає (гілки лабораторних 7–10 не запушені).
+Конвеєр вище описує, що буде виконуватись після push; локально кроки перевірено в Linux-контейнері (ризик R5).
+
 ## 7. Реліз і відкат
 
 | Середовище | Реліз | Відкат |
@@ -238,4 +242,4 @@ docker compose start order-service
 | R2 | немає автоматичного резервного копіювання | фактичний RPO = час від останньої ручної копії | CronJob / планувальник з `pg_dump`, перевірка відновлення раз на місяць |
 | R3 | немає метрик і алертів | збій помічає користувач | Actuator `prometheus` + Prometheus/Grafana |
 | R4 | Kafka в compose без тому | після `docker compose rm kafka` втрачаються непрочитані події | іменований том для `/var/lib/kafka/data` |
-| R5 | `scripts/quality-gate.sh` записаний у Git без біта виконання (`100644`), а `quality-gate.yml` викликає його як `./scripts/quality-gate.sh` | на Linux-раннері крок gate може завершитись `Permission denied` | `git update-index --chmod=+x scripts/*.sh` (для нових `doc-*.sh` уже зроблено) |
+| R5 | ~~`scripts/quality-gate.sh` без біта виконання~~ — **закрито** 2026-11-14: 14 скриптів `scripts/*.sh` і Maven Wrapper `mvnw` мали режим `100644`, а `quality-gate.yml` викликає `./mvnw` (jobs balanced-gate, integration-tests) і `./scripts/quality-gate.sh`; у Linux-контейнері це давало `Permission denied`, exit 126 (`docs/lab-10/ci-exec-bit-before.txt`) | gate не виконувався б узагалі | `git update-index --chmod=+x` для `mvnw` і всіх `scripts/*.sh`; перевірка після виправлення — `docs/lab-10/ci-exec-bit-after.txt` |

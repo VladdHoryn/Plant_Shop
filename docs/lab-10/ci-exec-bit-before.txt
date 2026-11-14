@@ -1,0 +1,17 @@
+# Does ./scripts/quality-gate.sh run on a Linux checkout? File modes come from the Git tree (git archive keeps them).
+# Revision 974b044, container eclipse-temurin:21-jre (Ubuntu), 2026-11-14 19:23
+
+$ git archive HEAD | docker run --rm -i eclipse-temurin:21-jre bash -c "mkdir /r && cd /r && tar x && ls -l scripts/quality-gate.sh scripts/doc-drift-check.sh && ./scripts/quality-gate.sh secure-logging; echo exit=\$?"
+Unable to find image 'eclipse-temurin:21-jre' locally
+21-jre: Pulling from library/eclipse-temurin
+Digest: sha256:18bb4a91a3dea3f03ee31d3755af34dfb40f904fc77ab56cdc2f092e32fff9c2
+Status: Downloaded newer image for eclipse-temurin:21-jre
+-rwxrwxr-x 1 root root 3518 Nov 14 17:20 scripts/doc-drift-check.sh
+-rw-rw-r-- 1 root root 2369 Nov 14 17:20 scripts/quality-gate.sh
+bash: line 1: ./scripts/quality-gate.sh: Permission denied
+exit=126
+
+$ git archive HEAD | docker run --rm -i eclipse-temurin:21-jre bash -c "mkdir /r && cd /r && tar x && ls -l mvnw && ./mvnw -v; echo exit=\$?"
+-rw-rw-r-- 1 root root 11790 Nov 14 17:20 mvnw
+bash: line 1: ./mvnw: Permission denied
+exit=126
