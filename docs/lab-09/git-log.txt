@@ -1,0 +1,27 @@
+* 0dadd2e feat(economics): lab 9 SQALE audit, financial ledger and FPA/UCP sizing
+* e35ab80 Dele comments
+* f1c4b52 docs(audit): lab 8 report (CK & MOOD audit, god object, composition)
+* 6f2e36a refactor(audit): replace inheritance with composition pattern, PASS
+* 92d52c2 arch(audit): capture inheritance fragility crash, FAIL
+* 68dfd8d chore(audit): add inheritance hierarchy baseline
+* bdf7a47 refactor(audit): eliminate god object via interface decomposition, PASS
+* 831041d arch(audit): capture god object coupling failure, FAIL
+* fa551f8 chore(audit): capture OO design baseline
+* 5a6549f Change task
+* 0cec185 Finish lab_7 Quality Testing
+* 819b36e ci(audit): code-metrics workflow with Lizard CSV/JSON artifact
+* f2d4201 refactor(audit): reduce Chapin complexity using immutable Value Objects, PASS
+* 42f3690 feat(audit): simulate data mutation issue, FAIL
+* cc8b76c docs(claude): add CLAUDE.md with build commands, architecture and lab workflow
+* 8008696 docs(audit): complexity audit report, hook demo script
+* 1b0218f feat(catalog): watering interval as a lookup table
+* 875376d build(audit): versioned pre-commit hook that blocks methods with CC > 10
+* 47306c9 refactor(audit): eliminate conditional branches using lookup table, PASS
+* 53c18ab feat(audit): simulate topological CC failure, FAIL
+* 76989e6 chore(audit): baseline for the complexity audit, PaymentService.process CC=3
+* 8c6a605 Finish Testting Qual Lab_5
+* 52895d1 Finish Testting Qual Lab_4
+* 9713832 Finish Testting Qual Lab_4
+* 1532a21 lab_4 commit
+* 6e42c77 Deploy Plant Shop to Kubernetes (minikube)
+* 0207223 Firs working version of the program

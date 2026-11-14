@@ -46,6 +46,7 @@
 | UML Use Case (Draw.io) | `docs/lab-09/order-service-use-cases.drawio` |
 | Розмір модуля (Lizard 1.24.3) | `docs/lab-09/lizard-order-service-main.txt`, `docs/lab-09/lizard-order-service-test.txt` |
 | Git-історія модуля | `docs/lab-09/git-log-order-service.txt` |
+| Історія комітів репозиторію (`git log --oneline --graph`) | `docs/lab-09/git-log.txt` |
 
 ---
 
