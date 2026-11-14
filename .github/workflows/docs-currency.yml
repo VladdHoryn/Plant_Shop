@@ -1,0 +1,35 @@
+# Lab 10: "code change = documentation change" (docs/maintenance.md).
+# doc-drift  - blocks the merge when an endpoint is missing from docs/sdd.md or README.md, or when the startup order
+#              of docker-compose.yml differs from docs/isd.md (scripts/doc-drift-check.sh).
+# currency   - report only: age and code-doc lag of every document (scripts/doc-currency.sh), needs the full history.
+name: docs-currency
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-currency-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  doc-drift:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Documentation matches the code
+        run: ./scripts/doc-drift-check.sh
+
+  currency:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Documentation currency report
+        run: ./scripts/doc-currency.sh | tee -a "$GITHUB_STEP_SUMMARY"

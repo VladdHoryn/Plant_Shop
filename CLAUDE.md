@@ -126,7 +126,23 @@ and `CorrelationIdFilter`. It is a "critical module" in the quality gate; keep i
   value; if a target is unreachable honestly, stop and tell me.
 - At each "stop and ask" point in my prompt, actually stop and wait for my answer.
 
-## Current lab: Lab 8 (CK & MOOD audit, God Object decomposition, inheritance → composition)
+## Current lab: Lab 10 (documentation audit, SDD/ISD/ADR passport, maintenance and handover)
+
+Assignment: PDF from the course (summary and theory in `docs/lab-10.md`). Branch: `lab/Lab_10`. Report:
+`docs/lab-10-report.md`, raw outputs in `docs/lab-10/`.
+
+- **Architecture passport is product documentation and must follow the code:** `docs/sdd.md` (C4, components,
+  data model, API and Kafka contracts), `docs/isd.md` (topology, environments, startup order, CI/CD, RTO/RPO),
+  `docs/architecture/adr/` (never rewrite an accepted ADR; supersede it with a new number), `README.md`.
+- **Code change = documentation change** (`docs/maintenance.md`): a new or changed endpoint, Feign client, event,
+  migration, compose/k8s/helm change updates the documents listed there in the same commit/PR.
+  `./scripts/doc-drift-check.sh` must print `RESULT: PASS` (also CI job `docs-currency.yml / doc-drift`).
+- Currency metrics come only from Git: `./scripts/doc-currency.sh <ref-date>` with the map
+  `docs/lab-10/doc-map.txt`; add every new product document to the map.
+- Lab reports (`docs/*-report.md`, `docs/lab-*.md`) are process documentation: never update their content; mark
+  misleading ones with a `DEPRECATED` banner that links the current document.
+
+## Lab 8 (completed): CK & MOOD audit, God Object decomposition, inheritance → composition
 
 Assignment: `docs/lab-08.md`. Branch: `lab/Lab_8`. Report: `docs/lab-08-report.md`, raw outputs (JSON, CSV,
 compiler logs, dependency graphs) in `docs/lab-08/`.

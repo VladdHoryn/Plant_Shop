@@ -47,6 +47,7 @@ The first build takes a few minutes; the services are ready about a minute after
 | [`docs/sdd.md`](docs/sdd.md) | how the system is built: C4 containers, components, data model, API contracts | developers, QA |
 | [`docs/isd.md`](docs/isd.md) | where it runs: topology, environments, CI/CD, monitoring, backup with RTO/RPO, release and rollback | DevOps |
 | [`docs/architecture/adr/`](docs/architecture/adr) | why: architecture decision records | developers, architects |
+| [`docs/maintenance.md`](docs/maintenance.md) | who owns which document, review cycles, the rule "code change = documentation change" | maintainers, reviewers |
 | `docs/*-report.md`, `docs/lab-*.md`, `docs/reports/` | lab reports: historical records of a moment in time, not updated | teacher, archive |
 
 `./scripts/doc-drift-check.sh` fails when the code has an endpoint that `docs/sdd.md` or this README does not list,

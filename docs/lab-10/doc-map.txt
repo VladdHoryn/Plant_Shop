@@ -33,3 +33,4 @@ docs/lab-08-report.md|process|-
 docs/lab-09.md|process|-
 docs/lab-9.md|process|-
 FINANCIAL_LEDGER.md|process|-
+.github/workflows/docs-currency.yml|product|scripts/doc-drift-check.sh scripts/doc-currency.sh

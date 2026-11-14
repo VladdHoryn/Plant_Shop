@@ -145,6 +145,9 @@ flowchart LR
   qg --> j2["integration-tests:<br/>./mvnw test + Testcontainers"]
   qg --> j3["complexity:<br/>CC <= 10, NLOC <= 60"]
   cm --> a1["Lizard CSV/JSON<br/>артефакт 30 днів"]
+  push --> dc["docs-currency.yml"]
+  dc --> d1["doc-drift:<br/>SDD, README, ISD = код"]
+  dc --> d2["currency:<br/>вік і lag документів"]
 ```
 
 | Workflow / засіб | Тригер | Стадії (jobs) | Quality Gate | Блокує? |
@@ -154,6 +157,8 @@ flowchart LR
 | | | `integration-tests` | `./mvnw -B test`, усі тести зелені | так |
 | | | `complexity` | CC ≤ 10 і ≤ 60 NLOC на функцію (`tools/lizard`, без мережі, 1 CPU / 256 MB) | так |
 | `.github/workflows/code-metrics.yml` | кожен push і PR | `lizard-report` | лише вимірює, артефакт `lizard-report` | ні |
+| `.github/workflows/docs-currency.yml` | кожен push і PR | `doc-drift` | кожен ендпоінт є в SDD і README, порядок запуску compose = ISD 5 (`scripts/doc-drift-check.sh`) | так |
+| | | `currency` | звіт віку та lag документів (`scripts/doc-currency.sh`) у Step Summary | ні |
 
 Захист від «плаваючих» метрик: закріплені образ раннера (`ubuntu-24.04`), збірка JDK (`21.0.8+9`), версії
 плагінів у `pom.xml` та образи аналізаторів у `tools/`.
@@ -233,3 +238,4 @@ docker compose start order-service
 | R2 | немає автоматичного резервного копіювання | фактичний RPO = час від останньої ручної копії | CronJob / планувальник з `pg_dump`, перевірка відновлення раз на місяць |
 | R3 | немає метрик і алертів | збій помічає користувач | Actuator `prometheus` + Prometheus/Grafana |
 | R4 | Kafka в compose без тому | після `docker compose rm kafka` втрачаються непрочитані події | іменований том для `/var/lib/kafka/data` |
+| R5 | `scripts/quality-gate.sh` записаний у Git без біта виконання (`100644`), а `quality-gate.yml` викликає його як `./scripts/quality-gate.sh` | на Linux-раннері крок gate може завершитись `Permission denied` | `git update-index --chmod=+x scripts/*.sh` (для нових `doc-*.sh` уже зроблено) |
