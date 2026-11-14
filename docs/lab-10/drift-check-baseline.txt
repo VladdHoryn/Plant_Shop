@@ -1,0 +1,71 @@
+$ ./scripts/doc-drift-check.sh   # 69df71c, before the passport (task 1 baseline)
+== 1. Controllers vs. docs/sdd.md (API contracts)
+  MISSING in docs/sdd.md: DELETE /api/catalog/plants/{id}
+  MISSING in docs/sdd.md: GET /api/catalog/categories
+  MISSING in docs/sdd.md: GET /api/catalog/info
+  MISSING in docs/sdd.md: GET /api/catalog/plants
+  MISSING in docs/sdd.md: GET /api/catalog/plants/by-ids
+  MISSING in docs/sdd.md: GET /api/catalog/plants/{id}
+  MISSING in docs/sdd.md: GET /api/inventory
+  MISSING in docs/sdd.md: GET /api/inventory/{plantId}
+  MISSING in docs/sdd.md: GET /api/orders
+  MISSING in docs/sdd.md: GET /api/orders/{id}
+  MISSING in docs/sdd.md: GET /api/payments/order/{orderId}
+  MISSING in docs/sdd.md: GET /api/payments/{id}
+  MISSING in docs/sdd.md: GET /api/users/{id}/consents
+  MISSING in docs/sdd.md: GET /api/users/{id}/personal-data
+  MISSING in docs/sdd.md: POST /api/analytics/events
+  MISSING in docs/sdd.md: POST /api/catalog/categories
+  MISSING in docs/sdd.md: POST /api/catalog/plants
+  MISSING in docs/sdd.md: POST /api/inventory/check
+  MISSING in docs/sdd.md: POST /api/marketing/emails
+  MISSING in docs/sdd.md: POST /api/orders
+  MISSING in docs/sdd.md: POST /api/users
+  MISSING in docs/sdd.md: POST /api/users/password-reset
+  MISSING in docs/sdd.md: POST /api/users/{id}/anonymize
+  MISSING in docs/sdd.md: POST /api/users/{id}/consents/{purpose}/grant
+  MISSING in docs/sdd.md: POST /api/users/{id}/consents/{purpose}/revoke
+  MISSING in docs/sdd.md: POST /internal/privacy/customers/anonymize
+  MISSING in docs/sdd.md: POST /internal/privacy/customers/orders
+  MISSING in docs/sdd.md: PUT /api/catalog/plants/{id}
+  MISSING in docs/sdd.md: PUT /api/inventory/{plantId}
+  endpoints in code: 29, undocumented in SDD: 29
+== 2. Public endpoints (/api/**) vs. README.md
+  MISSING in README.md: DELETE /api/catalog/plants/{id}
+  MISSING in README.md: GET /api/catalog/categories
+  MISSING in README.md: GET /api/catalog/plants
+  MISSING in README.md: GET /api/catalog/plants/by-ids
+  MISSING in README.md: GET /api/catalog/plants/{id}
+  MISSING in README.md: GET /api/inventory
+  MISSING in README.md: GET /api/inventory/{plantId}
+  MISSING in README.md: GET /api/orders
+  MISSING in README.md: GET /api/orders/{id}
+  MISSING in README.md: GET /api/payments/order/{orderId}
+  MISSING in README.md: GET /api/payments/{id}
+  MISSING in README.md: POST /api/catalog/categories
+  MISSING in README.md: POST /api/catalog/plants
+  MISSING in README.md: POST /api/inventory/check
+  MISSING in README.md: POST /api/orders
+  MISSING in README.md: POST /api/users/{id}/consents/{purpose}/revoke
+  MISSING in README.md: PUT /api/catalog/plants/{id}
+  MISSING in README.md: PUT /api/inventory/{plantId}
+  public endpoints: 27, not in README: 18
+== 3. docker-compose.yml depends_on vs. docs/isd.md (startup order)
+  MISMATCH in docs/isd.md: api-gateway waits for: config-service, discovery-service
+  MISMATCH in docs/isd.md: catalog-db waits for: -
+  MISMATCH in docs/isd.md: catalog-service waits for: catalog-db, config-service, discovery-service, kafka
+  MISMATCH in docs/isd.md: config-service waits for: -
+  MISMATCH in docs/isd.md: discovery-service waits for: config-service
+  MISMATCH in docs/isd.md: inventory-db waits for: -
+  MISMATCH in docs/isd.md: inventory-service waits for: config-service, discovery-service, inventory-db, kafka
+  MISMATCH in docs/isd.md: kafka-ui waits for: kafka
+  MISMATCH in docs/isd.md: kafka waits for: -
+  MISMATCH in docs/isd.md: order-db waits for: -
+  MISMATCH in docs/isd.md: order-service waits for: config-service, discovery-service, kafka, order-db
+  MISMATCH in docs/isd.md: payment-db waits for: -
+  MISMATCH in docs/isd.md: payment-service waits for: config-service, discovery-service, kafka, payment-db
+  MISMATCH in docs/isd.md: user-db waits for: -
+  MISMATCH in docs/isd.md: user-service waits for: config-service, discovery-service, kafka, user-db
+  containers: 15, startup rows that differ from ISD: 15
+RESULT: FAIL - the documentation does not describe the current system
+exit code: 1

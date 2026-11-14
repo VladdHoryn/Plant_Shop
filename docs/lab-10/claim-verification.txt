@@ -1,0 +1,99 @@
+# Claim verification of product documents against the code (task 1, Documentation Decay evidence)
+# Revision 69df71c, 2026-11-14 18:56
+
+## D1. README: 'order-service ... saga orchestration' vs. the code
+$ grep -n 'saga orchestration' README.md
+12:| order-service     | 8083 | Order placement, saga orchestration                                  |
+
+$ grep -rn '@KafkaListener' --include=*.java */src/main | sed 's/  */ /g'
+inventory-service/src/main/java/com/plantshop/inventory/event/InventoryEventListener.java:14: @KafkaListener(topics = KafkaTopics.PLANT_CREATED)
+inventory-service/src/main/java/com/plantshop/inventory/event/InventoryEventListener.java:19: @KafkaListener(topics = KafkaTopics.ORDER_CREATED)
+inventory-service/src/main/java/com/plantshop/inventory/event/InventoryEventListener.java:24: @KafkaListener(topics = KafkaTopics.PAYMENT_COMPLETED)
+inventory-service/src/main/java/com/plantshop/inventory/event/InventoryEventListener.java:29: @KafkaListener(topics = KafkaTopics.PAYMENT_FAILED)
+order-service/src/main/java/com/plantshop/order/event/OrderEventListener.java:14: @KafkaListener(topics = KafkaTopics.PAYMENT_COMPLETED)
+order-service/src/main/java/com/plantshop/order/event/OrderEventListener.java:19: @KafkaListener(topics = KafkaTopics.INVENTORY_FAILED)
+order-service/src/main/java/com/plantshop/order/event/OrderEventListener.java:24: @KafkaListener(topics = KafkaTopics.PAYMENT_FAILED)
+payment-service/src/main/java/com/plantshop/payment/event/PaymentEventListener.java:14: @KafkaListener(topics = KafkaTopics.INVENTORY_RESERVED)
+
+## D2. README Kubernetes / Helm section vs. the modules of the system (user-service, user-db)
+$ grep -n 'user-service' README.md | head -5
+14:| user-service      | 8085 | Customer accounts and privacy controls: data export, erasure, consents (see [Privacy controls](#privacy-controls)) |
+33:| user-service      | `user-db`      | 5437      | `user_db`      | `users`     | `V1__create_user_tables.sql`, `V2__seed_demo_users.sql` (5 synthetic accounts) |
+347:./scripts/privacy-demo.sh reset     # restore the seed data of user-service
+352:The same requests for the IntelliJ HTTP client are in [`user-service/privacy-demo.http`](user-service/privacy-demo.http).
+375:java -jar user-service/target/user-service-1.0.0-SNAPSHOT.jar
+
+$ grep -n 'db` ×4' README.md
+83:| `<service>-db` ×4 | Deployment (PostgreSQL 16, `Recreate`) + Service + **PVC** 1Gi | database per service, schema created by Flyway |
+
+$ ls k8s | grep -c user
+0
+
+$ ls helm/plantshop/templates | grep -c user
+0
+
+$ git log --diff-filter=A --format='%h %cs %s' -- k8s/00-namespace.yaml user-service/pom.xml
+52895d1 2026-10-25 Finish Testting Qual Lab_4
+6e42c77 2026-10-15 Deploy Plant Shop to Kubernetes (minikube)
+
+$ grep -n 'user-service' config-service/src/main/resources/configurations/api-gateway.yml
+50:            - id: user-service
+51:              uri: lb://user-service
+
+## D3. README 'Tests' section vs. the test sources
+$ grep -n 'Mockito unit tests' README.md
+415:`./mvnw test` runs the Mockito unit tests for the service layer of catalog, inventory, order and payment, the
+
+$ git ls-files 'user-service/src/test/*Test.java' 'catalog-service/src/test/*Test.java'
+catalog-service/src/test/java/com/plantshop/catalog/care/CareGuideTest.java
+catalog-service/src/test/java/com/plantshop/catalog/service/PlantServiceTest.java
+catalog-service/src/test/java/com/plantshop/catalog/service/WateringPlannerTest.java
+user-service/src/test/java/com/plantshop/user/ConsentIntegrationTest.java
+user-service/src/test/java/com/plantshop/user/ErasureIntegrationTest.java
+user-service/src/test/java/com/plantshop/user/PersonalDataExportIntegrationTest.java
+user-service/src/test/java/com/plantshop/user/SecureLoggingIntegrationTest.java
+user-service/src/test/java/com/plantshop/user/privacy/ExportValueObjectsTest.java
+user-service/src/test/java/com/plantshop/user/service/PersonalDataExportServiceTest.java
+user-service/src/test/java/com/plantshop/user/service/export/AuditedExportAccessGuardTest.java
+user-service/src/test/java/com/plantshop/user/service/export/DefaultExportAssemblerTest.java
+user-service/src/test/java/com/plantshop/user/service/export/FeignOrderHistorySourceTest.java
+user-service/src/test/java/com/plantshop/user/service/export/LocalSourcesTest.java
+
+## D4. README demo section: docs/helm-report.md is announced as the full run, the file stops after step 1c
+$ grep -n 'helm-report.md' README.md
+309:[`docs/helm-report.md`](docs/helm-report.md):
+
+$ wc -l docs/helm-report.md
+43 docs/helm-report.md
+
+$ grep -n '^## ' docs/helm-report.md
+6:## 1a-b. Helm and the cluster
+31:## 1c. The Lab 3 manifests still deploy and work
+
+$ tail -3 docs/helm-report.md
+
+```console
+$ for d in $(kubectl -n plantshop get deploy -o name); do kubectl -n plantshop rollout status $d --timeout=600s; done | tail -3
+
+## D5. CLAUDE.md names Lab 8 as the current lab; the history already contains Lab 9 and the branch is lab/Lab_10
+$ grep -n 'Current lab' CLAUDE.md
+129:## Current lab: Lab 8 (CK & MOOD audit, God Object decomposition, inheritance → composition)
+
+$ git log --format='%h %cs %s' -3
+69df71c 2026-11-14 docs(economics): add lab 9 git history log
+0dadd2e 2026-11-14 feat(economics): lab 9 SQALE audit, financial ledger and FPA/UCP sizing
+e35ab80 2026-11-11 Dele comments
+
+## D6. README does not mention the artifacts of Labs 7-9
+$ grep -cE 'lab-08|lab-9|FINANCIAL_LEDGER|code-metrics|ck_mood|reports/lab-07' README.md
+0
+
+## D7. Naming of the Lab 9 files: assignment docs/lab-09.md, report docs/lab-9.md (no inbound link)
+$ ls docs | grep -E 'lab-0?9'
+lab-09
+lab-09.md
+lab-9.md
+
+$ git grep -l -F 'lab-9.md' | wc -l
+0
+

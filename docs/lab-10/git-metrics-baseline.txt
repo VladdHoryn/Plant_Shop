@@ -1,0 +1,139 @@
+# Raw Git CLI commands of the Lab 10 audit (task 1), run on 69df71c, 2026-11-14 18:56
+
+## Last Updated Age
+$ git log -1 --format=%cs -- README.md
+2026-10-25
+
+$ git log -1 --format=%cs -- CLAUDE.md
+2026-11-07
+
+$ git log -1 --format=%cs -- docker-compose.yml
+2026-10-25
+
+$ git log -1 --format=%cs -- docs/privacy-report.md
+2026-10-25
+
+$ git log -1 --format=%cs -- docs/helm-report.md
+2026-10-15
+
+$ git log -1 --format=%cs -- docs/k8s-report.md
+2026-10-15
+
+$ git log -1 --format=%cs -- FINANCIAL_LEDGER.md
+2026-11-14
+
+## Code-Doc Change Ratio per component (code commits vs commits of README.md that describes them)
+$ git log --oneline -- README.md | wc -l
+6
+
+$ git log --oneline -- CLAUDE.md | wc -l
+2
+
+$ git log --oneline -- api-gateway/src | wc -l
+1
+
+$ git log --oneline -- config-service/src | wc -l
+4
+
+$ git log --oneline -- discovery-service/src | wc -l
+1
+
+$ git log --oneline -- catalog-service/src | wc -l
+6
+
+$ git log --oneline -- inventory-service/src | wc -l
+2
+
+$ git log --oneline -- order-service/src | wc -l
+3
+
+$ git log --oneline -- payment-service/src | wc -l
+4
+
+$ git log --oneline -- user-service/src | wc -l
+5
+
+$ git log --oneline -- secure-logging/src | wc -l
+2
+
+$ git log --oneline -- k8s helm | wc -l
+2
+
+## Code commits after the last README commit
+$ git log -1 --format='%h %cs' -- README.md
+8008696 2026-10-25
+
+$ git log --format='%h %cs %s' $(git log -1 --format=%H -- README.md)..HEAD -- '*/src/main/*' docker-compose.yml Dockerfile k8s helm
+6f2e36a 2026-11-07 refactor(audit): replace inheritance with composition pattern, PASS
+92d52c2 2026-11-07 arch(audit): capture inheritance fragility crash, FAIL
+68dfd8d 2026-11-07 chore(audit): add inheritance hierarchy baseline
+bdf7a47 2026-11-07 refactor(audit): eliminate god object via interface decomposition, PASS
+831041d 2026-11-07 arch(audit): capture god object coupling failure, FAIL
+f2d4201 2026-11-01 refactor(audit): reduce Chapin complexity using immutable Value Objects, PASS
+42f3690 2026-11-01 feat(audit): simulate data mutation issue, FAIL
+
+## Code commits after the last CLAUDE.md commit
+$ git log -1 --format='%h %cs' -- CLAUDE.md
+5a6549f 2026-11-07
+
+$ git log --format='%h %cs %s' $(git log -1 --format=%H -- CLAUDE.md)..HEAD -- '*/src/main/*' pom.xml '*/pom.xml' scripts .github docker-compose.yml
+0dadd2e 2026-11-14 feat(economics): lab 9 SQALE audit, financial ledger and FPA/UCP sizing
+f1c4b52 2026-11-07 docs(audit): lab 8 report (CK & MOOD audit, god object, composition)
+6f2e36a 2026-11-07 refactor(audit): replace inheritance with composition pattern, PASS
+92d52c2 2026-11-07 arch(audit): capture inheritance fragility crash, FAIL
+68dfd8d 2026-11-07 chore(audit): add inheritance hierarchy baseline
+bdf7a47 2026-11-07 refactor(audit): eliminate god object via interface decomposition, PASS
+831041d 2026-11-07 arch(audit): capture god object coupling failure, FAIL
+fa551f8 2026-11-07 chore(audit): capture OO design baseline
+
+## Access evidence: who links a document (git grep) and who touched it in the last 30 days
+$ git grep -l -F helm-report.md
+README.md
+docs/reports/lab-07/churn.txt
+scripts/helm-demo.sh
+
+$ git grep -l -F lab-9.md
+
+$ git grep -l -F CLAUDE.md
+CLAUDE.md
+docs/lab-09/git-log.txt
+docs/reports/lab-07-report.md
+docs/reports/lab-07/churn.txt
+docs/reports/lab-07/git-graph.txt
+
+$ git log --since='2026-10-15 00:00' --format='%h %cs %s' -- docs/k8s-report.md docs/helm-report.md
+1532a21 2026-10-15 lab_4 commit
+6e42c77 2026-10-15 Deploy Plant Shop to Kubernetes (minikube)
+
+## Ownership (bus factor input)
+$ git shortlog -sn --all
+    55	VladdHoryn
+
+$ git shortlog -sn HEAD -- README.md docs
+    24	VladdHoryn
+
+## Commit messages as process documentation
+$ git log --format=%s | wc -l
+28
+
+$ git log --format=%s | grep -cE '^[a-z]+(\([a-z0-9-]+\))?!?: '
+19
+
+$ git log --format=%s | grep -vE '^[a-z]+(\([a-z0-9-]+\))?!?: '
+Dele comments
+Change task
+Finish lab_7 Quality Testing
+Finish Testting Qual Lab_5
+Finish Testting Qual Lab_4
+Finish Testting Qual Lab_4
+lab_4 commit
+Deploy Plant Shop to Kubernetes (minikube)
+Firs working version of the program
+
+## Code comments as documentation (Javadoc blocks in production code)
+$ git grep -c '/\*\*' -- '*/src/main/*.java' | awk -F: '{s+=$2} END {print s}'
+160
+
+$ git ls-files '*/src/main/*.java' | wc -l
+212
+
