@@ -33,6 +33,7 @@
 | `docs/isd.md` | VladdHoryn | експлуатаційна | 90 днів | 2026-11-14 | 2027-02-12 |
 | `docs/architecture/adr/0001-database-per-service-postgresql-flyway.md` | VladdHoryn | архітектурна | 180 днів (перевірка статусу; зміст не переписується) | 2026-11-14 | 2027-05-13 |
 | `docs/architecture/adr/0002-kafka-choreography-saga.md` | VladdHoryn | архітектурна | 180 днів (перевірка статусу; зміст не переписується) | 2026-11-14 | 2027-05-13 |
+| `docs/architecture/adr/0003-synchronous-payment-read-for-tracking.md` | VladdHoryn | архітектурна | 180 днів (перевірка статусу; зміст не переписується) | 2026-11-14 | 2027-05-13 |
 | `docs/architecture/audience-coverage.md` | VladdHoryn | архітектурна | 180 днів | 2026-11-14 | 2027-05-13 |
 | `docs/maintenance.md` | VladdHoryn | експлуатаційна | 90 днів | 2026-11-14 | 2027-02-12 |
 | `CLAUDE.md` | VladdHoryn | експлуатаційна (інструкції для розробника і ШІ-асистента) | 90 днів і на початку кожної лабораторної | 2026-11-14 | 2027-02-12 |

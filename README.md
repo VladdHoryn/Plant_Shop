@@ -13,8 +13,9 @@ Plant Shop is an online shop for house plants, built as a university course proj
 - **Privacy officer and marketing** handle personal data on request: export, erasure, consents; marketing e-mails
   are sent only with the customer's consent.
 
-To see the result of an order, the client reads the order (`GET /api/orders/{id}`) and, for payment details, the
-payment of that order (`GET /api/payments/order/{orderId}`): two separate requests.
+To follow an order, one request is enough: `GET /api/orders/{id}/tracking` returns the order status, the payment
+status (`NOT_STARTED` until the saga reaches the payment step, then `COMPLETED` or `FAILED`), the transaction id,
+the failure reason and the next step in plain words.
 
 ## Quick start (about 5 minutes)
 
@@ -62,7 +63,7 @@ service, `http://localhost:<port>/swagger-ui.html`; behaviour contracts: [`docs/
 |---|---|
 | Catalog | `GET /api/catalog/plants`, `GET /api/catalog/plants/{id}`, `GET /api/catalog/plants/by-ids`, `POST /api/catalog/plants`, `PUT /api/catalog/plants/{id}`, `DELETE /api/catalog/plants/{id}`, `GET /api/catalog/categories`, `POST /api/catalog/categories`, `GET /api/catalog/info` |
 | Stock | `GET /api/inventory`, `GET /api/inventory/{plantId}`, `PUT /api/inventory/{plantId}`, `POST /api/inventory/check` |
-| Orders | `POST /api/orders` (202, `PENDING`), `GET /api/orders/{id}`, `GET /api/orders` (`?email=`) |
+| Orders | `POST /api/orders` (202, `PENDING`), `GET /api/orders/{id}`, `GET /api/orders/{id}/tracking` (order + payment in one response), `GET /api/orders` (`?email=`) |
 | Payments | `GET /api/payments/{id}`, `GET /api/payments/order/{orderId}` |
 | Accounts and privacy | `POST /api/users`, `POST /api/users/password-reset`, `GET /api/users/{id}/personal-data`, `POST /api/users/{id}/anonymize`, `GET /api/users/{id}/consents`, `POST /api/users/{id}/consents/{purpose}/grant`, `POST /api/users/{id}/consents/{purpose}/revoke` |
 | Marketing and analytics | `POST /api/marketing/emails`, `POST /api/analytics/events` |
@@ -476,6 +477,7 @@ curl -X POST http://localhost:8080/api/orders -H "Content-Type: application/json
 }'
 
 # A moment later the order is CONFIRMED and stock is deducted
+curl http://localhost:8080/api/orders/1/tracking     # order status + payment status + next step
 curl http://localhost:8080/api/orders/1
 curl http://localhost:8080/api/payments/order/1
 curl "http://localhost:8080/api/orders?email=jane@example.com"

@@ -64,6 +64,7 @@ C4Container
   Rel(gw, usr, "/api/users/**, /api/marketing/**, /api/analytics/**", "lb://")
   Rel(ord, cat, "ціни: GET /api/catalog/plants/by-ids", "Feign")
   Rel(ord, inv, "передперевірка: POST /api/inventory/check", "Feign")
+  Rel(ord, pay, "трекінг: GET /api/payments/order/{orderId}", "Feign")
   Rel(usr, ord, "POST /internal/privacy/customers/*", "Feign + X-Internal-Token")
   Rel(cat, kafka, "plant-created")
   Rel(ord, kafka, "order-created")
@@ -169,6 +170,11 @@ sequenceDiagram
   `order-created`. Фінальний стан `CONFIRMED`/`CANCELLED` — за подіями саги. Внутрішній API приватності для
   [user-service](#38-user-service) (експорт і анонімізація замовлень клієнта, токен `INTERNAL_API_TOKEN`).
 - **Слухає:** `payment-completed`, `payment-failed`, `inventory-failed`.
+- **Трекінг замовлення** (компонент `OrderTrackingController` → `OrderTrackingService`): `GET /api/orders/{id}/tracking`
+  повертає статус замовлення разом зі статусом платежу, який читається синхронно з
+  [payment-service](#37-payment-service) через Feign-клієнт `PaymentClient`. 404 від payment-service означає, що
+  сага ще не дійшла до оплати (`NOT_STARTED`); інша помилка payment-service → 503. Це запит на читання, а не
+  крок саги ([ADR-0003](architecture/adr/0003-synchronous-payment-read-for-tracking.md)).
 - **Важливо:** order-service **не керує** сагою командами (це не оркестрація): кожен учасник сам реагує на
   події ([ADR-0002](architecture/adr/0002-kafka-choreography-saga.md)).
 
@@ -177,7 +183,8 @@ sequenceDiagram
 - **Відповідальність:** імітація платіжного провайдера: оплачує зарезервоване замовлення; відхиляє суму, більшу
   за `payment.max-amount` (`PAYMENT_MAX_AMOUNT`, типово 10 000); правила методів оплати (lookup table у `PaymentService`).
 - **Слухає:** `inventory-reserved`. **Публікує:** `payment-completed`, `payment-failed`.
-- **API:** лише читання платежів (`GET /api/payments/...`).
+- **API:** лише читання платежів (`GET /api/payments/...`). Споживачі: клієнти через gateway і
+  [order-service](#36-order-service) (трекінг замовлення, `GET /api/payments/order/{orderId}`).
 
 ### 3.8. user-service
 
@@ -298,9 +305,10 @@ erDiagram
 | `POST /api/inventory/check` | inventory | order-service (Feign) | список `{plantId, quantity}` → `{plantId, requested, available, inStock}` |
 | `POST /api/orders` | order | клієнт | **202 Accepted**, `status: PENDING`; 400 — невалідний запит, 409 — нестача товару, 503 — catalog/inventory недоступні |
 | `GET /api/orders/{id}` | order | клієнт | поточний статус замовлення |
+| `GET /api/orders/{id}/tracking` | order | клієнт | `orderStatus`, `paymentStatus` (`NOT_STARTED` / `COMPLETED` / `FAILED`), `transactionId`, `failureReason`, `nextStep`; 404 — немає замовлення; 503 — payment-service недоступний |
 | `GET /api/orders` | order | клієнт | `?email=` — замовлення покупця |
 | `GET /api/payments/{id}` | payment | клієнт | платіж за id |
-| `GET /api/payments/order/{orderId}` | payment | клієнт | платіж замовлення: `COMPLETED` або `FAILED` + причина |
+| `GET /api/payments/order/{orderId}` | payment | клієнт, order-service (Feign, трекінг) | платіж замовлення: `COMPLETED` або `FAILED` + причина; 404, поки платежу немає |
 | `POST /api/users` | user | анонім | реєстрація, лист верифікації |
 | `POST /api/users/password-reset` | user | анонім | однакова відповідь незалежно від існування облікового запису |
 | `GET /api/users/{id}/personal-data` | user | власник, PRIVACY_OFFICER | версійований експорт усіх персональних даних |
@@ -341,7 +349,7 @@ erDiagram
 | Тема | Рішення | Де деталі |
 |---|---|---|
 | Сховище даних | PostgreSQL на сервіс + Flyway | [ADR-0001](architecture/adr/0001-database-per-service-postgresql-flyway.md) |
-| Інтеграція | синхронно Feign для перевірок, асинхронно Kafka для саги | [ADR-0002](architecture/adr/0002-kafka-choreography-saga.md) |
+| Інтеграція | синхронно Feign для перевірок і читання стану (трекінг), асинхронно Kafka для саги | [ADR-0002](architecture/adr/0002-kafka-choreography-saga.md), [ADR-0003](architecture/adr/0003-synchronous-payment-read-for-tracking.md) |
 | Конфігурація | централізовано в config-service | [ISD, розділ 4](isd.md#4-середовища-та-змінні-оточення) |
 | Безпека | HTTP Basic у user-service; `INTERNAL_API_TOKEN` для `/internal/**`; секрети лише через змінні оточення | `docs/privacy-report.md` |
 | Журнали | маскування PII і секретів, correlation id | розділ 3.9 |

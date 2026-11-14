@@ -1,0 +1,12 @@
+$ ./scripts/doc-drift-check.sh   # aef1513 = FAIL commit
+== 1. Controllers vs. docs/sdd.md (API contracts)
+  MISSING in docs/sdd.md: GET /api/orders/{id}/tracking
+  endpoints in code: 30, undocumented in SDD: 1
+== 2. Public endpoints (/api/**) vs. README.md
+  MISSING in README.md: GET /api/orders/{id}/tracking
+  public endpoints: 28, not in README: 1
+== 3. docker-compose.yml depends_on vs. docs/isd.md (startup order)
+  MISMATCH in docs/isd.md: order-service waits for: config-service, discovery-service, kafka, order-db, payment-service
+  containers: 15, startup rows that differ from ISD: 1
+RESULT: FAIL - the documentation does not describe the current system
+exit code: 1

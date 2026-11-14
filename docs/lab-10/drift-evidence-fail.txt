@@ -1,0 +1,52 @@
+# Evidence of documentation drift after the FAIL commit aef1513, per audience of the passport
+
+## Newcomer and business: README promises two requests and does not know the tracking endpoint
+$ grep -n 'two separate requests' README.md
+17:payment of that order (`GET /api/payments/order/{orderId}`): two separate requests.
+
+$ grep -c 'tracking' README.md
+0
+
+$ grep -rn '@GetMapping("/{id}/tracking")' order-service/src/main/java
+order-service/src/main/java/com/plantshop/order/controller/OrderTrackingController.java:19:    @GetMapping("/{id}/tracking")
+
+## Developers and QA: SDD does not know the new component and the new synchronous dependency
+$ grep -cE 'OrderTracking|PaymentClient|tracking' docs/sdd.md
+0
+
+$ grep -n 'Rel(ord, ' docs/sdd.md
+65:  Rel(ord, cat, "ціни: GET /api/catalog/plants/by-ids", "Feign")
+66:  Rel(ord, inv, "передперевірка: POST /api/inventory/check", "Feign")
+69:  Rel(ord, kafka, "order-created")
+74:  Rel(ord, orddb, "JPA")
+
+$ grep -n 'синхронно' docs/sdd.md | head -3
+168:  в [inventory-service](#35-inventory-service) (обидва — Feign, синхронно), збереження `PENDING`, подія
+344:| Інтеграція | синхронно Feign для перевірок, асинхронно Kafka для саги | [ADR-0002](architecture/adr/0002-kafka-choreography-saga.md) |
+
+$ git ls-files 'order-service/src/main/*' | grep -E 'Tracking|PaymentClient'
+order-service/src/main/java/com/plantshop/order/client/PaymentClient.java
+order-service/src/main/java/com/plantshop/order/controller/OrderTrackingController.java
+order-service/src/main/java/com/plantshop/order/dto/OrderTrackingResponse.java
+order-service/src/main/java/com/plantshop/order/service/OrderTrackingService.java
+
+## DevOps: ISD startup table says order-service does not wait for payment-service
+$ grep -n '| `order-service` |' docs/isd.md
+127:| `order-service` | config-service, discovery-service, kafka, order-db | 3 |
+
+$ docker compose config | sed -n '/^  order-service:/,/^  [a-z]/p' | sed -n '/depends_on/,/deploy\|environment\|image/p' | grep -E '^      [a-z-]+:'
+      config-service:
+      discovery-service:
+      kafka:
+      order-db:
+      payment-service:
+
+$ grep -n '| payment-service |' docs/isd.md
+71:| payment-service | `plantshop-payment-service`, 8084 | Deployment + ClusterIP | 1 / 1 | k8s: probes |
+101:| `PAYMENT_MAX_AMOUNT` | payment-service | `10000` | ні |
+
+## Tests and build are green: drift is invisible to the usual quality gates
+$ grep -E 'Tests run: .*OrderTracking|BUILD' docs/lab-10/fail-order-service-tests.txt
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.201 s -- in com.plantshop.order.service.OrderTrackingServiceTest
+[INFO] BUILD SUCCESS
+

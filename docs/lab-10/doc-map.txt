@@ -15,6 +15,7 @@ docs/sdd.md|product|*/src/main/java */src/main/resources/db/migration config-ser
 docs/isd.md|product|docker-compose.yml Dockerfile k8s helm .github config-service/src/main/resources/configurations
 docs/architecture/adr/0001-database-per-service-postgresql-flyway.md|product|*/src/main/resources/db/migration docker-compose.yml
 docs/architecture/adr/0002-kafka-choreography-saga.md|product|*/src/main/java/com/plantshop/*/event
+docs/architecture/adr/0003-synchronous-payment-read-for-tracking.md|product|order-service/src/main/java/com/plantshop/order/client docker-compose.yml
 docs/maintenance.md|product|-
 docs/privacy-report.md|process|-
 docs/privacy-demo.md|process|-

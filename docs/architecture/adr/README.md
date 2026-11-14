@@ -7,7 +7,8 @@
 | № | Рішення | Статус | Дата |
 |---|---|---|---|
 | [0001](0001-database-per-service-postgresql-flyway.md) | Окрема БД PostgreSQL на сервіс, схема лише через Flyway | Accepted | 2026-10-14 |
-| [0002](0002-kafka-choreography-saga.md) | Сага замовлення як хореографія подій Kafka | Accepted | 2026-10-14 |
+| [0002](0002-kafka-choreography-saga.md) | Сага замовлення як хореографія подій Kafka | Accepted (доповнено 0003) | 2026-10-14 |
+| [0003](0003-synchronous-payment-read-for-tracking.md) | Синхронне читання платежу для трекінгу замовлення (доповнює 0002) | Accepted | 2026-11-14 |
 
 ## Шаблон
 

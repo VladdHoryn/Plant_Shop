@@ -3,7 +3,7 @@
 | Поле | Значення |
 |---|---|
 | Номер | 0002 |
-| Статус | **Accepted** |
+| Статус | **Accepted** (доповнено [ADR-0003](0003-synchronous-payment-read-for-tracking.md): синхронне читання платежу для трекінгу) |
 | Дата рішення | 2026-10-14 (перша робоча версія, коміт `0207223`); оформлено як ADR 2026-11-14 |
 | Автор / власник | VladdHoryn |
 | Зачіпає | order-, inventory-, payment-, catalog-service; пакети `event`; `spring.json.type.mapping` у config-service |

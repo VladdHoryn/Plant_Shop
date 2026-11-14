@@ -68,7 +68,7 @@ flowchart LR
 | catalog-service | `plantshop-catalog-service`, 8081 | Deployment + ClusterIP | 2 / 3 | k8s: probes |
 | inventory-service | `plantshop-inventory-service`, 8082 | Deployment + ClusterIP | 1 / 1 | k8s: probes |
 | order-service | `plantshop-order-service`, 8083 | Deployment + ClusterIP | 1 / 1 | k8s: probes |
-| payment-service | `plantshop-payment-service`, 8084 | Deployment + ClusterIP | 1 / 1 | k8s: probes |
+| payment-service | `plantshop-payment-service`, 8084 | Deployment + ClusterIP | 1 / 1 | compose: TCP-порт 8084 (на нього чекає order-service); k8s: probes |
 | user-service | `plantshop-user-service`, 8085 | **не розгорнуто** | — | — |
 | catalog / inventory / order / payment-db | `plantshop-<name>-db`, 5433–5436 | Deployment (`Recreate`) + Service + PVC 1Gi | 1 | `pg_isready` |
 | user-db | `plantshop-user-db`, 5437 | **не розгорнуто** | — | `pg_isready` |
@@ -124,13 +124,13 @@ Docker Compose стартує контейнери хвилями за `depends_
 | `api-gateway` | config-service, discovery-service | 3 |
 | `catalog-service` | catalog-db, config-service, discovery-service, kafka | 3 |
 | `inventory-service` | config-service, discovery-service, inventory-db, kafka | 3 |
-| `order-service` | config-service, discovery-service, kafka, order-db | 3 |
+| `order-service` | config-service, discovery-service, kafka, order-db, payment-service | 4 |
 | `payment-service` | config-service, discovery-service, kafka, payment-db | 3 |
 | `user-service` | config-service, discovery-service, kafka, user-db | 3 |
 
 Запуск з IDE: `docker compose up -d catalog-db inventory-db order-db payment-db user-db kafka kafka-ui`, потім
-config-service → discovery-service → бізнес-сервіси (у будь-якому порядку) → api-gateway. У Kubernetes той самий
-порядок забезпечують init-контейнери.
+config-service → discovery-service → бізнес-сервіси (payment-service раніше за order-service) → api-gateway. У Kubernetes init-контейнери
+order-service чекають лише config, discovery, Kafka і order-db: трекінг до старту payment-service повертає 503 (див. ADR-0003).
 
 ## 6. CI/CD-конвеєр і Quality Gates
 
