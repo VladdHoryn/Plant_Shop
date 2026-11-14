@@ -1,0 +1,11 @@
+id,type,name,source,det,ret_ftr,note
+ILF1,ILF,Order (orders + order_items),entity/Order.java; entity/OrderItem.java; db/migration/V1__create_order_tables.sql,13,2,"RET: Order, OrderItem. DET orders: id, customer_email, shipping_address, payment_method, status, total_amount, failure_reason, created_at, updated_at; order_items: plant_id, plant_name, quantity, unit_price (surrogate id and FK order_id not counted)"
+EIF1,EIF,Plant (catalog-service),client/CatalogClient.java: PlantDto,4,1,"DET: id, name, price, active; read only for price and availability"
+EIF2,EIF,Stock (inventory-service),client/InventoryClient.java: StockCheckRequest/Response,4,1,"DET: plantId, quantity, available, inStock; read only (fast-fail check)"
+EI1,EI,Create order,POST /api/orders -> OrderService.create(CreateOrderRequest),7,3,"DET: customerEmail, shippingAddress, paymentMethod, plantId, quantity, error message, 202 response; FTR: Order, Plant, Stock"
+EI2,EI,Confirm order (payment-completed),OrderEventListener.onPaymentCompleted -> OrderService.confirm(Long),3,1,"DET: orderId, paymentId, transactionId; FTR: Order"
+EI3,EI,Cancel order (inventory-failed / payment-failed),OrderEventListener.onInventoryFailed/onPaymentFailed -> OrderService.cancel(Long; String),2,1,"DET: orderId, reason; FTR: Order. Both topics run the same processing logic with the same DET/FTR -> one elementary process"
+EI4,EI,Anonymize customer orders,POST /internal/privacy/customers/anonymize -> CustomerDataService.anonymizeOrders(String),3,1,"DET: email, ordersAnonymized, error message; FTR: Order"
+EO1,EO,View order by id,GET /api/orders/{id} -> OrderService.findById(Long),14,1,"DET: id + 12 output fields incl. derived lineTotal + error message (404). Derived lineTotal = unitPrice x quantity -> EO, not EQ"
+EO2,EO,Customer order history,GET /api/orders?email= -> OrderService.findByCustomer(String),13,1,"DET: email + 12 output fields incl. derived lineTotal; FTR: Order"
+EQ1,EQ,Export customer orders (GDPR),POST /internal/privacy/customers/orders -> CustomerDataService.findOrders(String),11,1,"DET: email + orderId, status, paymentMethod, totalAmount, shippingAddress, createdAt, plantId, plantName, quantity, unitPrice; no derived data -> EQ"

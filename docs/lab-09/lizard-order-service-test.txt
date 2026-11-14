@@ -1,0 +1,27 @@
+================================================
+  NLOC    CCN   token  PARAM  length  location  
+------------------------------------------------
+       6      1     57      0       7 CustomerDataIntegrationTest::seedOrders@60-66@order-service/src/test/java/com/plantshop/order/privacy/CustomerDataIntegrationTest.java
+      15      1    199      0      20 CustomerDataIntegrationTest::anonymizesOnlyThisCustomersOrdersAndKeepsThemUsable@69-88@order-service/src/test/java/com/plantshop/order/privacy/CustomerDataIntegrationTest.java
+       6      1     94      0       8 CustomerDataIntegrationTest::repeatingTheAnonymizationIsSafe@91-98@order-service/src/test/java/com/plantshop/order/privacy/CustomerDataIntegrationTest.java
+      11      1    104      0      11 CustomerDataIntegrationTest::exportsOnlyThisCustomersOrders@101-111@order-service/src/test/java/com/plantshop/order/privacy/CustomerDataIntegrationTest.java
+       6      1     64      0       7 CustomerDataIntegrationTest::rejectsCallsWithoutTheInternalToken@114-120@order-service/src/test/java/com/plantshop/order/privacy/CustomerDataIntegrationTest.java
+       9      2     63      2       9 CustomerDataIntegrationTest::anonymize@122-130@order-service/src/test/java/com/plantshop/order/privacy/CustomerDataIntegrationTest.java
+       8      1     68      3       8 CustomerDataIntegrationTest::order@132-139@order-service/src/test/java/com/plantshop/order/privacy/CustomerDataIntegrationTest.java
+      18      1    240      0      20 OrderServiceTest::createMergesLinesComputesTotalAndPublishesEvent@59-78@order-service/src/test/java/com/plantshop/order/service/OrderServiceTest.java
+       6      1     77      0       7 OrderServiceTest::createRejectsInactivePlant@81-87@order-service/src/test/java/com/plantshop/order/service/OrderServiceTest.java
+       7      1    109      0       8 OrderServiceTest::createRejectsWhenOutOfStock@90-97@order-service/src/test/java/com/plantshop/order/service/OrderServiceTest.java
+       8      1     80      0      10 OrderServiceTest::cancelIgnoresAlreadyConfirmedOrder@100-109@order-service/src/test/java/com/plantshop/order/service/OrderServiceTest.java
+2 file analyzed.
+==============================================================
+NLOC    Avg.NLOC  AvgCCN  Avg.token  function_cnt    file
+--------------------------------------------------------------
+    115       8.7     1.1       92.7         7     order-service/src/test/java/com/plantshop/order/privacy/CustomerDataIntegrationTest.java
+     94       9.8     1.0      126.5         4     order-service/src/test/java/com/plantshop/order/service/OrderServiceTest.java
+
+=================================================================================================================
+No thresholds exceeded (cyclomatic_complexity > 1000 or length > 1000 or nloc > 1000000 or parameter_count > 100)
+==========================================================================================
+Total nloc   Avg.NLOC  AvgCCN  Avg.token   Fun Cnt  Warning cnt   Fun Rt   nloc Rt
+------------------------------------------------------------------------------------------
+       209       9.1     1.1      105.0       11            0      0.00    0.00

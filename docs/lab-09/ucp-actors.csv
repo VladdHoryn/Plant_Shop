@@ -1,0 +1,6 @@
+id,actor,kind,interface,complexity
+A1,Customer (покупець),human,"REST/HTTP via api-gateway (the project has no GUI)",average
+A2,Catalog Service,system,"HTTP REST via Feign (GET /api/catalog/plants/by-ids)",average
+A3,Inventory Service,system,"HTTP REST via Feign (POST /api/inventory/check) + Kafka inventory-failed",average
+A4,Payment Service,system,"Kafka events only (payment-completed / payment-failed), typed message API",simple
+A5,User Service (privacy),system,"HTTP POST /internal/privacy/** with X-Internal-Token",average

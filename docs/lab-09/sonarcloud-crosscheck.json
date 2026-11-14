@@ -1,0 +1,1 @@
+{"component":{"id":"AW8EG4-3sAQR2DA_j1HN","key":"apache_fineract","name":"fineract","description":"Run as:\ngradle clean bootRun","qualifier":"TRK","measures":[{"metric":"ncloc_language_distribution","value":"java\u003d377143;py\u003d231;shell\u003d46;yaml\u003d3813"},{"metric":"development_cost","value":"11436990"},{"metric":"sqale_debt_ratio","value":"1.5","bestValue":false}]}}

@@ -1,0 +1,1 @@
+{"component":{"organization":"apache","key":"apache_fineract","name":"fineract","description":"Run as:\ngradle clean bootRun","qualifier":"TRK","analysisDate":"2026-11-13T11:56:29+0000","tags":[],"visibility":"public","leakPeriodDate":"2026-10-06T13:17:44+0000","version":"1.17.0-SNAPSHOT"},"ancestors":[]}

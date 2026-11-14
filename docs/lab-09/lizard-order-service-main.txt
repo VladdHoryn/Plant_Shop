@@ -1,0 +1,85 @@
+================================================
+  NLOC    CCN   token  PARAM  length  location  
+------------------------------------------------
+       7      1     40      1       7 InternalApiConfig::internalApiTokenFilter@12-18@order-service/src/main/java/com/plantshop/order/config/InternalApiConfig.java
+       3      1     18      1       3 InternalApiTokenFilter::InternalApiTokenFilter@26-28@order-service/src/main/java/com/plantshop/order/config/InternalApiTokenFilter.java
+      11      3     89      3      12 InternalApiTokenFilter::doFilterInternal@31-42@order-service/src/main/java/com/plantshop/order/config/InternalApiTokenFilter.java
+       3      1     23      1       3 InternalPrivacyController::findOrders@28-30@order-service/src/main/java/com/plantshop/order/controller/InternalPrivacyController.java
+       3      1     27      1       3 InternalPrivacyController::anonymize@33-35@order-service/src/main/java/com/plantshop/order/controller/InternalPrivacyController.java
+       4      1     27      1       4 OrderController::ResponseStatus@29-32@order-service/src/main/java/com/plantshop/order/controller/OrderController.java
+       3      1     17      1       3 OrderController::findById@35-37@order-service/src/main/java/com/plantshop/order/controller/OrderController.java
+       3      1     17      1       3 OrderController::findByCustomer@40-42@order-service/src/main/java/com/plantshop/order/controller/OrderController.java
+      29      1    245      1      39 Order::GeneratedValue@32-70@order-service/src/main/java/com/plantshop/order/entity/Order.java
+       7      2     27      0       7 Order::confirm@73-79@order-service/src/main/java/com/plantshop/order/entity/Order.java
+       8      2     33      1       8 Order::cancel@81-88@order-service/src/main/java/com/plantshop/order/entity/Order.java
+      19      1    149      1      26 OrderItem::GeneratedValue@26-51@order-service/src/main/java/com/plantshop/order/entity/OrderItem.java
+       3      1     18      0       3 OrderItem::getLineTotal@53-55@order-service/src/main/java/com/plantshop/order/entity/OrderItem.java
+       3      1     27      0       3 KafkaTopics::orderCreatedTopic@17-19@order-service/src/main/java/com/plantshop/order/event/KafkaTopics.java
+       3      1     18      1       3 OrderEventListener::onPaymentCompleted@15-17@order-service/src/main/java/com/plantshop/order/event/OrderEventListener.java
+       3      1     24      1       3 OrderEventListener::onInventoryFailed@20-22@order-service/src/main/java/com/plantshop/order/event/OrderEventListener.java
+       3      1     24      1       3 OrderEventListener::onPaymentFailed@25-27@order-service/src/main/java/com/plantshop/order/event/OrderEventListener.java
+       4      1     46      1       4 OrderEventPublisher::onOrderCreated@18-21@order-service/src/main/java/com/plantshop/order/event/OrderEventPublisher.java
+       3      1     23      1       3 GlobalExceptionHandler::handleNotFound@19-21@order-service/src/main/java/com/plantshop/order/exception/GlobalExceptionHandler.java
+       3      1     23      1       3 GlobalExceptionHandler::handleInvalidOrder@24-26@order-service/src/main/java/com/plantshop/order/exception/GlobalExceptionHandler.java
+       5      1     41      1       5 GlobalExceptionHandler::handleOutOfStock@29-33@order-service/src/main/java/com/plantshop/order/exception/GlobalExceptionHandler.java
+       5      1     32      1       5 GlobalExceptionHandler::handleRemoteFailure@36-40@order-service/src/main/java/com/plantshop/order/exception/GlobalExceptionHandler.java
+       7      1     92      1       7 GlobalExceptionHandler::handleValidation@43-49@order-service/src/main/java/com/plantshop/order/exception/GlobalExceptionHandler.java
+       3      1     12      1       3 InvalidOrderException::InvalidOrderException@5-7@order-service/src/main/java/com/plantshop/order/exception/InvalidOrderException.java
+       4      1     23      1       4 OutOfStockException::OutOfStockException@12-15@order-service/src/main/java/com/plantshop/order/exception/OutOfStockException.java
+       3      1     21      2       3 ResourceNotFoundException::ResourceNotFoundException@5-7@order-service/src/main/java/com/plantshop/order/exception/ResourceNotFoundException.java
+       2      1      5      0       2 OrderMapper::OrderMapper@11-12@order-service/src/main/java/com/plantshop/order/mapper/OrderMapper.java
+      12      1     81      1      12 OrderMapper::toResponse@14-25@order-service/src/main/java/com/plantshop/order/mapper/OrderMapper.java
+       4      1     44      1       4 OrderMapper::toResponse@27-30@order-service/src/main/java/com/plantshop/order/mapper/OrderMapper.java
+       8      1     97      1       8 OrderMapper::toExport@32-39@order-service/src/main/java/com/plantshop/order/mapper/OrderMapper.java
+       9      1     71      1       9 OrderMapper::toCreatedEvent@42-50@order-service/src/main/java/com/plantshop/order/mapper/OrderMapper.java
+       5      1     30      1       5 CustomerDataService::findOrders@31-35@order-service/src/main/java/com/plantshop/order/service/CustomerDataService.java
+       8      2     53      1       8 CustomerDataService::anonymizeOrders@39-46@order-service/src/main/java/com/plantshop/order/service/CustomerDataService.java
+      37      5    388      1      41 OrderService::create@47-87@order-service/src/main/java/com/plantshop/order/service/OrderService.java
+       5      1     36      1       5 OrderService::findById@90-94@order-service/src/main/java/com/plantshop/order/service/OrderService.java
+       5      1     30      1       5 OrderService::findByCustomer@97-101@order-service/src/main/java/com/plantshop/order/service/OrderService.java
+       9      2     53      1       9 OrderService::confirm@104-112@order-service/src/main/java/com/plantshop/order/service/OrderService.java
+       9      2     59      2       9 OrderService::cancel@115-123@order-service/src/main/java/com/plantshop/order/service/OrderService.java
+       3      1     20      1       3 OrderServiceApplication::main@11-13@order-service/src/main/java/com/plantshop/order/OrderServiceApplication.java
+32 file analyzed.
+==============================================================
+NLOC    Avg.NLOC  AvgCCN  Avg.token  function_cnt    file
+--------------------------------------------------------------
+     14       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/client/CatalogClient.java
+     14       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/client/InventoryClient.java
+     16       7.0     1.0       40.0         1     order-service/src/main/java/com/plantshop/order/config/InternalApiConfig.java
+     30       7.0     2.0       53.5         2     order-service/src/main/java/com/plantshop/order/config/InternalApiTokenFilter.java
+     26       3.0     1.0       25.0         2     order-service/src/main/java/com/plantshop/order/controller/InternalPrivacyController.java
+     35       3.3     1.0       20.3         3     order-service/src/main/java/com/plantshop/order/controller/OrderController.java
+      3       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/dto/AnonymizationResult.java
+     16       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/dto/CreateOrderRequest.java
+     12       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/dto/CustomerOrderExport.java
+      5       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/dto/CustomerRef.java
+      5       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/dto/OrderItemRequest.java
+     21       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/dto/OrderResponse.java
+     72      14.7     1.7      101.7         3     order-service/src/main/java/com/plantshop/order/entity/Order.java
+     44      11.0     1.0       83.5         2     order-service/src/main/java/com/plantshop/order/entity/OrderItem.java
+      6       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/entity/OrderStatus.java
+      7       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/entity/PaymentMethod.java
+      3       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/event/InventoryFailedEvent.java
+     16       3.0     1.0       27.0         1     order-service/src/main/java/com/plantshop/order/event/KafkaTopics.java
+     12       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/event/OrderCreatedEvent.java
+     22       3.0     1.0       22.0         3     order-service/src/main/java/com/plantshop/order/event/OrderEventListener.java
+     17       4.0     1.0       46.0         1     order-service/src/main/java/com/plantshop/order/event/OrderEventPublisher.java
+      3       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/event/PaymentCompletedEvent.java
+      3       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/event/PaymentFailedEvent.java
+     42       4.6     1.0       42.2         5     order-service/src/main/java/com/plantshop/order/exception/GlobalExceptionHandler.java
+      6       3.0     1.0       12.0         1     order-service/src/main/java/com/plantshop/order/exception/InvalidOrderException.java
+     11       4.0     1.0       23.0         1     order-service/src/main/java/com/plantshop/order/exception/OutOfStockException.java
+      6       3.0     1.0       21.0         1     order-service/src/main/java/com/plantshop/order/exception/ResourceNotFoundException.java
+     43       7.0     1.0       59.6         5     order-service/src/main/java/com/plantshop/order/mapper/OrderMapper.java
+     19       0.0     0.0        0.0         0     order-service/src/main/java/com/plantshop/order/repository/OrderRepository.java
+     33       6.5     1.5       41.5         2     order-service/src/main/java/com/plantshop/order/service/CustomerDataService.java
+    106      13.0     2.2      113.2         5     order-service/src/main/java/com/plantshop/order/service/OrderService.java
+     11       3.0     1.0       20.0         1     order-service/src/main/java/com/plantshop/order/OrderServiceApplication.java
+
+=================================================================================================================
+No thresholds exceeded (cyclomatic_complexity > 1000 or length > 1000 or nloc > 1000000 or parameter_count > 100)
+==========================================================================================
+Total nloc   Avg.NLOC  AvgCCN  Avg.token   Fun Cnt  Warning cnt   Fun Rt   nloc Rt
+------------------------------------------------------------------------------------------
+       679       6.9     1.3       53.9       39            0      0.00    0.00

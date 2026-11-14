@@ -1,0 +1,15 @@
+test_break_even_tdd_matches_simulation (test_financial_ledger.EconomicsTest.test_break_even_tdd_matches_simulation) ... ok
+test_heavy_debt_fails_gate (test_financial_ledger.EconomicsTest.test_heavy_debt_fails_gate) ... ok
+test_npv_is_cumulative_and_discounted (test_financial_ledger.EconomicsTest.test_npv_is_cumulative_and_discounted) ... ok
+test_payback_needs_strictly_positive_npv (test_financial_ledger.EconomicsTest.test_payback_needs_strictly_positive_npv) ... ok
+test_principal_and_cost_of_delay (test_financial_ledger.EconomicsTest.test_principal_and_cost_of_delay) ... ok
+test_missing_metric_is_rejected (test_financial_ledger.LoadBaselineTest.test_missing_metric_is_rejected) ... ok
+test_reads_metrics_from_json (test_financial_ledger.LoadBaselineTest.test_reads_metrics_from_json) ... ok
+test_sonar_error_response_is_rejected (test_financial_ledger.LoadBaselineTest.test_sonar_error_response_is_rejected) ... ok
+test_missing_variable_is_rejected (test_financial_ledger.LoadConfigTest.test_missing_variable_is_rejected) ... ok
+test_rate_outside_range_is_rejected (test_financial_ledger.LoadConfigTest.test_rate_outside_range_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.006s
+
+OK

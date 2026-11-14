@@ -1,0 +1,55 @@
+## FPA (IFPUG) ledger
+
+| ID | Тип | Функція | DET | RET/FTR | Складність | Вага FP |
+|---|---|---|---|---|---|---|
+| ILF1 | ILF | Order (orders + order_items) | 13 | 2 | Low | 7 |
+| EIF1 | EIF | Plant (catalog-service) | 4 | 1 | Low | 5 |
+| EIF2 | EIF | Stock (inventory-service) | 4 | 1 | Low | 5 |
+| EI1 | EI | Create order | 7 | 3 | High | 6 |
+| EI2 | EI | Confirm order (payment-completed) | 3 | 1 | Low | 3 |
+| EI3 | EI | Cancel order (inventory-failed / payment-failed) | 2 | 1 | Low | 3 |
+| EI4 | EI | Anonymize customer orders | 3 | 1 | Low | 3 |
+| EO1 | EO | View order by id | 14 | 1 | Low | 4 |
+| EO2 | EO | Customer order history | 13 | 1 | Low | 4 |
+| EQ1 | EQ | Export customer orders (GDPR) | 11 | 1 | Low | 3 |
+
+UFP = ILF 7 + EIF 10 + EI 15 + EO 8 + EQ 3 = **43 FP**; VAF = 1.00 -> AFP = 43 × 1.00 = **43 FP**
+
+## UCP (Karner) ledger
+
+| ID | Актор | Інтерфейс | Складність | Вага |
+|---|---|---|---|---|
+| A1 | Customer (покупець) | REST/HTTP via api-gateway (the project has no GUI) | average | 2 |
+| A2 | Catalog Service | HTTP REST via Feign (GET /api/catalog/plants/by-ids) | average | 2 |
+| A3 | Inventory Service | HTTP REST via Feign (POST /api/inventory/check) + Kafka inventory-failed | average | 2 |
+| A4 | Payment Service | Kafka events only (payment-completed / payment-failed), typed message API | simple | 1 |
+| A5 | User Service (privacy) | HTTP POST /internal/privacy/** with X-Internal-Token | average | 2 |
+
+UAW = 2 + 2 + 2 + 1 + 2 = **9**
+
+| ID | Use Case | Транзакцій | Складність | Вага |
+|---|---|---|---|---|
+| UC1 | Оформити замовлення | 10 | Complex | 15 |
+| UC2 | Переглянути замовлення за id | 4 | Average | 10 |
+| UC3 | Переглянути історію замовлень | 3 | Simple | 5 |
+| UC4 | Підтвердити замовлення після оплати | 5 | Average | 10 |
+| UC5 | Скасувати замовлення (компенсація саги) | 5 | Average | 10 |
+| UC6 | Експортувати замовлення клієнта | 4 | Average | 10 |
+| UC7 | Анонімізувати замовлення клієнта | 5 | Average | 10 |
+
+UUCW = 15 + 10 + 5 + 10 + 10 + 10 + 10 = **70**
+
+UUCP = UAW + UUCW = 9 + 70 = **79**
+
+UCP = UUCP × TCF × ECF = 79 × 1.0 × 1.0 = **79**
+
+## Calibration
+
+Effort = NLOC × 0.5 h = 679 × 0.5 = **339.5 person-hours**
+
+PF = Effort / UCP = 339.5 / 79 = **4.30 person-hours per UCP**
+
+Hours per FP = 339.5 / 43 = 7.90 person-hours per FP
+
+totals: ufp=43, afp=43, uaw=9, uucw=70, uucp=79, ucp=79, nloc=679, effort=339.5, pf=4.29747
+[OK] written docs\lab-09\fpa-ucp-ledger.md

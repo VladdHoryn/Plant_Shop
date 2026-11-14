@@ -1,0 +1,25 @@
+<mxfile host="app.diagrams.net"><diagram id="order-uc" name="order-service Use Cases"><mxGraphModel dx="1000" dy="700" grid="1" gridSize="10" page="1" pageWidth="900" pageHeight="720"><root><mxCell id="0"/><mxCell id="1" parent="0"/>
+<mxCell id="sys" value="Plant Shop :: order-service" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fillColor=none;" vertex="1" parent="1"><mxGeometry x="230" y="10" width="420" height="650" as="geometry"/></mxCell>
+<mxCell id="uc1" value="UC1: Оформити замовлення" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="50" width="300" height="60" as="geometry"/></mxCell>
+<mxCell id="uc2" value="UC2: Переглянути замовлення за id" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="135" width="300" height="60" as="geometry"/></mxCell>
+<mxCell id="uc3" value="UC3: Переглянути історію замовлень" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="220" width="300" height="60" as="geometry"/></mxCell>
+<mxCell id="uc4" value="UC4: Підтвердити замовлення після оплати" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="305" width="300" height="60" as="geometry"/></mxCell>
+<mxCell id="uc5" value="UC5: Скасувати замовлення (компенсація саги)" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="390" width="300" height="60" as="geometry"/></mxCell>
+<mxCell id="uc6" value="UC6: Експортувати замовлення клієнта" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="475" width="300" height="60" as="geometry"/></mxCell>
+<mxCell id="uc7" value="UC7: Анонімізувати замовлення клієнта" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="560" width="300" height="60" as="geometry"/></mxCell>
+<mxCell id="a1" value="Customer (HTTP via gateway)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="90" y="120" width="30" height="60" as="geometry"/></mxCell>
+<mxCell id="a5" value="User Service (internal HTTP)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="90" y="500" width="30" height="60" as="geometry"/></mxCell>
+<mxCell id="a2" value="Catalog Service (HTTP)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="760" y="30" width="30" height="60" as="geometry"/></mxCell>
+<mxCell id="a3" value="Inventory Service (HTTP + Kafka)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="760" y="200" width="30" height="60" as="geometry"/></mxCell>
+<mxCell id="a4" value="Payment Service (Kafka)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1"><mxGeometry x="760" y="380" width="30" height="60" as="geometry"/></mxCell>
+<mxCell id="e1" style="endArrow=none;html=1;" edge="1" parent="1" source="a1" target="uc1"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e2" style="endArrow=none;html=1;" edge="1" parent="1" source="a1" target="uc2"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e3" style="endArrow=none;html=1;" edge="1" parent="1" source="a1" target="uc3"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e4" style="endArrow=none;html=1;" edge="1" parent="1" source="a2" target="uc1"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e5" style="endArrow=none;html=1;" edge="1" parent="1" source="a3" target="uc1"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e6" style="endArrow=none;html=1;" edge="1" parent="1" source="a3" target="uc5"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e7" style="endArrow=none;html=1;" edge="1" parent="1" source="a4" target="uc4"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e8" style="endArrow=none;html=1;" edge="1" parent="1" source="a4" target="uc5"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e9" style="endArrow=none;html=1;" edge="1" parent="1" source="a5" target="uc6"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="e10" style="endArrow=none;html=1;" edge="1" parent="1" source="a5" target="uc7"><mxGeometry relative="1" as="geometry"/></mxCell>
+</root></mxGraphModel></diagram></mxfile>

@@ -1,0 +1,13 @@
+Project      : apache_fineract (ncloc=381,233, sqale_index=171,031 min, rating=A)
+Principal    : $148,226.87
+Cost of Delay: $152,493.20 / month
+  t=1  factor=0.990099  cumulative=     $150,983.37  NPV=       $2,756.50
+  t=2  factor=0.980296  cumulative=     $300,471.85  NPV=     $152,244.98
+  t=3  factor=0.970590  cumulative=     $448,480.25  NPV=     $300,253.38
+  t=4  factor=0.960980  cumulative=     $595,023.21  NPV=     $446,796.35
+  t=5  factor=0.951466  cumulative=     $740,115.26  NPV=     $591,888.39
+  t=6  factor=0.942045  cumulative=     $883,770.75  NPV=     $735,543.89
+Payback      : month 1
+Quality gate : PASS
+[OK] Financial ledger written to D:\Projects\Course_4\Claude_test_projects\ClaudeTestProject\FINANCIAL_LEDGER.md
+exit=0

@@ -1,0 +1,58 @@
+## git log --all --date=iso --format='%h %ad %an %s' -- order-service
+52895d1 2026-10-25 15:46:31 +0200 VladdHoryn Finish Testting Qual Lab_4
+9713832 2026-10-25 15:46:20 +0200 VladdHoryn Finish Testting Qual Lab_4
+0207223 2026-10-14 18:05:32 +0300 VladdHoryn Firs working version of the program
+
+## authors (git shortlog -sn --all -- order-service)
+     3	VladdHoryn
+
+## numstat per commit (added deleted path), src/main + src/test + resources
+--- 52895d1 2026-10-25
+
+19	0	order-service/src/main/java/com/plantshop/order/config/InternalApiConfig.java
+43	0	order-service/src/main/java/com/plantshop/order/config/InternalApiTokenFilter.java
+36	0	order-service/src/main/java/com/plantshop/order/controller/InternalPrivacyController.java
+4	0	order-service/src/main/java/com/plantshop/order/dto/AnonymizationResult.java
+17	0	order-service/src/main/java/com/plantshop/order/dto/CustomerOrderExport.java
+8	0	order-service/src/main/java/com/plantshop/order/dto/CustomerRef.java
+47	0	order-service/src/main/java/com/plantshop/order/service/CustomerDataService.java
+140	0	order-service/src/test/java/com/plantshop/order/privacy/CustomerDataIntegrationTest.java
+25	0	order-service/src/test/resources/application.yml
+--- 9713832 2026-10-25
+
+19	0	order-service/pom.xml
+0	1	order-service/src/main/java/com/plantshop/order/event/OrderCreatedEvent.java
+11	1	order-service/src/main/java/com/plantshop/order/mapper/OrderMapper.java
+8	0	order-service/src/main/java/com/plantshop/order/repository/OrderRepository.java
+1	2	order-service/src/main/java/com/plantshop/order/service/OrderService.java
+--- 0207223 2026-10-14
+
+87	0	order-service/pom.xml
+14	0	order-service/src/main/java/com/plantshop/order/OrderServiceApplication.java
+19	0	order-service/src/main/java/com/plantshop/order/client/CatalogClient.java
+20	0	order-service/src/main/java/com/plantshop/order/client/InventoryClient.java
+43	0	order-service/src/main/java/com/plantshop/order/controller/OrderController.java
+19	0	order-service/src/main/java/com/plantshop/order/dto/CreateOrderRequest.java
+7	0	order-service/src/main/java/com/plantshop/order/dto/OrderItemRequest.java
+24	0	order-service/src/main/java/com/plantshop/order/dto/OrderResponse.java
+89	0	order-service/src/main/java/com/plantshop/order/entity/Order.java
+56	0	order-service/src/main/java/com/plantshop/order/entity/OrderItem.java
+7	0	order-service/src/main/java/com/plantshop/order/entity/OrderStatus.java
+8	0	order-service/src/main/java/com/plantshop/order/entity/PaymentMethod.java
+4	0	order-service/src/main/java/com/plantshop/order/event/InventoryFailedEvent.java
+20	0	order-service/src/main/java/com/plantshop/order/event/KafkaTopics.java
+15	0	order-service/src/main/java/com/plantshop/order/event/OrderCreatedEvent.java
+28	0	order-service/src/main/java/com/plantshop/order/event/OrderEventListener.java
+22	0	order-service/src/main/java/com/plantshop/order/event/OrderEventPublisher.java
+4	0	order-service/src/main/java/com/plantshop/order/event/PaymentCompletedEvent.java
+4	0	order-service/src/main/java/com/plantshop/order/event/PaymentFailedEvent.java
+50	0	order-service/src/main/java/com/plantshop/order/exception/GlobalExceptionHandler.java
+8	0	order-service/src/main/java/com/plantshop/order/exception/InvalidOrderException.java
+16	0	order-service/src/main/java/com/plantshop/order/exception/OutOfStockException.java
+8	0	order-service/src/main/java/com/plantshop/order/exception/ResourceNotFoundException.java
+41	0	order-service/src/main/java/com/plantshop/order/mapper/OrderMapper.java
+17	0	order-service/src/main/java/com/plantshop/order/repository/OrderRepository.java
+125	0	order-service/src/main/java/com/plantshop/order/service/OrderService.java
+5	0	order-service/src/main/resources/application.yml
+26	0	order-service/src/main/resources/db/migration/V1__create_order_tables.sql
+110	0	order-service/src/test/java/com/plantshop/order/service/OrderServiceTest.java

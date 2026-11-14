@@ -1,0 +1,5 @@
+# request: 2026-11-14T16:23:17Z
+curl -s -G "https://sonarcloud.io/api/measures/component" --data-urlencode "component=apache_fineract" --data-urlencode "metricKeys=sqale_index,ncloc,sqale_rating"
+
+# HTTP 200, 315 bytes, 0.303558s
+# effective URL: https://sonarcloud.io/api/measures/component?component=apache_fineract&metricKeys=sqale_index%2cncloc%2csqale_rating

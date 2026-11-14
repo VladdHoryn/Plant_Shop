@@ -1,0 +1,1 @@
+{"component":{"id":"AW8EG4-3sAQR2DA_j1HN","key":"apache_fineract","name":"fineract","description":"Run as:\ngradle clean bootRun","qualifier":"TRK","measures":[{"metric":"ncloc","value":"381233"},{"metric":"sqale_index","value":"171031","bestValue":false},{"metric":"sqale_rating","value":"1.0","bestValue":true}]}}
