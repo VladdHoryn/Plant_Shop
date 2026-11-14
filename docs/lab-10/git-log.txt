@@ -1,0 +1,13 @@
+* 20b6d83 docs(handover): handover package with bus factor declaration
+* 7e82c94 docs(maintenance): restore documentation currency, PASS
+* aef1513 docs(audit): simulate documentation decay, FAIL
+* 82b8742 docs(maintenance): documentation maintenance regime and drift check in CI
+* c24ee0f docs(architecture): deliver design and infrastructure passport
+* 852f73b docs(audit): inventory and currency audit of project documentation
+* 69df71c docs(economics): add lab 9 git history log
+* 0dadd2e feat(economics): lab 9 SQALE audit, financial ledger and FPA/UCP sizing
+* e35ab80 Dele comments
+* f1c4b52 docs(audit): lab 8 report (CK & MOOD audit, god object, composition)
+* 6f2e36a refactor(audit): replace inheritance with composition pattern, PASS
+* 92d52c2 arch(audit): capture inheritance fragility crash, FAIL
+(the last commit, docs(audit): lab 10 git history log, adds this file)

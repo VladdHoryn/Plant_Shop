@@ -36,7 +36,8 @@
 | `82b8742` | `docs(maintenance): documentation maintenance regime and drift check in CI` | 3.1 |
 | `aef1513` | `docs(audit): simulate documentation decay, FAIL` | 3.2 |
 | `7e82c94` | `docs(maintenance): restore documentation currency, PASS` | 3.3 |
-| наступні | handover-пакет, звіт, теорія, git log | 3.4, звіт |
+| `20b6d83` | `docs(handover): handover package with bus factor declaration` (разом зі звітом і теорією) | 3.4, звіт |
+| останній | `docs(audit): lab 10 git history log` | `docs/lab-10/git-log.txt` |
 
 Повний граф — `docs/lab-10/git-log.txt`.
 
