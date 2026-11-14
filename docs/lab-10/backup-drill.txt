@@ -1,0 +1,78 @@
+# Backup / restore drill for docs/isd.md (task 2). Throw-away container lab10-drill-catalog-db (postgres:16-alpine, same image and
+# credentials as catalog-db in docker-compose.yml); the project's named volumes are not touched. 2026-11-14 19:01
+$ docker run -d --rm --name lab10-drill-catalog-db -e POSTGRES_USER=plantshop -e POSTGRES_PASSWORD=plantshop -e POSTGRES_DB=catalog_db postgres:16-alpine > /dev/null && echo started
+Unable to find image 'postgres:16-alpine' locally
+16-alpine: Pulling from library/postgres
+b7106f8586ee: Pulling fs layer
+5959c7ea857a: Pulling fs layer
+6bceb0db2fd1: Pulling fs layer
+f997efa53d88: Pulling fs layer
+ea98517a315c: Pulling fs layer
+5788ee6f91dc: Pulling fs layer
+86cc7190d1c0: Pulling fs layer
+a2d17f5b24d5: Pulling fs layer
+f85a33377d83: Pulling fs layer
+41713cbe7496: Pulling fs layer
+89872578f4c5: Download complete
+df1cd84c95ef: Download complete
+5788ee6f91dc: Download complete
+5959c7ea857a: Download complete
+b7106f8586ee: Download complete
+f997efa53d88: Download complete
+ea98517a315c: Download complete
+ea98517a315c: Pull complete
+86cc7190d1c0: Download complete
+6bceb0db2fd1: Download complete
+f85a33377d83: Download complete
+41713cbe7496: Download complete
+5788ee6f91dc: Pull complete
+f997efa53d88: Pull complete
+41713cbe7496: Pull complete
+a2d17f5b24d5: Download complete
+a2d17f5b24d5: Pull complete
+5959c7ea857a: Pull complete
+b7106f8586ee: Pull complete
+86cc7190d1c0: Pull complete
+6bceb0db2fd1: Pull complete
+f85a33377d83: Pull complete
+Digest: sha256:f377d590e5474681d4d7838635031a2b50647923b7abfa803ce9b5ff35d5c663
+Status: Downloaded newer image for postgres:16-alpine
+started
+
+# schema + seed exactly as Flyway applies them (V1, V2 of catalog-service), in schema catalog
+$ { echo 'CREATE SCHEMA catalog; SET search_path TO catalog;'; cat catalog-service/src/main/resources/db/migration/V1__create_catalog_tables.sql catalog-service/src/main/resources/db/migration/V2__seed_catalog.sql; } | docker exec -i lab10-drill-catalog-db psql -q -U plantshop -d catalog_db
+
+$ docker exec lab10-drill-catalog-db psql -U plantshop -d catalog_db -tAc 'SELECT count(*) FROM catalog.plants'
+10
+
+# 1. Backup (the command of docs/isd.md, section 10)
+$ time docker exec lab10-drill-catalog-db pg_dump -U plantshop -d catalog_db -Fc -f /tmp/catalog_db.dump && docker exec lab10-drill-catalog-db ls -l /tmp/catalog_db.dump
+
+real	0m0.486s
+user	0m0.000s
+sys	0m0.045s
+-rw-r--r--    1 root     root          7633 Nov 14 17:01 /tmp/catalog_db.dump
+
+# 2. Disaster: the schema is lost
+$ docker exec lab10-drill-catalog-db psql -U plantshop -d catalog_db -c 'DROP SCHEMA catalog CASCADE'
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to table catalog.categories
+drop cascades to table catalog.plants
+DROP SCHEMA
+
+$ docker exec lab10-drill-catalog-db psql -U plantshop -d catalog_db -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'catalog'"
+0
+
+# 3. Restore
+$ time docker exec lab10-drill-catalog-db pg_restore -U plantshop -d catalog_db --clean --if-exists /tmp/catalog_db.dump
+
+real	0m0.419s
+user	0m0.000s
+sys	0m0.045s
+
+$ docker exec lab10-drill-catalog-db psql -U plantshop -d catalog_db -tAc 'SELECT count(*) FROM catalog.plants'
+10
+
+$ docker stop lab10-drill-catalog-db > /dev/null && echo removed
+removed
+

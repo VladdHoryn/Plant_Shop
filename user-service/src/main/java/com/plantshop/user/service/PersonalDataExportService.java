@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Right of access: everything the shop holds about one customer, in the versioned {@link PersonalDataExport}
- * format. Only coordinates four ports (Lab 8): access + audit, the local snapshot, the remote order history and
+ * format. Only coordinates four ports: access + audit, the local snapshot, the remote order history and
  * the assembly of the document. It knows none of their implementations, repositories or the Feign client.
  */
 @Slf4j

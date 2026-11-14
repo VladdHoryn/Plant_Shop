@@ -2,6 +2,72 @@
 
 Java 21 · Spring Boot 3.5 · Spring Cloud 2025.0 · PostgreSQL + Flyway · Kafka
 
+## What it does and for whom
+
+Plant Shop is an online shop for house plants, built as a university course project.
+
+- **Customers** browse the catalog (filter by category, care level and price), place orders and follow their
+  status. An order is accepted at once (`PENDING`); stock is reserved and the payment is simulated in the
+  background, then the order becomes `CONFIRMED` or `CANCELLED`.
+- **Shop staff** manage plants, categories and stock levels.
+- **Privacy officer and marketing** handle personal data on request: export, erasure, consents; marketing e-mails
+  are sent only with the customer's consent.
+
+To see the result of an order, the client reads the order (`GET /api/orders/{id}`) and, for payment details, the
+payment of that order (`GET /api/payments/order/{orderId}`): two separate requests.
+
+## Quick start (about 5 minutes)
+
+Prerequisites: Git and Docker Desktop (running). No local JDK is needed.
+
+```bash
+git clone https://github.com/VladdHoryn/Plant_Shop.git && cd Plant_Shop
+docker compose up -d --build
+curl http://localhost:8080/api/catalog/plants
+```
+
+The first build takes a few minutes; the services are ready about a minute after the containers start
+(`docker compose ps` shows them as healthy). Then try an order: see [Try it](#try-it-through-the-gateway).
+
+## Onboarding path for a new developer
+
+1. Read this README: purpose, quick start, [API at a glance](#api-at-a-glance).
+2. Run the stack with the quick start above and place one order (section [Try it](#try-it-through-the-gateway)).
+3. Read the design: [`docs/sdd.md`](docs/sdd.md) (components, data model, API and event contracts) and the
+   decisions in [`docs/architecture/adr/`](docs/architecture/adr).
+4. Read the environment: [`docs/isd.md`](docs/isd.md) (startup order, variables, CI/CD, backups).
+5. Set up the IDE workflow ([Running the services from the IDE](#running-the-services-from-the-ide)), run
+   `./mvnw test` and install the commit hook with `./scripts/install-hooks.sh`.
+
+## Documentation map
+
+| Document | Answers | Audience |
+|---|---|---|
+| `README.md` (this file) | what the system does, how to start it, which API it has | everyone, business, newcomers |
+| [`docs/sdd.md`](docs/sdd.md) | how the system is built: C4 containers, components, data model, API contracts | developers, QA |
+| [`docs/isd.md`](docs/isd.md) | where it runs: topology, environments, CI/CD, monitoring, backup with RTO/RPO, release and rollback | DevOps |
+| [`docs/architecture/adr/`](docs/architecture/adr) | why: architecture decision records | developers, architects |
+| `docs/*-report.md`, `docs/lab-*.md`, `docs/reports/` | lab reports: historical records of a moment in time, not updated | teacher, archive |
+
+`./scripts/doc-drift-check.sh` fails when the code has an endpoint that `docs/sdd.md` or this README does not list,
+or when `docker-compose.yml` starts the containers in another order than `docs/isd.md` says.
+
+## API at a glance
+
+All requests go through the gateway, `http://localhost:8080`. Request and response schemas: Swagger UI of each
+service, `http://localhost:<port>/swagger-ui.html`; behaviour contracts: [`docs/sdd.md`](docs/sdd.md#5-api-контракти).
+
+| Area | Endpoints |
+|---|---|
+| Catalog | `GET /api/catalog/plants`, `GET /api/catalog/plants/{id}`, `GET /api/catalog/plants/by-ids`, `POST /api/catalog/plants`, `PUT /api/catalog/plants/{id}`, `DELETE /api/catalog/plants/{id}`, `GET /api/catalog/categories`, `POST /api/catalog/categories`, `GET /api/catalog/info` |
+| Stock | `GET /api/inventory`, `GET /api/inventory/{plantId}`, `PUT /api/inventory/{plantId}`, `POST /api/inventory/check` |
+| Orders | `POST /api/orders` (202, `PENDING`), `GET /api/orders/{id}`, `GET /api/orders` (`?email=`) |
+| Payments | `GET /api/payments/{id}`, `GET /api/payments/order/{orderId}` |
+| Accounts and privacy | `POST /api/users`, `POST /api/users/password-reset`, `GET /api/users/{id}/personal-data`, `POST /api/users/{id}/anonymize`, `GET /api/users/{id}/consents`, `POST /api/users/{id}/consents/{purpose}/grant`, `POST /api/users/{id}/consents/{purpose}/revoke` |
+| Marketing and analytics | `POST /api/marketing/emails`, `POST /api/analytics/events` |
+
+## Services
+
 | Service           | Port | Responsibility                                                       |
 |-------------------|------|----------------------------------------------------------------------|
 | config-service    | 8888 | Spring Cloud Config server; all service config lives in `config-service/src/main/resources/configurations` |
@@ -9,7 +75,7 @@ Java 21 · Spring Boot 3.5 · Spring Cloud 2025.0 · PostgreSQL + Flyway · Kafk
 | api-gateway       | 8080 | Single entry point, routes `/api/**` to services via Eureka          |
 | catalog-service   | 8081 | Plants and categories (search, filter, CRUD)                         |
 | inventory-service | 8082 | Stock levels and per-order reservations                              |
-| order-service     | 8083 | Order placement, saga orchestration                                  |
+| order-service     | 8083 | Order placement; takes part in the order saga (choreography over Kafka, no central orchestrator) |
 | payment-service   | 8084 | Simulated payment provider (declines amounts above `payment.max-amount`) |
 | user-service      | 8085 | Customer accounts and privacy controls: data export, erasure, consents (see [Privacy controls](#privacy-controls)) |
 
@@ -83,6 +149,10 @@ All manifests are in [`k8s/`](k8s), one object per file, everything in the `plan
 | `<service>-db` ×4 | Deployment (PostgreSQL 16, `Recreate`) + Service + **PVC** 1Gi | database per service, schema created by Flyway |
 | kafka | Deployment (KRaft single node, `Recreate`) + Service + **PVC** 1Gi | |
 | shared | ConfigMap `plantshop-config`, Secret `plantshop-db-secret` | |
+
+> **Known gap:** user-service and user-db were added after this deployment and are not in `k8s/` or the Helm
+> chart yet, so `/api/users/**`, `/api/marketing/**` and `/api/analytics/**` do not work on Kubernetes. Use Docker
+> Compose for the privacy features. Tracked as risk R1 in [`docs/isd.md`](docs/isd.md#11-відомі-ризики-інфраструктури).
 
 Every Spring Deployment has CPU/memory requests and limits, a startup probe and liveness/readiness probes
 (`/actuator/health/liveness` and `/readiness`), and an init container that waits for its dependencies
@@ -315,6 +385,9 @@ or `kubectl -n <ns> logs <release>-plantshop-test-api`.
 - the hook and the test, including an upgrade blocked by the hook;
 - `helm uninstall`.
 
+The committed `docs/helm-report.md` is **incomplete** (the recorded run stopped after the first step) and is marked
+deprecated; run the script again to get a full transcript.
+
 ## Privacy controls
 
 The privacy lab (secure logging, right of access, right to erasure, consent enforcement) is documented in
@@ -412,9 +485,15 @@ To see the failure path, restock a plant generously and order more than 10 000 w
 
 ## Tests
 
-`./mvnw test` runs the Mockito unit tests for the service layer of catalog, inventory, order and payment, the
-secure-logging tests, and the integration tests of user-service and order-service. The integration tests start
-PostgreSQL with Testcontainers, so Docker must be running.
+`./mvnw test` runs the Mockito unit tests of catalog (including the care guides), inventory, order, payment and
+user-service (personal data export), the secure-logging tests, and the integration tests (`*IntegrationTest`) of
+user-service and order-service. The integration tests start PostgreSQL with Testcontainers, so Docker must be
+running.
+
+Course lab reports (Labs 4–9) are in `docs/`: e.g. [`docs/lab-08-report.md`](docs/lab-08-report.md) (CK & MOOD),
+[`docs/lab-9.md`](docs/lab-9.md) (SQALE, FPA/UCP, with [`FINANCIAL_LEDGER.md`](FINANCIAL_LEDGER.md)).
+They are historical records and are not
+updated when the code changes.
 
 Quality measurements (coverage + mutation score gate, Goodhart crash test, reliability and stability tests of the
 metrics, protections) are described in [`docs/metrics-report.md`](docs/metrics-report.md).

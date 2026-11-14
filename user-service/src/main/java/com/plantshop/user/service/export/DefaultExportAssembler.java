@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Every intermediate result is an immutable value object: the sections, the omissions and the declared categories
- * are derived once and never changed afterwards (Lab 7). Pure: no I/O, no logging.
+ * are derived once and never changed afterwards. Pure: no I/O, no logging.
  */
 @Component
 public class DefaultExportAssembler implements ExportAssembler {

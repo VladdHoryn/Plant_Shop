@@ -3,8 +3,8 @@ package com.plantshop.catalog.care;
 import java.time.Duration;
 
 /**
- * Orchids (Phalaenopsis): a tropical plant that is watered rarely and rests after blooming. Lab 8, task 3: no longer
- * extends TropicalCareGuide; holds it as a private field and delegates. The tropical watering rule and summary
+ * Orchids (Phalaenopsis): a tropical plant that is watered rarely and rests after blooming. It does not
+ * extend TropicalCareGuide: it holds it as a private field and delegates. The tropical watering rule and summary
  * are applied to the orchid's own interval explicitly ({@code tropical.isDue(days, wateringInterval())}) instead
  * of silently, through an overridden method called from inherited code.
  */

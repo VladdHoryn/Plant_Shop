@@ -3,7 +3,7 @@ package com.plantshop.catalog.care;
 import java.time.Duration;
 
 /**
- * Tropical plants: warmer, more humid, their soil dries faster. Lab 8, task 3: no longer extends PlantCareGuide.
+ * Tropical plants: warmer, more humid, their soil dries faster. It does not extend PlantCareGuide.
  * The former parent is a private field injected through the constructor; what a tropical plant shares with an
  * ordinary one is delegated to it, what differs is this class's own code. Nothing is overridden, and the rule
  * that used to be reached through overriding (the watering interval) is now an explicit parameter of

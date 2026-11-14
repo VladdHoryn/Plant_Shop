@@ -4,12 +4,10 @@ import java.time.Duration;
 
 /**
  * Care advice for an ordinary house plant, as shown on a plant's page in the shop.
- * Lab 8, task 3: formerly the top of a 3-level inheritance chain; since the PASS commit TropicalCareGuide holds it
- * as a private field and delegates to it (composition), nothing extends it any more.
+ * TropicalCareGuide holds it as a private field and delegates to it (composition); nothing extends it.
  */
 public class PlantCareGuide {
 
-    /** Since Lab 8 (FAIL commit) a Duration; it was int wateringIntervalDays(). */
     public Duration wateringInterval() {
         return Duration.ofDays(7);
     }
