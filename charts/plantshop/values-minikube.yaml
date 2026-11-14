@@ -15,6 +15,8 @@ configService:
   replicaCount: 1
   image:
     repository: vladyslavv648/plantshop-config-service
+    # 1.1.0: catalog-service config with /actuator/prometheus, histogram buckets, ECS JSON logs, FAIL_RATE
+    tag: "1.1.0"
 
 discoveryService:
   replicaCount: 1
@@ -32,27 +34,46 @@ apiGateway:
 catalogService:
   # 4 pods: every 25% canary step is exactly one more pod of the new version
   replicaCount: 4
-  # A broken rollout (e.g. a missing image tag) turns the app Degraded after 2 minutes instead of 10
-  progressDeadlineSeconds: 120
+  # A broken rollout (e.g. a missing image tag) turns the app Degraded after 5 minutes instead of 10
+  # (longer than in Lab 6: a canary step now also waits for the 2-minute analysis)
+  progressDeadlineSeconds: 300
+  # Lab 7: "bad behaviour" switch. FAIL_RATE is the share of /api/** requests answered with 500.
+  # A bad release = a commit that sets it to "0.5" (pod template change -> new canary).
+  env:
+    - name: FAIL_RATE
+      value: "0"
   # Lab 6: canary release. No traffic router, so the weight is the share of pods of the new version;
   # api-gateway balances over Eureka instances, which gives the same ratio.
+  # Lab 7: the manual pause is replaced by an analysis step: Prometheus decides (success rate >= 95%).
   rollout:
     enabled: true
+    analysis:
+      enabled: true
+      prometheusAddress: http://kps-prometheus.monitoring:9090
+      selector: 'namespace="plantshop",service="plantshop-catalog-service"'
     strategy:
       canary:
-        maxSurge: 1          # at most one extra pod during a step (memory on minikube is tight)
+        maxSurge: 1          # at most one extra pod during a step
         maxUnavailable: 0
         steps:
           - setWeight: 25    # 1 of 4 pods on the new version
-          - pause: {}        # wait for a manual promote
+          - pause: {duration: 30s}   # let the canary serve traffic and Prometheus scrape it
+          - analysis:
+              templates:
+                - templateName: plantshop-catalog-service-success-rate
           - setWeight: 50
-          - pause: {duration: 30s}
+          - pause: {duration: 20s}
           - setWeight: 75
-          - pause: {duration: 30s}
+          - pause: {duration: 20s}
+  # Lab 7: ServiceMonitor (/actuator/prometheus) + Grafana dashboard ConfigMap; alert on 5xx share > 5%
+  metrics:
+    enabled: true
+  alerts:
+    enabled: true
   image:
     repository: vladyslavv648/plantshop-catalog-service
     # Own tag, so a release (or a bad tag) touches only catalog-service
-    tag: "1.2.0"
+    tag: "1.5.0"
 
 inventoryService:
   replicaCount: 1

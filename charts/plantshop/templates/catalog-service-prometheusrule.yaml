@@ -1,0 +1,28 @@
+# Lab 7 (optional d): alert when more than errorRateThreshold of catalog API requests answer 5xx.
+# State: Prometheus -> Alerts (Inactive -> Pending -> Firing after "for"), Alertmanager (svc/kps-alertmanager 9093).
+{{- if .Values.catalogService.alerts.enabled }}
+{{- $al := .Values.catalogService.alerts }}
+{{- $component := "catalog-service" }}
+{{- $sel := printf "namespace=\"%s\",service=\"%s\",uri!~\"/actuator.*\"" .Release.Namespace (include "plantshop.componentName" (dict "root" . "component" $component)) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}-alerts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  groups:
+    - name: plantshop-catalog
+      rules:
+        - alert: CatalogHighErrorRate
+          expr: |
+            sum(rate(http_server_requests_seconds_count{ {{- $sel -}},status=~"5.."}[1m]))
+              / sum(rate(http_server_requests_seconds_count{ {{- $sel -}} }[1m])) > {{ $al.errorRateThreshold }}
+          for: {{ $al.for }}
+          labels:
+            severity: warning
+          annotations:
+            summary: "catalog-service: more than {{ mulf $al.errorRateThreshold 100 }}% of responses are 5xx"
+            description: {{ printf "5xx share is {{ $value | humanizePercentage }}" | quote }}
+{{- end }}

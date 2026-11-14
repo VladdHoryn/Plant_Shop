@@ -1,0 +1,31 @@
+# Lab 7: metric-based verdict for a canary step. Every `interval` the AnalysisRun asks Prometheus for the
+# share of catalog API requests that were not 5xx over the last minute. `count` measurements are taken;
+# more than `failureLimit` failed ones mark the AnalysisRun Failed and Argo Rollouts aborts the release
+# (all traffic back to the stable ReplicaSet). No traffic gives 0/0 = NaN, which also counts as a failure.
+# Health checks and the metrics endpoint itself are not API traffic: uri!~"/actuator.*".
+{{- if .Values.catalogService.rollout.analysis.enabled }}
+{{- $a := .Values.catalogService.rollout.analysis }}
+{{- $sel := printf "%s,uri!~\"/actuator.*\"" $a.selector }}
+{{- $component := "catalog-service" }}
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}-success-rate
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  metrics:
+    - name: success-rate
+      interval: {{ $a.interval }}
+      count: {{ $a.count }}
+      failureLimit: {{ $a.failureLimit }}
+      successCondition: result[0] >= {{ $a.successRate }}
+      provider:
+        prometheus:
+          address: {{ $a.prometheusAddress }}
+          query: |
+            sum(rate(http_server_requests_seconds_count{ {{- $sel -}},status!~"5.."}[1m]))
+            /
+            sum(rate(http_server_requests_seconds_count{ {{- $sel -}} }[1m]))
+{{- end }}

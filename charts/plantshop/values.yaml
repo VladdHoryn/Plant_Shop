@@ -107,11 +107,33 @@ catalogService:
     type: ClusterIP
     port: 8081
   resources: {}
+  # Extra container env, e.g. [{name: FAIL_RATE, value: "0"}] (Lab 7: share of API requests answered with 500)
+  env: []
   # Lab 6: an Argo Rollout (needs the argo-rollouts controller and CRDs) instead of the Deployment
   rollout:
     enabled: false
     # Rollout spec.strategy as is: {canary: {steps: [...]}} or {blueGreen: {...}}
     strategy: {}
+    # Lab 7: AnalysisTemplate <fullname>-catalog-service-success-rate that asks Prometheus for the share
+    # of non-5xx API requests; reference it from an analysis step of the strategy
+    analysis:
+      enabled: false
+      prometheusAddress: http://kps-prometheus.monitoring:9090
+      # PromQL label matchers that select the analysed requests
+      selector: 'namespace="plantshop",service="plantshop-catalog-service"'
+      successRate: 0.95     # pass threshold
+      interval: 30s
+      count: 4
+      failureLimit: 1
+  # Lab 7: observability (needs the kube-prometheus-stack CRDs: ServiceMonitor, PrometheusRule)
+  metrics:
+    enabled: false          # ServiceMonitor scraping /actuator/prometheus + Grafana dashboard ConfigMap
+    path: /actuator/prometheus
+    interval: 15s
+  alerts:
+    enabled: false          # PrometheusRule: 5xx share above errorRateThreshold for "for"
+    errorRateThreshold: 0.05
+    for: 1m
 
 inventoryService:
   replicaCount: 1

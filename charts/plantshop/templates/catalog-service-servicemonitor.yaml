@@ -1,0 +1,25 @@
+# Lab 7: tells the Prometheus Operator to scrape catalog-service. It selects the catalog Service by its
+# labels and scrapes every endpoint (pod) behind the port named "http". Prometheus adds the target labels
+# namespace, service, pod, container, job; podTargetLabels also copies the Argo Rollouts
+# pod-template hash, so stable and canary pods can be told apart (rollouts_pod_template_hash).
+{{- if .Values.catalogService.metrics.enabled }}
+{{- $m := .Values.catalogService.metrics }}
+{{- $component := "catalog-service" }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "plantshop.componentName" (dict "root" . "component" $component) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" $component) | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 6 }}
+  podTargetLabels:
+    - rollouts-pod-template-hash
+  endpoints:
+    - port: http
+      path: {{ $m.path }}
+      interval: {{ $m.interval }}
+{{- end }}

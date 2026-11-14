@@ -1,0 +1,16 @@
+# Lab 7: the Grafana dashboard as code. The Grafana sidecar (kube-prometheus-stack, searchNamespace: ALL)
+# loads every ConfigMap labelled grafana_dashboard="1". Edit the dashboard in Grafana, export it
+# (Share -> Export -> Save to file) into dashboards/plantshop.json and commit: Git stays the source of truth.
+{{- if .Values.catalogService.metrics.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "plantshop.fullname" . }}-dashboard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "plantshop.labels" (dict "root" . "component" "dashboard") | nindent 4 }}
+    grafana_dashboard: "1"
+data:
+  plantshop.json: |-
+{{ .Files.Get "dashboards/plantshop.json" | indent 4 }}
+{{- end }}

@@ -34,6 +34,9 @@ spec:
       env:
         - name: DB_HOST
           value: {{ include "plantshop.componentName" (dict "root" . "component" "catalog-db") }}
+        {{- with $c.env }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       resources:
         {{- toYaml ($c.resources | default .Values.resources) | nindent 8 }}
       {{- include "plantshop.springProbes" . | nindent 6 }}
