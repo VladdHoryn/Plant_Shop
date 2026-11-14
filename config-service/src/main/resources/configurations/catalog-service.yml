@@ -2,6 +2,8 @@ server:
   port: 8081
 
 spring:
+  main:
+    banner-mode: off   # Lab 7: stdout carries only JSON log lines
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/catalog_db
     username: ${plantshop.db.username}
@@ -31,3 +33,33 @@ plantshop:
   version: ${APP_VERSION:dev}
   shop-name: ${SHOP_NAME:Plant Shop}
   currency: ${SHOP_CURRENCY:UAH}
+  # Lab 7: share of /api/** requests answered with 500 (the "bad release"); 0..1, from the pod env
+  fail-rate: ${FAIL_RATE:0}
+
+# Lab 7: Prometheus metrics. /actuator/prometheus is scraped by the ServiceMonitor in the chart.
+# http_server_requests_seconds_{count,sum,bucket} have the labels method, uri (route template), status, outcome.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    distribution:
+      # histogram buckets, so p95 can be computed in Prometheus (histogram_quantile) across pods
+      percentiles-histogram:
+        http.server.requests: true
+      # fewer buckets: only between 5 ms and 5 s
+      minimum-expected-value:
+        http.server.requests: 5ms
+      maximum-expected-value:
+        http.server.requests: 5s
+
+# Lab 7: one JSON object per log line on stdout (Elastic Common Schema), collected by Alloy into Loki.
+# MDC keys of the access log (method, route, status, duration_ms, version) become JSON fields.
+logging:
+  structured:
+    format:
+      console: ecs
+    ecs:
+      service:
+        version: ${APP_VERSION:dev}
