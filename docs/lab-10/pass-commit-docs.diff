@@ -1,0 +1,118 @@
+diff --git a/README.md b/README.md
+index e922406..2928567 100644
+--- a/README.md
++++ b/README.md
+@@ -13,8 +13,9 @@ Plant Shop is an online shop for house plants, built as a university course proj
+ - **Privacy officer and marketing** handle personal data on request: export, erasure, consents; marketing e-mails
+   are sent only with the customer's consent.
+ 
+-To see the result of an order, the client reads the order (`GET /api/orders/{id}`) and, for payment details, the
+-payment of that order (`GET /api/payments/order/{orderId}`): two separate requests.
++To follow an order, one request is enough: `GET /api/orders/{id}/tracking` returns the order status, the payment
++status (`NOT_STARTED` until the saga reaches the payment step, then `COMPLETED` or `FAILED`), the transaction id,
++the failure reason and the next step in plain words.
+ 
+ ## Quick start (about 5 minutes)
+ 
+@@ -62,7 +63,7 @@ service, `http://localhost:<port>/swagger-ui.html`; behaviour contracts: [`docs/
+ |---|---|
+ | Catalog | `GET /api/catalog/plants`, `GET /api/catalog/plants/{id}`, `GET /api/catalog/plants/by-ids`, `POST /api/catalog/plants`, `PUT /api/catalog/plants/{id}`, `DELETE /api/catalog/plants/{id}`, `GET /api/catalog/categories`, `POST /api/catalog/categories`, `GET /api/catalog/info` |
+ | Stock | `GET /api/inventory`, `GET /api/inventory/{plantId}`, `PUT /api/inventory/{plantId}`, `POST /api/inventory/check` |
+-| Orders | `POST /api/orders` (202, `PENDING`), `GET /api/orders/{id}`, `GET /api/orders` (`?email=`) |
++| Orders | `POST /api/orders` (202, `PENDING`), `GET /api/orders/{id}`, `GET /api/orders/{id}/tracking` (order + payment in one response), `GET /api/orders` (`?email=`) |
+ | Payments | `GET /api/payments/{id}`, `GET /api/payments/order/{orderId}` |
+ | Accounts and privacy | `POST /api/users`, `POST /api/users/password-reset`, `GET /api/users/{id}/personal-data`, `POST /api/users/{id}/anonymize`, `GET /api/users/{id}/consents`, `POST /api/users/{id}/consents/{purpose}/grant`, `POST /api/users/{id}/consents/{purpose}/revoke` |
+ | Marketing and analytics | `POST /api/marketing/emails`, `POST /api/analytics/events` |
+@@ -476,6 +477,7 @@ curl -X POST http://localhost:8080/api/orders -H "Content-Type: application/json
+ }'
+ 
+ # A moment later the order is CONFIRMED and stock is deducted
++curl http://localhost:8080/api/orders/1/tracking     # order status + payment status + next step
+ curl http://localhost:8080/api/orders/1
+ curl http://localhost:8080/api/payments/order/1
+ curl "http://localhost:8080/api/orders?email=jane@example.com"
+diff --git a/docs/isd.md b/docs/isd.md
+index 2dc6b5f..fa60ee6 100644
+--- a/docs/isd.md
++++ b/docs/isd.md
+@@ -68,7 +68,7 @@ flowchart LR
+ | catalog-service | `plantshop-catalog-service`, 8081 | Deployment + ClusterIP | 2 / 3 | k8s: probes |
+ | inventory-service | `plantshop-inventory-service`, 8082 | Deployment + ClusterIP | 1 / 1 | k8s: probes |
+ | order-service | `plantshop-order-service`, 8083 | Deployment + ClusterIP | 1 / 1 | k8s: probes |
+-| payment-service | `plantshop-payment-service`, 8084 | Deployment + ClusterIP | 1 / 1 | k8s: probes |
++| payment-service | `plantshop-payment-service`, 8084 | Deployment + ClusterIP | 1 / 1 | compose: TCP-порт 8084 (на нього чекає order-service); k8s: probes |
+ | user-service | `plantshop-user-service`, 8085 | **не розгорнуто** | — | — |
+ | catalog / inventory / order / payment-db | `plantshop-<name>-db`, 5433–5436 | Deployment (`Recreate`) + Service + PVC 1Gi | 1 | `pg_isready` |
+ | user-db | `plantshop-user-db`, 5437 | **не розгорнуто** | — | `pg_isready` |
+@@ -124,13 +124,13 @@ Docker Compose стартує контейнери хвилями за `depends_
+ | `api-gateway` | config-service, discovery-service | 3 |
+ | `catalog-service` | catalog-db, config-service, discovery-service, kafka | 3 |
+ | `inventory-service` | config-service, discovery-service, inventory-db, kafka | 3 |
+-| `order-service` | config-service, discovery-service, kafka, order-db | 3 |
++| `order-service` | config-service, discovery-service, kafka, order-db, payment-service | 4 |
+ | `payment-service` | config-service, discovery-service, kafka, payment-db | 3 |
+ | `user-service` | config-service, discovery-service, kafka, user-db | 3 |
+ 
+ Запуск з IDE: `docker compose up -d catalog-db inventory-db order-db payment-db user-db kafka kafka-ui`, потім
+-config-service → discovery-service → бізнес-сервіси (у будь-якому порядку) → api-gateway. У Kubernetes той самий
+-порядок забезпечують init-контейнери.
++config-service → discovery-service → бізнес-сервіси (payment-service раніше за order-service) → api-gateway. У Kubernetes init-контейнери
++order-service чекають лише config, discovery, Kafka і order-db: трекінг до старту payment-service повертає 503 (див. ADR-0003).
+ 
+ ## 6. CI/CD-конвеєр і Quality Gates
+ 
+diff --git a/docs/sdd.md b/docs/sdd.md
+index c7da603..5cbb72b 100644
+--- a/docs/sdd.md
++++ b/docs/sdd.md
+@@ -64,6 +64,7 @@ C4Container
+   Rel(gw, usr, "/api/users/**, /api/marketing/**, /api/analytics/**", "lb://")
+   Rel(ord, cat, "ціни: GET /api/catalog/plants/by-ids", "Feign")
+   Rel(ord, inv, "передперевірка: POST /api/inventory/check", "Feign")
++  Rel(ord, pay, "трекінг: GET /api/payments/order/{orderId}", "Feign")
+   Rel(usr, ord, "POST /internal/privacy/customers/*", "Feign + X-Internal-Token")
+   Rel(cat, kafka, "plant-created")
+   Rel(ord, kafka, "order-created")
+@@ -169,6 +170,11 @@ sequenceDiagram
+   `order-created`. Фінальний стан `CONFIRMED`/`CANCELLED` — за подіями саги. Внутрішній API приватності для
+   [user-service](#38-user-service) (експорт і анонімізація замовлень клієнта, токен `INTERNAL_API_TOKEN`).
+ - **Слухає:** `payment-completed`, `payment-failed`, `inventory-failed`.
++- **Трекінг замовлення** (компонент `OrderTrackingController` → `OrderTrackingService`): `GET /api/orders/{id}/tracking`
++  повертає статус замовлення разом зі статусом платежу, який читається синхронно з
++  [payment-service](#37-payment-service) через Feign-клієнт `PaymentClient`. 404 від payment-service означає, що
++  сага ще не дійшла до оплати (`NOT_STARTED`); інша помилка payment-service → 503. Це запит на читання, а не
++  крок саги ([ADR-0003](architecture/adr/0003-synchronous-payment-read-for-tracking.md)).
+ - **Важливо:** order-service **не керує** сагою командами (це не оркестрація): кожен учасник сам реагує на
+   події ([ADR-0002](architecture/adr/0002-kafka-choreography-saga.md)).
+ 
+@@ -177,7 +183,8 @@ sequenceDiagram
+ - **Відповідальність:** імітація платіжного провайдера: оплачує зарезервоване замовлення; відхиляє суму, більшу
+   за `payment.max-amount` (`PAYMENT_MAX_AMOUNT`, типово 10 000); правила методів оплати (lookup table у `PaymentService`).
+ - **Слухає:** `inventory-reserved`. **Публікує:** `payment-completed`, `payment-failed`.
+-- **API:** лише читання платежів (`GET /api/payments/...`).
++- **API:** лише читання платежів (`GET /api/payments/...`). Споживачі: клієнти через gateway і
++  [order-service](#36-order-service) (трекінг замовлення, `GET /api/payments/order/{orderId}`).
+ 
+ ### 3.8. user-service
+ 
+@@ -298,9 +305,10 @@ erDiagram
+ | `POST /api/inventory/check` | inventory | order-service (Feign) | список `{plantId, quantity}` → `{plantId, requested, available, inStock}` |
+ | `POST /api/orders` | order | клієнт | **202 Accepted**, `status: PENDING`; 400 — невалідний запит, 409 — нестача товару, 503 — catalog/inventory недоступні |
+ | `GET /api/orders/{id}` | order | клієнт | поточний статус замовлення |
++| `GET /api/orders/{id}/tracking` | order | клієнт | `orderStatus`, `paymentStatus` (`NOT_STARTED` / `COMPLETED` / `FAILED`), `transactionId`, `failureReason`, `nextStep`; 404 — немає замовлення; 503 — payment-service недоступний |
+ | `GET /api/orders` | order | клієнт | `?email=` — замовлення покупця |
+ | `GET /api/payments/{id}` | payment | клієнт | платіж за id |
+-| `GET /api/payments/order/{orderId}` | payment | клієнт | платіж замовлення: `COMPLETED` або `FAILED` + причина |
++| `GET /api/payments/order/{orderId}` | payment | клієнт, order-service (Feign, трекінг) | платіж замовлення: `COMPLETED` або `FAILED` + причина; 404, поки платежу немає |
+ | `POST /api/users` | user | анонім | реєстрація, лист верифікації |
+ | `POST /api/users/password-reset` | user | анонім | однакова відповідь незалежно від існування облікового запису |
+ | `GET /api/users/{id}/personal-data` | user | власник, PRIVACY_OFFICER | версійований експорт усіх персональних даних |
+@@ -341,7 +349,7 @@ erDiagram
+ | Тема | Рішення | Де деталі |
+ |---|---|---|
+ | Сховище даних | PostgreSQL на сервіс + Flyway | [ADR-0001](architecture/adr/0001-database-per-service-postgresql-flyway.md) |
+-| Інтеграція | синхронно Feign для перевірок, асинхронно Kafka для саги | [ADR-0002](architecture/adr/0002-kafka-choreography-saga.md) |
++| Інтеграція | синхронно Feign для перевірок і читання стану (трекінг), асинхронно Kafka для саги | [ADR-0002](architecture/adr/0002-kafka-choreography-saga.md), [ADR-0003](architecture/adr/0003-synchronous-payment-read-for-tracking.md) |
+ | Конфігурація | централізовано в config-service | [ISD, розділ 4](isd.md#4-середовища-та-змінні-оточення) |
+ | Безпека | HTTP Basic у user-service; `INTERNAL_API_TOKEN` для `/internal/**`; секрети лише через змінні оточення | `docs/privacy-report.md` |
+ | Журнали | маскування PII і секретів, correlation id | розділ 3.9 |

@@ -1,0 +1,18 @@
+# Code-Doc Change Ratio per component vs README.md, baseline revision 69df71c (task 1)
+# code = git log --oneline 69df71c -- <module>/src | wc -l ; after = git log --oneline 8008696..69df71c -- <module>/src | wc -l
+# README.md commits at 69df71c: 6
+component            code   after_last_README
+api-gateway          1      0     
+config-service       4      0     
+discovery-service    1      0     
+catalog-service      6      3     
+inventory-service    2      0     
+order-service        3      0     
+payment-service      4      0     
+user-service         5      4     
+secure-logging       2      0     
+
+# order-service vs docs/sdd.md around the crash test
+82b8742: order-service code commits=3, sdd commits=1, order-service commits after last SDD commit=0
+aef1513: order-service code commits=4, sdd commits=1, order-service commits after last SDD commit=1
+7e82c94: order-service code commits=4, sdd commits=2, order-service commits after last SDD commit=0

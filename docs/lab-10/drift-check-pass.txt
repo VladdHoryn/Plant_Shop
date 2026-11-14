@@ -1,0 +1,9 @@
+$ ./scripts/doc-drift-check.sh   # 7e82c94 = PASS commit
+== 1. Controllers vs. docs/sdd.md (API contracts)
+  endpoints in code: 30, undocumented in SDD: 0
+== 2. Public endpoints (/api/**) vs. README.md
+  public endpoints: 28, not in README: 0
+== 3. docker-compose.yml depends_on vs. docs/isd.md (startup order)
+  containers: 15, startup rows that differ from ISD: 0
+RESULT: PASS - SDD, README and ISD match the code
+exit code: 0

@@ -35,3 +35,4 @@ docs/lab-09.md|process|-
 docs/lab-9.md|process|-
 FINANCIAL_LEDGER.md|process|-
 .github/workflows/docs-currency.yml|product|scripts/doc-drift-check.sh scripts/doc-currency.sh
+docs/handover.md|product|*/src/main/* docker-compose.yml k8s helm

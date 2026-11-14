@@ -49,6 +49,7 @@ The first build takes a few minutes; the services are ready about a minute after
 | [`docs/isd.md`](docs/isd.md) | where it runs: topology, environments, CI/CD, monitoring, backup with RTO/RPO, release and rollback | DevOps |
 | [`docs/architecture/adr/`](docs/architecture/adr) | why: architecture decision records | developers, architects |
 | [`docs/maintenance.md`](docs/maintenance.md) | who owns which document, review cycles, the rule "code change = documentation change" | maintainers, reviewers |
+| [`docs/handover.md`](docs/handover.md) | handover package: document register, onboarding steps, bus factor | support team, new maintainers |
 | `docs/*-report.md`, `docs/lab-*.md`, `docs/reports/` | lab reports: historical records of a moment in time, not updated | teacher, archive |
 
 `./scripts/doc-drift-check.sh` fails when the code has an endpoint that `docs/sdd.md` or this README does not list,
@@ -493,8 +494,9 @@ user-service (personal data export), the secure-logging tests, and the integrati
 user-service and order-service. The integration tests start PostgreSQL with Testcontainers, so Docker must be
 running.
 
-Course lab reports (Labs 4–9) are in `docs/`: e.g. [`docs/lab-08-report.md`](docs/lab-08-report.md) (CK & MOOD),
-[`docs/lab-9.md`](docs/lab-9.md) (SQALE, FPA/UCP, with [`FINANCIAL_LEDGER.md`](FINANCIAL_LEDGER.md)).
+Course lab reports (Labs 4–10) are in `docs/`: e.g. [`docs/lab-08-report.md`](docs/lab-08-report.md) (CK & MOOD),
+[`docs/lab-9.md`](docs/lab-9.md) (SQALE, FPA/UCP, with [`FINANCIAL_LEDGER.md`](FINANCIAL_LEDGER.md)),
+[`docs/lab-10-report.md`](docs/lab-10-report.md) (documentation audit, passport, handover).
 They are historical records and are not
 updated when the code changes.
 

@@ -1,0 +1,65 @@
+# Live check of handover onboarding steps 3-4 on 7e82c94, 2026-11-14 19:19
+# docker compose up -d --build took 5m41s (first build, images built from scratch)
+
+$ docker compose ps --format '{{.Name}}: {{.Status}}' | sort
+plantshop-api-gateway: Up 59 seconds
+plantshop-catalog-db: Up About a minute (healthy)
+plantshop-catalog-service: Up 58 seconds
+plantshop-config-service: Up About a minute (healthy)
+plantshop-discovery-service: Up About a minute (healthy)
+plantshop-inventory-db: Up About a minute (healthy)
+plantshop-inventory-service: Up 59 seconds
+plantshop-kafka-ui: Up About a minute
+plantshop-kafka: Up About a minute (healthy)
+plantshop-order-db: Up About a minute (healthy)
+plantshop-order-service: Up 27 seconds
+plantshop-payment-db: Up About a minute (healthy)
+plantshop-payment-service: Up 58 seconds (healthy)
+plantshop-user-db: Up About a minute (healthy)
+plantshop-user-service: Up 59 seconds
+
+
+$ docker compose ps --format '{{.Name}}' | wc -l
+15
+
+
+$ curl -s 'http://localhost:8080/api/catalog/plants?size=20' | grep -o '"totalElements":[0-9]*'
+"totalElements":10
+
+
+$ curl -s -X POST http://localhost:8080/api/orders -H 'Content-Type: application/json' -d '{"customerEmail":"onboarding@example.test","shippingAddress":"12 Fern Street, Kyiv","paymentMethod":"CARD","items":[{"plantId":1,"quantity":1}]}' -w '\nHTTP %{http_code}'
+{"id":1,"customerEmail":"onboarding@example.test","shippingAddress":"12 Fern Street, Kyiv","paymentMethod":"CARD","status":"PENDING","totalAmount":34.99,"failureReason":null,"items":[{"plantId":1,"plantName":"Monstera Deliciosa","quantity":1,"unitPrice":34.99,"lineTotal":34.99}],"createdAt":"2026-11-14T17:19:19.700010Z"}
+HTTP 202
+
+# order id: 1; waiting 5 s for the saga
+
+$ curl -s http://localhost:8080/api/orders/1/tracking -w '\nHTTP %{http_code}'
+{"orderId":1,"orderStatus":"CONFIRMED","paymentStatus":"COMPLETED","transactionId":"bca484ef-0b0a-46ce-ba0f-1b44bd2a9fcc","failureReason":null,"nextStep":"Paid, being prepared for shipment"}
+HTTP 200
+
+$ curl -s http://localhost:8080/api/orders/999999/tracking -w '\nHTTP %{http_code}'
+{"type":"about:blank","title":"Not Found","status":404,"detail":"Order with id 999999 not found","instance":"/api/orders/999999/tracking"}
+HTTP 404
+
+$ curl -s http://localhost:8761/eureka/apps -H 'Accept: application/json' | grep -o '"name":"[A-Z-]*"' | sort -u
+"name":"API-GATEWAY"
+"name":"CATALOG-SERVICE"
+"name":"INVENTORY-SERVICE"
+"name":"PAYMENT-SERVICE"
+"name":"USER-SERVICE"
+
+
+# Repeated 1 minute later: the Eureka response above was taken while order-service (started last, after
+# payment-service became healthy) was still being propagated to the registry view
+$ curl -s http://localhost:8761/eureka/apps -H 'Accept: application/json' | grep -o '"name":"[A-Z-]*"' | sort -u
+"name":"API-GATEWAY"
+"name":"CATALOG-SERVICE"
+"name":"INVENTORY-SERVICE"
+"name":"ORDER-SERVICE"
+"name":"PAYMENT-SERVICE"
+"name":"USER-SERVICE"
+
+$ docker inspect -f '{{.Name}} {{.State.StartedAt}}' plantshop-payment-service plantshop-order-service plantshop-catalog-service
+/plantshop-payment-service 2026-11-14T17:18:19.465569319Z
+/plantshop-order-service 2026-11-14T17:18:49.988432891Z
+/plantshop-catalog-service 2026-11-14T17:18:18.900217972Z
