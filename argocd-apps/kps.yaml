@@ -1,0 +1,67 @@
+# Lab 7: kube-prometheus-stack (Prometheus Operator, Prometheus, Alertmanager, Grafana,
+# kube-state-metrics, node-exporter), installed from Git like everything else.
+# The Application name is the Helm release name; fullnameOverride gives short service names:
+#   kps-prometheus:9090, kps-grafana:80, kps-alertmanager:9093 (namespace monitoring)
+# Before the first sync create the Grafana admin Secret by hand (never stored in Git):
+#   kubectl create namespace monitoring
+#   kubectl -n monitoring create secret generic grafana-admin \
+#     --from-literal=admin-user=admin --from-literal=admin-password=<password>
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kps
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"   # CRDs (ServiceMonitor, PrometheusRule) before plantshop
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 93.3.0      # helm search repo prometheus-community/kube-prometheus-stack (operator v0.95.2)
+    helm:
+      valuesObject:
+        fullnameOverride: kps
+        # minikube control-plane components cannot be scraped from inside the cluster: no noise
+        kubeEtcd: {enabled: false}
+        kubeControllerManager: {enabled: false}
+        kubeScheduler: {enabled: false}
+        kubeProxy: {enabled: false}
+        # fewer moving parts: no admission webhook and no TLS certificate jobs
+        prometheusOperator:
+          admissionWebhooks: {enabled: false}
+          tls: {enabled: false}
+        prometheus:
+          prometheusSpec:
+            retention: 2d
+            # pick up ServiceMonitors / PodMonitors / PrometheusRules from any release,
+            # not only those labelled release=kps
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+            ruleSelectorNilUsesHelmValues: false
+            resources:
+              requests: {cpu: 100m, memory: 400Mi}
+        grafana:
+          admin:
+            existingSecret: grafana-admin
+            userKey: admin-user
+            passwordKey: admin-password
+          sidecar:
+            dashboards:
+              searchNamespace: ALL   # dashboards come as ConfigMaps labelled grafana_dashboard from any namespace
+          additionalDataSources:
+            - name: Loki
+              uid: loki
+              type: loki
+              access: proxy
+              url: http://loki-gateway.monitoring
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true    # the Prometheus Operator CRDs are too large for client-side apply

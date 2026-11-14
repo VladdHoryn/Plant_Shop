@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/VladdHoryn/Plant_Shop.git
-    targetRevision: lab/DevOps_lab_6
+    targetRevision: lab/DevOps_lab_7
     path: argocd-apps
   destination:
     server: https://kubernetes.default.svc
