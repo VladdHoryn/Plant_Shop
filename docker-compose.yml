@@ -217,6 +217,9 @@ services:
       <<: *business-deps
       order-db:
         condition: service_healthy
+      # GET /api/orders/{id}/tracking reads the payment synchronously (Feign)
+      payment-service:
+        condition: service_healthy
 
   payment-service:
     <<: *business-service
@@ -225,6 +228,9 @@ services:
       args: { SERVICE: payment-service }
     image: plantshop/payment-service
     container_name: plantshop-payment-service
+    healthcheck:
+      <<: *port-healthcheck
+      test: ["CMD", "bash", "-c", "</dev/tcp/localhost/8084"]
     ports: ["8084:8084"]
     environment:
       <<: *spring-env
