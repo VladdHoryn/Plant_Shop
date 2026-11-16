@@ -41,8 +41,6 @@
 
 Повний граф — `docs/lab-10/git-log.txt`.
 
-> 📸 SCREENSHOT: `git log --oneline --graph` гілки `lab/Lab_10` з комітами FAIL і PASS (`docs/lab-10/git-log.txt`)
-
 ---
 
 ## 1. Інвентаризаційний реєстр документації
@@ -256,8 +254,6 @@ C4Container
   Rel(usr, usrdb, "JPA")
 ```
 
-> 📸 SCREENSHOT: `docs/sdd.md` у GitHub або Obsidian з відрендереною C4-діаграмою контейнерів (розділ 2)
-
 Фрагмент опису компонента (як компоненти посилаються один на одного):
 
 ```markdown
@@ -437,8 +433,6 @@ exit code: 1
 | Розробники і QA | SDD | C4 не має стрілки order → payment; компонента трекінгу немає; контракту `/tracking` немає (structure drift) | `grep -cE 'OrderTracking\|PaymentClient\|tracking' docs/sdd.md` → 0; у коді — 4 нові файли |
 | DevOps | ISD | таблиця запуску: order-service чекає 4 залежності, хвиля 3; фактично 5, включно з payment-service; у payment-service в Compose з'явився healthcheck, ISD про нього не знає | `docker compose config` → `payment-service:` у `depends_on` order-service; ISD рядок 127 |
 
-> 📸 SCREENSHOT: GitHub Actions, workflow `docs-currency` на коміті `aef1513` — червоний job `doc-drift` (якщо гілку буде запушено)
-
 ### 6.3. Деградація метрик актуальності
 
 Повторний аудит (`docs/lab-10/currency-before-fail.md` → `currency-after-fail.md`):
@@ -491,8 +485,6 @@ ISD 3 (healthcheck payment-service), новий ADR-0003, статус ADR-0002,
 | Lag README / SDD / ISD | 1 / 1 / 1 | 0 / 0 / 0 (`currency-after-pass.md`) |
 | Комітів order-service після SDD | 1 | 0 |
 | Матриця аудиторій | 3 питання з хибною відповіддю (новачок, розробник/QA, DevOps) | без прогалин |
-
-> 📸 SCREENSHOT: термінал з виводом `./scripts/doc-drift-check.sh` після PASS (`RESULT: PASS`)
 
 ---
 
