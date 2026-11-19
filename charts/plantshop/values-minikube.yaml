@@ -73,7 +73,7 @@ catalogService:
   image:
     repository: vladyslavv648/plantshop-catalog-service
     # Own tag, so a release (or a bad tag) touches only catalog-service
-    tag: "1.5.0"
+    tag: "1.6.0"
 
 inventoryService:
   replicaCount: 1
