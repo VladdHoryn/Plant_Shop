@@ -95,14 +95,14 @@
       ]
     },
     {
-      "id": 7, "type": "timeseries", "title": "CPU by pod (namespace plantshop)",
+      "id": 7, "type": "timeseries", "title": "CPU by pod, cores (namespace plantshop)",
       "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "fieldConfig": {"defaults": {"unit": "short", "min": 0}, "overrides": []},
       "options": {"legend": {"displayMode": "table", "placement": "right", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi"}},
       "targets": [
         {"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"},
-         "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"plantshop\",container!=\"\"}[1m]))",
+         "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"plantshop\",container=\"\"}[1m]))",
          "legendFormat": "{{pod}}"}
       ]
     },
@@ -114,7 +114,7 @@
       "options": {"legend": {"displayMode": "table", "placement": "right", "calcs": ["lastNotNull"]}, "tooltip": {"mode": "multi"}},
       "targets": [
         {"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"},
-         "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"plantshop\",container!=\"\"})",
+         "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"plantshop\",container=\"\"})",
          "legendFormat": "{{pod}}"}
       ]
     },

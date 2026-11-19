@@ -11,8 +11,9 @@ metadata:
     {{- include "plantshop.selectorLabels" (dict "root" . "component" $component) | nindent 4 }}
     app.kubernetes.io/part-of: {{ include "plantshop.name" . }}
   annotations:
-    # Environment variables are read only at startup: restart the pods when the ConfigMap changes
-    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    # Environment variables are read only at startup: restart the pods when the ConfigMap data changes
+    # (hash of .data only, so a chart version bump in the labels does not restart every pod)
+    checksum/config: {{ (include (print $.Template.BasePath "/configmap.yaml") . | fromYaml).data | toJson | sha256sum }}
 spec:
   enableServiceLinks: false
   terminationGracePeriodSeconds: 45

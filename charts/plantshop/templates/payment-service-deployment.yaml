@@ -30,7 +30,7 @@ spec:
         app.kubernetes.io/part-of: {{ include "plantshop.name" . }}
       annotations:
         # Environment variables are read only at startup: restart the pods when the ConfigMap changes
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ (include (print $.Template.BasePath "/configmap.yaml") . | fromYaml).data | toJson | sha256sum }}
     spec:
       enableServiceLinks: false
       terminationGracePeriodSeconds: 45
