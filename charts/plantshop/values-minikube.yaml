@@ -41,7 +41,7 @@ catalogService:
   # A bad release = a commit that sets it to "0.5" (pod template change -> new canary).
   env:
     - name: FAIL_RATE
-      value: "0.5"
+      value: "0"
   # Lab 6: canary release. No traffic router, so the weight is the share of pods of the new version;
   # api-gateway balances over Eureka instances, which gives the same ratio.
   # Lab 7: the manual pause is replaced by an analysis step: Prometheus decides (success rate >= 95%).
