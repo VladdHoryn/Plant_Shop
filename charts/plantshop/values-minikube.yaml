@@ -103,3 +103,8 @@ hooks:
     enabled: false
 tests:
   enabled: false
+
+# Lab 7: with the monitoring stack on the same 4 CPUs, seven JVMs starting together (e.g. after a
+# ConfigMap change) need longer than 3 minutes; 72 x 5 s = up to 6 minutes before a restart
+probes:
+  startupFailureThreshold: 72
