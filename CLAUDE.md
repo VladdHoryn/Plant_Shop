@@ -127,8 +127,8 @@ sum(rate(http_server_requests_seconds_count{namespace="plantshop",uri!~"/actuato
 sum(rate(http_server_requests_seconds_count{namespace="plantshop",status=~"5.."}[1m])) / sum(rate(http_server_requests_seconds_count{namespace="plantshop"}[1m]))
 histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{namespace="plantshop",uri!~"/actuator.*"}[1m])))
 sum by (pod) (rate(http_server_requests_seconds_count{namespace="plantshop",status=~"5.."}[1m]))                # 5xx per pod
-sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="plantshop",container!=""}[1m]))
-sum by (pod) (container_memory_working_set_bytes{namespace="plantshop",container!=""})
+sum by (pod) (rate(container_cpu_usage_seconds_total{namespace="plantshop",container=""}[1m]))
+sum by (pod) (container_memory_working_set_bytes{namespace="plantshop",container=""})
 {namespace="plantshop", component="catalog-service"} | json | status >= 500                                       # LogQL
 ```
 Load from namespace `default`, hitting catalog directly (`http://plantshop-catalog-service.plantshop:8081/api/catalog/plants`) or via `http://plantshop-api-gateway.plantshop/api/catalog/plants`: `kubectl run hey --rm -it --restart=Never --image=williamyeh/hey -- -z 3m -c 20 <url>`; background: `kubectl create deployment load --image=curlimages/curl -- sh -c 'while true; do curl -s -o /dev/null <url>; sleep 0.05; done'` (`MSYS_NO_PATHCONV=1` in Git Bash). Without traffic the analysis is 0/0 = NaN and fails even for a good version.
