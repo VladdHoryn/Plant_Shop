@@ -47,7 +47,7 @@ versions in the root `pom.xml`) so metrics never change because a tool moved; ke
 - From the IDE: `docker compose up -d catalog-db inventory-db order-db payment-db user-db kafka kafka-ui`, then start
   config-service → discovery-service → business services → api-gateway (jars in `<module>/target/`).
 - Kubernetes manifests in `k8s/`, Helm chart in `helm/plantshop` (`helm lint helm/plantshop --strict`); images are
-  built into minikube with `./scripts/build-images.sh`. The README documents both in detail.
+  built into minikube with `./scripts/build-images.sh`. `docs/architecture/deployment.md` documents both in detail.
 
 ## Architecture
 
@@ -126,15 +126,35 @@ and `CorrelationIdFilter`. It is a "critical module" in the quality gate; keep i
   value; if a target is unreachable honestly, stop and tell me.
 - At each "stop and ask" point in my prompt, actually stop and wait for my answer.
 
-## Current lab: Lab 10 (documentation audit, SDD/ISD/ADR passport, maintenance and handover)
+## Current lab: Lab 11 (Documentation as Code: MkDocs knowledge base, OpenAPI API-first, docs CI/CD)
+
+Assignment: PDF from the course (theory for the defence in `docs/lab-11.md`). Branch: `lab/Lab_11`. Report:
+`docs/lab-11-report.md`, raw outputs in `docs/lab-11/`.
+
+- **Knowledge base:** `mkdocs.yml` (nav = four-level pyramid: README → `docs/developer/` → `docs/api/` →
+  `docs/architecture/`), theme override `overrides/main.html`, pinned toolchain `tools/mkdocs/requirements.txt`
+  (Docker image locally, pip in CI). Build only with `./scripts/docs-build.sh` (`--strict`); lint with
+  `./scripts/docs-lint.sh` (markdownlint + Spectral + review_date audit). Process docs are excluded from the site
+  (`exclude_docs`) and from markdownlint (`.markdownlint-cli2.yaml`).
+- **Every product page** has front matter `owner`, `status` (draft / in-review / published / deprecated),
+  `review_date`, `tags`, and is listed in `nav` (an orphan fails the strict build). Never delete an outdated page:
+  `status: deprecated` + `superseded_by` + a `DEPRECATED` banner. Links are relative Markdown links, not wikilinks.
+- **API-first contract** `docs/api/openapi.yaml` (OpenAPI 3.0.3, SemVer `info.version`) is the single source for
+  the Swagger UI page, the SDK (`./scripts/api-sdk.sh`) and contract tests (`./scripts/api-contract-test.sh`,
+  Schemathesis against the running gateway). Spectral threshold: 0 errors.
+- CI: `.github/workflows/docs.yml` (build job: markdownlint → Spectral → review_date → `mkdocs build --strict` →
+  Javadoc; deploy job → GitHub Pages). Crash test commits: `docs(ci): inject broken reference into strict build, FAIL`
+  and `docs(ci): restore strict build pipeline, PASS`; documentation versions are annotated tags `docs-vX.Y`.
+
+## Lab 10 (completed): documentation audit, SDD/ISD/ADR passport, maintenance and handover
 
 Assignment: PDF from the course (summary and theory in `docs/lab-10.md`). Branch: `lab/Lab_10`. Report:
 `docs/lab-10-report.md`, raw outputs in `docs/lab-10/`.
 
-- **Architecture passport is product documentation and must follow the code:** `docs/sdd.md` (C4, components,
-  data model, API and Kafka contracts), `docs/isd.md` (topology, environments, startup order, CI/CD, RTO/RPO),
+- **Architecture passport is product documentation and must follow the code:** `docs/architecture/sdd.md` (C4, components,
+  data model, API and Kafka contracts), `docs/architecture/isd.md` (topology, environments, startup order, CI/CD, RTO/RPO),
   `docs/architecture/adr/` (never rewrite an accepted ADR; supersede it with a new number), `README.md`.
-- **Code change = documentation change** (`docs/maintenance.md`): a new or changed endpoint, Feign client, event,
+- **Code change = documentation change** (`docs/developer/maintenance.md`): a new or changed endpoint, Feign client, event,
   migration, compose/k8s/helm change updates the documents listed there in the same commit/PR.
   `./scripts/doc-drift-check.sh` must print `RESULT: PASS` (also CI job `docs-currency.yml / doc-drift`).
 - Currency metrics come only from Git: `./scripts/doc-currency.sh <ref-date>` with the map

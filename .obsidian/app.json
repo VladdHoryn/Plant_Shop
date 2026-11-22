@@ -1,0 +1,15 @@
+{
+  "useMarkdownLinks": true,
+  "newLinkFormat": "relative",
+  "alwaysUpdateLinks": true,
+  "showFrontmatter": true,
+  "userIgnoreFilters": [
+    "site/",
+    "sdk-client/",
+    "target/",
+    "tools/",
+    "docs/lab-",
+    "docs/reports/",
+    "docs/complexity/"
+  ]
+}

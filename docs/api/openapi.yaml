@@ -1,0 +1,740 @@
+# Plant Shop public API contract (API-first, ADR-0005). Single source of truth for:
+#   - the interactive reference docs/api/reference.md (Swagger UI renders this file, it does not copy it);
+#   - the generated client SDK (openapi-generator, ./scripts/api-sdk.sh);
+#   - contract tests against the running gateway (Schemathesis, ./scripts/api-contract-test.sh);
+#   - the drift check: every operation here must exist in a controller (./scripts/doc-drift-check.sh, check 2).
+# Lint: ./scripts/docs-lint.sh (Spectral, ruleset .spectral.yaml, threshold 0 errors).
+# Versioning (SemVer): MAJOR - breaking change for clients; MINOR - new operation or optional field;
+# PATCH - descriptions and examples only. Bump info.version and add a CHANGELOG.md entry in the same PR.
+openapi: 3.0.3
+info:
+  title: Plant Shop Customer API
+  version: 1.0.0
+  description: |
+    Public REST API of Plant Shop for the customer journey: browse the catalog, place an order and follow it.
+    All requests go through the API gateway. An order is accepted asynchronously: `POST /api/orders` returns
+    `202 Accepted` with status `PENDING`; stock reservation and payment run as a Kafka saga
+    (ADR-0002), after which the order becomes `CONFIRMED` or `CANCELLED`.
+
+    Errors use one `Error` object. Errors raised by the services are RFC 9457 Problem Details
+    (`application/problem+json`: `type`, `title`, `status`, `detail`, `instance`). Errors produced by the
+    framework itself (malformed JSON, wrong parameter type, gateway without a live instance) carry
+    `timestamp`, `status`, `error`, `path` (`application/json`). `status` is always present.
+  contact:
+    name: VladdHoryn (API owner)
+    url: https://github.com/VladdHoryn/Plant_Shop
+  license:
+    name: Course project, educational use
+    url: https://github.com/VladdHoryn/Plant_Shop
+servers:
+  - url: http://localhost:8080
+    description: API gateway of the local Docker Compose stack
+tags:
+  - name: Catalog
+    description: Plants offered for sale (catalog-service)
+  - name: Orders
+    description: Order placement and tracking (order-service)
+
+paths:
+  /api/catalog/plants:
+    get:
+      tags: [Catalog]
+      operationId: searchPlants
+      summary: Search plants
+      description: |
+        Returns one page of active plants that match all given filters (deactivated plants are hidden). Without
+        filters returns the whole active catalog sorted by name. `name` is a case-insensitive substring match.
+      parameters:
+        - name: name
+          in: query
+          description: Part of the plant name, case-insensitive.
+          schema:
+            type: string
+            example: lily
+        - name: categoryId
+          in: query
+          description: Only plants of this category.
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - name: careLevel
+          in: query
+          description: Only plants with this care level.
+          schema:
+            $ref: "#/components/schemas/CareLevel"
+        - name: maxPrice
+          in: query
+          description: Upper price limit, inclusive.
+          schema:
+            type: number
+            example: 25
+        - name: page
+          in: query
+          description: Zero-based page index.
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: Page size.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 2000
+            default: 20
+      responses:
+        "200":
+          description: One page of plants.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantPage"
+              examples:
+                easyAndCheap:
+                  summary: "GET /api/catalog/plants?careLevel=EASY&maxPrice=15&size=2"
+                  value:
+                    content:
+                      - id: 6
+                        name: Aloe Vera
+                        latinName: Aloe barbadensis
+                        description: Medicinal succulent with soothing gel.
+                        price: 12.99
+                        category: {id: 2, name: "Succulents & Cacti", description: Drought-tolerant plants that store water}
+                        careLevel: EASY
+                        lightRequirement: DIRECT_SUN
+                        potSizeCm: 10
+                        imageUrl: null
+                        active: true
+                      - id: 10
+                        name: Sweet Basil
+                        latinName: Ocimum basilicum
+                        description: Classic culinary herb for the kitchen windowsill.
+                        price: 4.99
+                        category: {id: 4, name: Herbs, description: Edible and aromatic herbs}
+                        careLevel: EASY
+                        lightRequirement: DIRECT_SUN
+                        potSizeCm: 9
+                        imageUrl: null
+                        active: true
+                    page: {size: 2, number: 0, totalElements: 2, totalPages: 1}
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /api/catalog/plants/{id}:
+    get:
+      tags: [Catalog]
+      operationId: getPlant
+      summary: Get a plant
+      description: Returns one plant by id, including deactivated plants (`active` is `false` for them).
+      parameters:
+        - $ref: "#/components/parameters/PlantId"
+      responses:
+        "200":
+          description: The plant.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Plant"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /api/orders:
+    post:
+      tags: [Orders]
+      operationId: createOrder
+      summary: Place an order
+      description: |
+        Validates the request, reads current prices from catalog-service and checks stock in inventory-service
+        (both synchronous), stores the order as `PENDING` and starts the saga. The stock check is a fast fail,
+        not a reservation: an order accepted here can still end `CANCELLED` (stock taken meanwhile, payment
+        declined above the payment limit). Duplicate plant ids are merged by adding their quantities.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+            examples:
+              twoPlants:
+                summary: Two plants paid by card
+                value:
+                  customerEmail: jane@example.com
+                  shippingAddress: 12 Fern Street, Kyiv
+                  paymentMethod: CARD
+                  items:
+                    - {plantId: 1, quantity: 2}
+                    - {plantId: 3, quantity: 1}
+      responses:
+        "202":
+          description: Order accepted and stored as `PENDING`; follow it with `GET /api/orders/{id}/tracking`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/OutOfStock"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    get:
+      tags: [Orders]
+      operationId: listCustomerOrders
+      summary: List the orders of a customer
+      description: Returns every order placed with this e-mail (case-insensitive), newest first; an empty list if none.
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: Customer e-mail used when the orders were placed.
+          schema:
+            type: string
+            example: jane@example.com
+      responses:
+        "200":
+          description: Orders of the customer, newest first.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /api/orders/{id}:
+    get:
+      tags: [Orders]
+      operationId: getOrder
+      summary: Get an order
+      description: Returns the order with its items and current saga status.
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: The order.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /api/orders/{id}/tracking:
+    get:
+      tags: [Orders]
+      operationId: trackOrder
+      summary: Track an order
+      description: |
+        "Where is my order" in one request (added in Lab 10, ADR-0003): the order status from order-service and
+        the payment status read synchronously from payment-service. `paymentStatus` is `NOT_STARTED` until the
+        saga reaches the payment step. If payment-service is down the answer is 503 while the order itself stays
+        available through `GET /api/orders/{id}`.
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Order and payment status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderTracking"
+              examples:
+                confirmed:
+                  summary: Paid order
+                  value:
+                    orderId: 1
+                    orderStatus: CONFIRMED
+                    paymentStatus: COMPLETED
+                    transactionId: 3f6b2c1e-8a4d-4c1b-9e7a-2d5f0b6c9a41
+                    failureReason: null
+                    nextStep: Paid, being prepared for shipment
+                cancelled:
+                  summary: Payment declined above the limit
+                  value:
+                    orderId: 2
+                    orderStatus: CANCELLED
+                    paymentStatus: FAILED
+                    transactionId: null
+                    failureReason: Amount exceeds the limit of 10000
+                    nextStep: Cancelled, nothing will be charged or shipped
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+components:
+  parameters:
+    PlantId:
+      name: id
+      in: path
+      required: true
+      description: Plant id.
+      schema:
+        type: integer
+        format: int64
+        example: 1
+    OrderId:
+      name: id
+      in: path
+      required: true
+      description: Order id.
+      schema:
+        type: integer
+        format: int64
+        example: 1
+
+  responses:
+    BadRequest:
+      description: |
+        The request is invalid: bean validation failed (`errors` maps each field to its message), a plant is
+        unknown or inactive, the JSON is malformed or a parameter has the wrong type.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            type: about:blank
+            title: Bad Request
+            status: 400
+            detail: Validation failed
+            instance: /api/orders
+            errors:
+              customerEmail: must be a well-formed email address
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            timestamp: "2026-11-22T10:15:30.123+00:00"
+            status: 400
+            error: Bad Request
+            path: /api/orders
+    NotFound:
+      description: No resource with this id.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            type: about:blank
+            title: Not Found
+            status: 404
+            detail: Order with id 42 not found
+            instance: /api/orders/42
+    OutOfStock:
+      description: Not enough stock for the listed plants at the moment of the check.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            type: about:blank
+            title: Conflict
+            status: 409
+            detail: "Not enough stock for plants [8]"
+            instance: /api/orders
+            plantIds: [8]
+    ServiceUnavailable:
+      description: |
+        A dependency is unavailable: catalog/inventory/payment-service did not answer (Problem Details from
+        order-service) or the gateway has no live instance of the target service (gateway default error).
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            type: about:blank
+            title: Service Unavailable
+            status: 503
+            detail: A dependent service is unavailable, please try again later
+            instance: /api/orders
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            timestamp: "2026-11-22T10:15:30.123+00:00"
+            path: /api/catalog/plants
+            status: 503
+            error: Service Unavailable
+            requestId: 6c1f0b2e-41
+
+  schemas:
+    Error:
+      type: object
+      description: |
+        The one error object of every route. Service errors fill the RFC 9457 fields; framework errors fill
+        `timestamp`, `error` and `path`. Clients should rely on `status` and show `detail` when present.
+      required: [status]
+      properties:
+        type:
+          type: string
+          description: Problem type URI; `about:blank` when the status code says it all.
+          example: about:blank
+        title:
+          type: string
+          description: Short summary of the problem type (the HTTP reason phrase).
+          example: Not Found
+        status:
+          type: integer
+          format: int32
+          minimum: 400
+          maximum: 599
+          description: HTTP status code.
+          example: 404
+        detail:
+          type: string
+          description: Human-readable explanation of this occurrence.
+          example: Order with id 42 not found
+        instance:
+          type: string
+          description: Request path that caused the problem.
+          example: /api/orders/42
+        errors:
+          type: object
+          description: Validation errors, field name to message (400 only).
+          additionalProperties:
+            type: string
+          example:
+            customerEmail: must be a well-formed email address
+        plantIds:
+          type: array
+          description: Plants without enough stock (409 only).
+          items:
+            type: integer
+            format: int64
+          example: [8]
+        timestamp:
+          type: string
+          description: Time of the error (framework errors only).
+          example: "2026-11-22T10:15:30.123+00:00"
+        error:
+          type: string
+          description: HTTP reason phrase (framework errors only).
+          example: Bad Request
+        path:
+          type: string
+          description: Request path (framework errors only).
+          example: /api/orders
+        requestId:
+          type: string
+          description: Gateway request id (gateway errors only).
+          example: 6c1f0b2e-41
+      example:
+        type: about:blank
+        title: Not Found
+        status: 404
+        detail: Order with id 42 not found
+        instance: /api/orders/42
+
+    CareLevel:
+      type: string
+      description: How much care the plant needs.
+      enum: [EASY, MEDIUM, HARD]
+      example: EASY
+
+    LightRequirement:
+      type: string
+      description: Light the plant needs.
+      enum: [LOW, MEDIUM, BRIGHT_INDIRECT, DIRECT_SUN]
+      example: BRIGHT_INDIRECT
+
+    Category:
+      type: object
+      description: Plant category.
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Indoor
+        description:
+          type: string
+          nullable: true
+          example: Houseplants that thrive inside
+      example:
+        id: 1
+        name: Indoor
+        description: Houseplants that thrive inside
+
+    Plant:
+      type: object
+      description: A plant of the catalog.
+      required: [id, name, price, category, careLevel, lightRequirement, active]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Monstera Deliciosa
+        latinName:
+          type: string
+          nullable: true
+          example: Monstera deliciosa
+        description:
+          type: string
+          nullable: true
+          example: Iconic split-leaf plant with large glossy leaves.
+        price:
+          type: number
+          description: Price in the shop currency.
+          example: 34.99
+        category:
+          $ref: "#/components/schemas/Category"
+        careLevel:
+          $ref: "#/components/schemas/CareLevel"
+        lightRequirement:
+          $ref: "#/components/schemas/LightRequirement"
+        potSizeCm:
+          type: integer
+          format: int32
+          nullable: true
+          example: 17
+        imageUrl:
+          type: string
+          nullable: true
+          example: null
+        active:
+          type: boolean
+          description: "`false` for deactivated plants: they cannot be ordered."
+          example: true
+      example:
+        id: 1
+        name: Monstera Deliciosa
+        latinName: Monstera deliciosa
+        description: Iconic split-leaf plant with large glossy leaves.
+        price: 34.99
+        category: {id: 1, name: Indoor, description: Houseplants that thrive inside}
+        careLevel: EASY
+        lightRequirement: BRIGHT_INDIRECT
+        potSizeCm: 17
+        imageUrl: null
+        active: true
+
+    PageMetadata:
+      type: object
+      description: Paging information of a page.
+      required: [size, number, totalElements, totalPages]
+      properties:
+        size:
+          type: integer
+          format: int32
+          example: 20
+        number:
+          type: integer
+          format: int32
+          example: 0
+        totalElements:
+          type: integer
+          format: int64
+          example: 10
+        totalPages:
+          type: integer
+          format: int32
+          example: 1
+      example: {size: 20, number: 0, totalElements: 10, totalPages: 1}
+
+    PlantPage:
+      type: object
+      description: One page of plants (Spring Data `PagedModel`).
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Plant"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+      example:
+        content: []
+        page: {size: 20, number: 0, totalElements: 0, totalPages: 0}
+
+    PaymentMethod:
+      type: string
+      description: How the customer pays.
+      enum: [CARD, PAYPAL, APPLE_PAY, GOOGLE_PAY]
+      example: CARD
+
+    OrderStatus:
+      type: string
+      description: |
+        `PENDING` - accepted, saga running; `CONFIRMED` - stock reserved and paid;
+        `CANCELLED` - stock missing or payment declined.
+      enum: [PENDING, CONFIRMED, CANCELLED]
+      example: PENDING
+
+    OrderItemRequest:
+      type: object
+      description: One position of a new order.
+      required: [plantId, quantity]
+      properties:
+        plantId:
+          type: integer
+          format: int64
+          example: 1
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 2
+      example: {plantId: 1, quantity: 2}
+
+    CreateOrderRequest:
+      type: object
+      description: A new order. Prices are taken from the catalog, never from the client.
+      required: [customerEmail, shippingAddress, paymentMethod, items]
+      properties:
+        customerEmail:
+          type: string
+          format: email
+          maxLength: 255
+          example: jane@example.com
+        shippingAddress:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: 12 Fern Street, Kyiv
+        paymentMethod:
+          $ref: "#/components/schemas/PaymentMethod"
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/OrderItemRequest"
+      example:
+        customerEmail: jane@example.com
+        shippingAddress: 12 Fern Street, Kyiv
+        paymentMethod: CARD
+        items:
+          - {plantId: 1, quantity: 2}
+          - {plantId: 3, quantity: 1}
+
+    OrderItem:
+      type: object
+      description: One position of an order with the price fixed at order time.
+      required: [plantId, plantName, quantity, unitPrice, lineTotal]
+      properties:
+        plantId:
+          type: integer
+          format: int64
+          example: 1
+        plantName:
+          type: string
+          example: Monstera Deliciosa
+        quantity:
+          type: integer
+          format: int32
+          example: 2
+        unitPrice:
+          type: number
+          example: 34.99
+        lineTotal:
+          type: number
+          example: 69.98
+      example: {plantId: 1, plantName: Monstera Deliciosa, quantity: 2, unitPrice: 34.99, lineTotal: 69.98}
+
+    Order:
+      type: object
+      description: An order with its items and saga status.
+      required: [id, customerEmail, shippingAddress, paymentMethod, status, totalAmount, items, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        customerEmail:
+          type: string
+          example: jane@example.com
+        shippingAddress:
+          type: string
+          example: 12 Fern Street, Kyiv
+        paymentMethod:
+          $ref: "#/components/schemas/PaymentMethod"
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        totalAmount:
+          type: number
+          example: 92.48
+        failureReason:
+          type: string
+          nullable: true
+          description: Why the order was cancelled; `null` otherwise.
+          example: null
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-11-22T10:15:30.123456Z"
+      example:
+        id: 1
+        customerEmail: jane@example.com
+        shippingAddress: 12 Fern Street, Kyiv
+        paymentMethod: CARD
+        status: PENDING
+        totalAmount: 92.48
+        failureReason: null
+        items:
+          - {plantId: 1, plantName: Monstera Deliciosa, quantity: 2, unitPrice: 34.99, lineTotal: 69.98}
+          - {plantId: 3, plantName: Snake Plant, quantity: 1, unitPrice: 22.50, lineTotal: 22.50}
+        createdAt: "2026-11-22T10:15:30.123456Z"
+
+    OrderTracking:
+      type: object
+      description: Order status and payment status in one answer.
+      required: [orderId, orderStatus, paymentStatus, nextStep]
+      properties:
+        orderId:
+          type: integer
+          format: int64
+          example: 1
+        orderStatus:
+          $ref: "#/components/schemas/OrderStatus"
+        paymentStatus:
+          type: string
+          description: "`NOT_STARTED` until the saga reaches the payment step."
+          enum: [NOT_STARTED, COMPLETED, FAILED]
+          example: COMPLETED
+        transactionId:
+          type: string
+          nullable: true
+          example: 3f6b2c1e-8a4d-4c1b-9e7a-2d5f0b6c9a41
+        failureReason:
+          type: string
+          nullable: true
+          example: null
+        nextStep:
+          type: string
+          description: The next step in plain words.
+          example: Paid, being prepared for shipment
+      example:
+        orderId: 1
+        orderStatus: CONFIRMED
+        paymentStatus: COMPLETED
+        transactionId: 3f6b2c1e-8a4d-4c1b-9e7a-2d5f0b6c9a41
+        failureReason: null
+        nextStep: Paid, being prepared for shipment

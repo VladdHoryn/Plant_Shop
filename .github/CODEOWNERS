@@ -1,0 +1,20 @@
+# Lab 11: the owner of a document must approve every change to it ("documentation owner", Lecture 8).
+# Enforced when branch protection of master has "Require review from Code Owners" enabled.
+# The last matching pattern wins, so the general rules come first.
+
+# Product documentation: the knowledge base, its configuration and the contract of the public API
+/docs/                          @VladdHoryn
+/README.md                      @VladdHoryn
+/CHANGELOG.md                   @VladdHoryn
+/mkdocs.yml                     @VladdHoryn
+/overrides/                     @VladdHoryn
+/docs/api/openapi.yaml          @VladdHoryn
+/.spectral.yaml                 @VladdHoryn
+/.markdownlint-cli2.yaml        @VladdHoryn
+
+# Accepted architecture decisions are immutable: only the architect may add or supersede them
+/docs/architecture/adr/         @VladdHoryn
+
+# The documentation pipeline itself
+/.github/workflows/docs.yml     @VladdHoryn
+/.github/CODEOWNERS             @VladdHoryn

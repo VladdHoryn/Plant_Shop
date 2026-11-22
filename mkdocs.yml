@@ -1,0 +1,135 @@
+# Plant Shop knowledge base (Lab 11, Documentation as Code).
+# Local:  ./scripts/docs-build.sh          strict build into site/ (the same command CI runs)
+#         ./scripts/docs-build.sh serve    live preview on http://localhost:8000
+# CI:     .github/workflows/docs.yml       markdownlint -> Spectral -> review_date audit -> strict build -> Pages
+site_name: Plant Shop — база знань
+site_description: Документація продукту Plant Shop за пірамідою README → Developer → API → Architecture
+site_author: VladdHoryn
+site_url: https://vladdhoryn.github.io/Plant_Shop/
+repo_url: https://github.com/VladdHoryn/Plant_Shop
+repo_name: VladdHoryn/Plant_Shop
+edit_uri: edit/master/docs/
+copyright: Plant Shop, навчальний проєкт
+
+docs_dir: docs
+# Process documentation (lab assignments and reports, their raw outputs) is a record of a moment in time and is
+# never updated (docs/developer/maintenance.md, section 2). It stays in Git but is not part of the product
+# knowledge base, so its historical links are not validated against the current structure.
+exclude_docs: |
+  lab-*.md
+  lab-*/
+  *-report.md
+  reports/
+  complexity/
+  privacy-demo.md
+  goodhart-demo.md
+  gqm-metrics.md
+  .obsidian/
+
+# --strict turns every warning below into a failed build (exit code 1): "не збирається — не їде".
+strict: true
+validation:
+  nav:
+    omitted_files: warn        # a page outside nav is an orphan, not a tolerated draft
+    not_found: warn            # nav points to a missing file
+    absolute_links: warn
+  links:
+    not_found: warn            # dead relative link
+    anchors: warn              # link to a missing heading
+    absolute_links: warn
+    unrecognized_links: warn
+
+theme:
+  name: material
+  language: uk
+  custom_dir: overrides        # shows the front matter passport (owner / status / review_date) on every page
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: green
+      toggle:
+        icon: material/weather-night
+        name: Темна тема
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: green
+      toggle:
+        icon: material/weather-sunny
+        name: Світла тема
+
+plugins:
+  - search:
+      lang: [ru, en]                     # lunr has no Ukrainian stemmer; Russian is the closest Cyrillic one
+  - tags                                 # front matter `tags` = the same tags Obsidian shows in its graph
+  - include-markdown                     # docs/index.md renders README.md, changelog.md renders CHANGELOG.md
+  - swagger-ui-tag                       # docs/api/reference.md renders docs/api/openapi.yaml (SSOT)
+  - mermaid2                             # C4 and sequence diagrams of the SDD
+  - git-revision-date-localized:         # "last updated" of every page from git log (currency metric, Lecture 8)
+      type: date
+      locale: uk
+      timezone: Europe/Kyiv
+      enable_creation_date: false        # only the last change matters for currency
+      fallback_to_build_date: true
+      enable_git_follow: true
+      strict: false                      # git quirks (uncommitted page, rename) are logged as INFO: they are not
+                                         # documentation defects and must not block a local build before commit
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      # GitHub-style anchors that keep Cyrillic letters (#4-модель-даних), so the same links work on GitHub,
+      # in Obsidian and on the site; the default slugify drops non-ASCII characters
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid_custom
+
+# Four levels of the documentation pyramid (Lecture 9); each level answers its own audience's question.
+nav:
+  - "1 · Що це і як запустити": index.md
+  - "2 · Розробникам":
+      - developer/CONTRIBUTING.md
+      - developer/local-setup.md
+      - developer/coding-standards.md
+      - developer/maintenance.md
+      - developer/handover.md
+      - developer/changelog.md
+  - "3 · API":
+      - api/index.md
+      - api/reference.md
+      - api/privacy.md
+      - api/javadoc.md
+  - "4 · Архітектура":
+      - architecture/sdd.md
+      - architecture/isd.md
+      - architecture/deployment.md
+      - architecture/audience-coverage.md
+      - "ADR":
+          - architecture/adr/README.md
+          - architecture/adr/0001-database-per-service-postgresql-flyway.md
+          - architecture/adr/0002-kafka-choreography-saga.md
+          - architecture/adr/0003-synchronous-payment-read-for-tracking.md
+          - architecture/adr/0004-documentation-as-code-mkdocs.md
+          - architecture/adr/0005-api-first-openapi-contract.md
+          - architecture/adr/0006-uniform-problem-detail-errors.md
+  - "Теги": tags.md

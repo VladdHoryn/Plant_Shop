@@ -39,3 +39,10 @@ build/
 .DS_Store
 ### SonarScanner ###
 .scannerwork/
+
+### Documentation as Code (Lab 11) ###
+# build artifacts: the site, the SDK generated from docs/api/openapi.yaml, local Obsidian state
+site/
+sdk-client/
+.obsidian/workspace*.json
+.hypothesis/

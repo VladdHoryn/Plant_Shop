@@ -10,6 +10,8 @@
 #   refs   git grep -l -F <doc file name> | wc -l              other tracked files that link or name the document
 #   30d    git log --since=<ref - 30 days> --oneline -- <doc> | wc -l   changes in the last month
 # Usage: ./scripts/doc-currency.sh [reference-date YYYY-MM-DD] [revision]   (defaults: today, HEAD)
+# Lab 11: document history is read with --follow, so a document moved into the pyramid (docs/sdd.md ->
+# docs/architecture/sdd.md) keeps its commits and age.
 # The map has one line per document: <doc path>|<kind: product|process>|<code pathspecs separated by spaces or ->
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -28,17 +30,17 @@ echo "|---|---|---|---|---|---|---|---|---|---|"
 
 while IFS='|' read -r doc kind paths; do
   [[ -z "$doc" || "$doc" == \#* ]] && continue
-  last=$(git log -1 --format=%cs "$REV" -- "$doc")
+  last=$(git log --follow -1 --format=%cs "$REV" -- "$doc")
   if [[ -z "$last" ]]; then
     echo "| \`$doc\` | $kind | not in Git | - | 0 | - | - | - | - | MISSING |"
     continue
   fi
   age=$(( (ref_epoch - $(date -d "$last" +%s)) / 86400 ))
-  doc_commits=$(git log --oneline "$REV" -- "$doc" | wc -l | tr -d ' ')
-  last_hash=$(git log -1 --format=%H "$REV" -- "$doc")
+  doc_commits=$(git log --follow --oneline "$REV" -- "$doc" | wc -l | tr -d ' ')
+  last_hash=$(git log --follow -1 --format=%H "$REV" -- "$doc")
   name=$(basename "$doc")
   refs=$(git grep -l -F "$name" "$REV" -- ":(exclude)$doc" ':(exclude)docs/lab-10/*' 2>/dev/null | wc -l | tr -d ' ')
-  recent=$(git log --since="$since" --oneline "$REV" -- "$doc" | wc -l | tr -d ' ')
+  recent=$(git log --follow --since="$since" --oneline "$REV" -- "$doc" | wc -l | tr -d ' ')
   if [[ "$paths" == "-" ]]; then
     code="n/a"; lag="n/a"
   else

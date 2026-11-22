@@ -1,0 +1,63 @@
+# Contract quality rules for docs/api/openapi.yaml (Lab 11). Threshold: 0 errors (./scripts/docs-lint.sh, CI).
+# Built-in OpenAPI rules plus the three rules of the assignment, all raised to "error" so they block the merge.
+extends: [["spectral:oas", recommended]]
+
+rules:
+  # 1. Every operation explains what it does (the built-in rule is only a warning).
+  operation-description: error
+  operation-operationId: error
+  operation-tags: error
+
+  # 2. Every schema carries an example: the reference and the SDK show real data, not "string".
+  plantshop-schema-example:
+    description: Every component schema must have an example.
+    message: "Schema {{property}} has no example."
+    severity: error
+    given: "$.components.schemas[*]"
+    then:
+      field: example
+      function: defined
+
+  # 3. Errors are described consistently: every 4xx/5xx response of a path is a shared component response...
+  plantshop-error-response-shared:
+    description: 4xx and 5xx responses must reference a shared response from components.responses.
+    message: "{{path}} must be a $ref to #/components/responses/..."
+    severity: error
+    resolved: false
+    given: "$.paths[*][*].responses[?(@property.match(/^[45]/))]"
+    then:
+      - field: $ref
+        function: defined
+      - field: $ref
+        function: pattern
+        functionOptions:
+          match: "^#/components/responses/"
+
+  # ...and every shared error response returns the one Error object, whatever its media type.
+  plantshop-error-schema:
+    description: Every error response returns the shared Error schema.
+    message: "{{path}} must use #/components/schemas/Error"
+    severity: error
+    resolved: false
+    given: "$.components.responses[*].content[*].schema"
+    then:
+      - field: $ref
+        function: defined
+      - field: $ref
+        function: pattern
+        functionOptions:
+          match: "^#/components/schemas/Error$"
+
+  # Every operation documents a client error and a server/dependency error, not only the happy path.
+  plantshop-operation-error-codes:
+    description: Every operation declares at least one 4xx and one 5xx response.
+    severity: error
+    given: "$.paths[*][get,put,post,delete,patch].responses"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          allOf:
+            - anyOf: [{required: ["400"]}, {required: ["404"]}, {required: ["409"]}]
+            - anyOf: [{required: ["500"]}, {required: ["503"]}]

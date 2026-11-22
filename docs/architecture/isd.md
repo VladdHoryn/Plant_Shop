@@ -1,13 +1,20 @@
+---
+owner: VladdHoryn
+status: published
+review_date: 2027-02-12
+tags:
+  - architecture
+  - ops
+---
+
 # ISD — Infrastructure Specification Document: Plant Shop
 
 | Поле | Значення |
 |---|---|
 | Тип документа | документація продукту, експлуатаційна |
 | Аудиторія | DevOps, розробники (локальний запуск), QA (тестове середовище) |
-| Власник | VladdHoryn (DevOps / мейнтейнер) |
-| Цикл перегляду | 90 днів або при кожній зміні `docker-compose.yml`, `Dockerfile`, `k8s/`, `helm/`, `.github/workflows/` (див. [`maintenance.md`](maintenance.md)) |
-| Останній перегляд | 2026-11-14 |
-| Пов'язані документи | [`sdd.md`](sdd.md) — що саме розгортається; [`README.md`](../README.md) — швидкий старт |
+| Цикл перегляду | 90 днів або при кожній зміні `docker-compose.yml`, `Dockerfile`, `k8s/`, `helm/`, `.github/workflows/` (див. [`maintenance.md`](../developer/maintenance.md)) |
+| Пов'язані документи | [`sdd.md`](sdd.md) — що саме розгортається; [`README.md`](../index.md) — швидкий старт |
 
 > Документ описує **де і на чому система працює**: топологію, середовища, змінні оточення, CI/CD, моніторинг,
 > резервне копіювання. Внутрішня будова компонентів — у [SDD](sdd.md). Таблицю порядку запуску (розділ 5)
@@ -129,8 +136,9 @@ Docker Compose стартує контейнери хвилями за `depends_
 | `user-service` | config-service, discovery-service, kafka, user-db | 3 |
 
 Запуск з IDE: `docker compose up -d catalog-db inventory-db order-db payment-db user-db kafka kafka-ui`, потім
-config-service → discovery-service → бізнес-сервіси (payment-service раніше за order-service) → api-gateway. У Kubernetes init-контейнери
-order-service чекають лише config, discovery, Kafka і order-db: трекінг до старту payment-service повертає 503 (див. ADR-0003).
+config-service → discovery-service → бізнес-сервіси (payment-service раніше за order-service) → api-gateway.
+У Kubernetes init-контейнери order-service чекають лише config, discovery, Kafka і order-db: трекінг до старту
+payment-service повертає 503 (див. ADR-0003).
 
 ## 6. CI/CD-конвеєр і Quality Gates
 
@@ -146,8 +154,12 @@ flowchart LR
   qg --> j3["complexity:<br/>CC <= 10, NLOC <= 60"]
   cm --> a1["Lizard CSV/JSON<br/>артефакт 30 днів"]
   push --> dc["docs-currency.yml"]
-  dc --> d1["doc-drift:<br/>SDD, README, ISD = код"]
+  dc --> d1["doc-drift:<br/>SDD, OpenAPI, ISD = код"]
   dc --> d2["currency:<br/>вік і lag документів"]
+  push --> dw["docs.yml"]
+  dw --> w1["build: markdownlint,<br/>Spectral, review_date,<br/>mkdocs --strict, Javadoc"]
+  w1 -->|"exit 0, master / lab/Lab_11"| w2["deploy:<br/>GitHub Pages"]
+  w1 -->|"exit 1"| stop["сайт не оновлено"]
 ```
 
 | Workflow / засіб | Тригер | Стадії (jobs) | Quality Gate | Блокує? |
@@ -157,13 +169,16 @@ flowchart LR
 | | | `integration-tests` | `./mvnw -B test`, усі тести зелені | так |
 | | | `complexity` | CC ≤ 10 і ≤ 60 NLOC на функцію (`tools/lizard`, без мережі, 1 CPU / 256 MB) | так |
 | `.github/workflows/code-metrics.yml` | кожен push і PR | `lizard-report` | лише вимірює, артефакт `lizard-report` | ні |
-| `.github/workflows/docs-currency.yml` | кожен push і PR | `doc-drift` | кожен ендпоінт є в SDD і README, порядок запуску compose = ISD 5 (`scripts/doc-drift-check.sh`) | так |
+| `.github/workflows/docs-currency.yml` | кожен push і PR | `doc-drift` | кожен ендпоінт коду є в SDD, кожна операція `docs/api/openapi.yaml` є в коді, порядок запуску compose = ISD 5 (`scripts/doc-drift-check.sh`) | так |
 | | | `currency` | звіт віку та lag документів (`scripts/doc-currency.sh`) у Step Summary | ні |
+| `.github/workflows/docs.yml` | кожен push і PR | `build` | markdownlint 0 помилок; Spectral 0 errors для контракту API; `mkdocs build --strict` (мертві посилання, якорі, сторінки поза nav = exit 1); звіт `review_date` у Step Summary; Javadoc | так |
+| | push у `master` або `lab/Lab_11` після зеленого `build` | `deploy` | публікація `site/` на GitHub Pages (`actions/deploy-pages`) | — |
 
 Захист від «плаваючих» метрик: закріплені образ раннера (`ubuntu-24.04`), збірка JDK (`21.0.8+9`), версії
 плагінів у `pom.xml` та образи аналізаторів у `tools/`.
 
-**CD (доставка)** не автоматизована: реліз виконує людина командами розділу 7.
+**CD (доставка)** застосунку не автоматизована: реліз виконує людина командами розділу 7. Автоматично
+доставляється лише сайт документації (`docs.yml` → GitHub Pages, <https://vladdhoryn.github.io/Plant_Shop/>).
 
 **Фактичний стан CI на 2026-11-14:** workflows ще жодного разу не запускались на GitHub — GitHub API повертає
 `"total_count": 0` запусків, а в `origin/master` каталогу `.github/` немає (гілки лабораторних 7–10 не запушені).

@@ -11,12 +11,12 @@ helm/plantshop/templates/NOTES.txt|product|helm/plantshop/templates/api-gateway-
 user-service/privacy-demo.http|product|user-service/src/main/java
 sonar-project.properties|product|pom.xml */pom.xml
 scripts/git-hooks/pre-commit|product|scripts/cc-check.sh tools/lizard
-docs/sdd.md|product|*/src/main/java */src/main/resources/db/migration config-service/src/main/resources/configurations
-docs/isd.md|product|docker-compose.yml Dockerfile k8s helm .github config-service/src/main/resources/configurations
+docs/architecture/sdd.md|product|*/src/main/java */src/main/resources/db/migration config-service/src/main/resources/configurations
+docs/architecture/isd.md|product|docker-compose.yml Dockerfile k8s helm .github config-service/src/main/resources/configurations
 docs/architecture/adr/0001-database-per-service-postgresql-flyway.md|product|*/src/main/resources/db/migration docker-compose.yml
 docs/architecture/adr/0002-kafka-choreography-saga.md|product|*/src/main/java/com/plantshop/*/event
 docs/architecture/adr/0003-synchronous-payment-read-for-tracking.md|product|order-service/src/main/java/com/plantshop/order/client docker-compose.yml
-docs/maintenance.md|product|-
+docs/developer/maintenance.md|product|-
 docs/privacy-report.md|process|-
 docs/privacy-demo.md|process|-
 docs/metrics-report.md|process|-
@@ -35,4 +35,21 @@ docs/lab-09.md|process|-
 docs/lab-9.md|process|-
 FINANCIAL_LEDGER.md|process|-
 .github/workflows/docs-currency.yml|product|scripts/doc-drift-check.sh scripts/doc-currency.sh
-docs/handover.md|product|*/src/main/* docker-compose.yml k8s helm
+docs/developer/handover.md|product|*/src/main/* docker-compose.yml k8s helm
+CHANGELOG.md|product|docs/api/openapi.yaml mkdocs.yml
+mkdocs.yml|product|-
+docs/developer/CONTRIBUTING.md|product|.github .spectral.yaml .markdownlint-cli2.yaml
+docs/developer/local-setup.md|product|docker-compose.yml */pom.xml
+docs/developer/coding-standards.md|product|.editorconfig tools .github/workflows/code-metrics.yml .github/workflows/quality-gate.yml
+docs/api/openapi.yaml|product|catalog-service/src/main/java/com/plantshop/catalog/controller catalog-service/src/main/java/com/plantshop/catalog/dto order-service/src/main/java/com/plantshop/order/controller order-service/src/main/java/com/plantshop/order/dto order-service/src/main/java/com/plantshop/order/exception
+docs/api/index.md|product|*/src/main/java/*/controller */src/main/java/*/exception
+docs/api/privacy.md|product|user-service/src/main/java
+docs/architecture/deployment.md|product|k8s helm scripts/build-images.sh
+docs/architecture/adr/0004-documentation-as-code-mkdocs.md|product|mkdocs.yml .github/workflows/docs.yml
+docs/architecture/adr/0005-api-first-openapi-contract.md|product|docs/api/openapi.yaml
+docs/architecture/adr/0006-uniform-problem-detail-errors.md|product|*/src/main/java/*/exception
+.github/workflows/docs.yml|product|scripts/docs-build.sh scripts/docs-lint.sh scripts/doc-review-audit.sh tools/mkdocs
+docs/lab-10-report.md|process|-
+docs/lab-11.md|process|-
+docs/lab-11-report.md|process|-
+docs/architecture/audience-coverage.md|product|-

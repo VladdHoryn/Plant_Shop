@@ -1,0 +1,8 @@
+# Documentation site toolchain (Lab 11). One pinned list for the local Docker image (tools/mkdocs/Dockerfile)
+# and for CI (.github/workflows/docs.yml), so a page never builds differently on a laptop and on the runner.
+mkdocs==1.6.1
+mkdocs-material==9.7.6
+mkdocs-git-revision-date-localized-plugin==1.7.0
+mkdocs-mermaid2-plugin==1.2.3
+mkdocs-swagger-ui-tag==0.8.1
+mkdocs-include-markdown-plugin==7.3.2

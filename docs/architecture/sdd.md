@@ -1,13 +1,20 @@
+---
+owner: VladdHoryn
+status: published
+review_date: 2027-05-13
+tags:
+  - architecture
+  - api
+---
+
 # SDD — System Design Document: Plant Shop
 
 | Поле | Значення |
 |---|---|
 | Тип документа | документація продукту, архітектурна |
 | Аудиторія | розробники, QA (контракти), DevOps (через посилання на ISD) |
-| Власник | VladdHoryn (архітектор / мейнтейнер) |
-| Цикл перегляду | 180 днів або при кожній зміні контракту, компонента чи моделі даних (див. [`maintenance.md`](maintenance.md)) |
-| Останній перегляд | 2026-11-14 |
-| Пов'язані документи | [`isd.md`](isd.md) — де і як компоненти розгорнуто; [`architecture/adr/`](architecture/adr) — чому так; [`README.md`](../README.md) — швидкий старт |
+| Цикл перегляду | 180 днів або при кожній зміні контракту, компонента чи моделі даних (див. [`maintenance.md`](../developer/maintenance.md)) |
+| Пов'язані документи | [`isd.md`](isd.md) — де і як компоненти розгорнуто; [`architecture/adr/`](adr/README.md) — чому так; [`README.md`](../index.md) — швидкий старт |
 
 > Документ описує **як система влаштована всередині**. Де вона працює (контейнери, середовища, CI/CD,
 > резервне копіювання) — у [ISD](isd.md). Відповідність цього документа коду перевіряє
@@ -82,7 +89,7 @@ config-service і реєструється в discovery-service; gateway і Feig
 `kafka-ui` (:8090) — допоміжний інструмент розробника, не частина продукту. `secure-logging` — бібліотека,
 а не контейнер: вона вбудована в кожен сервіс (розділ 3.9).
 
-### 2.1. Потік замовлення (сага-хореографія, [ADR-0002](architecture/adr/0002-kafka-choreography-saga.md))
+### 2.1. Потік замовлення (сага-хореографія, [ADR-0002](adr/0002-kafka-choreography-saga.md))
 
 ```mermaid
 sequenceDiagram
@@ -174,9 +181,9 @@ sequenceDiagram
   повертає статус замовлення разом зі статусом платежу, який читається синхронно з
   [payment-service](#37-payment-service) через Feign-клієнт `PaymentClient`. 404 від payment-service означає, що
   сага ще не дійшла до оплати (`NOT_STARTED`); інша помилка payment-service → 503. Це запит на читання, а не
-  крок саги ([ADR-0003](architecture/adr/0003-synchronous-payment-read-for-tracking.md)).
+  крок саги ([ADR-0003](adr/0003-synchronous-payment-read-for-tracking.md)).
 - **Важливо:** order-service **не керує** сагою командами (це не оркестрація): кожен учасник сам реагує на
-  події ([ADR-0002](architecture/adr/0002-kafka-choreography-saga.md)).
+  події ([ADR-0002](adr/0002-kafka-choreography-saga.md)).
 
 ### 3.7. payment-service
 
@@ -208,7 +215,7 @@ sequenceDiagram
 
 ## 4. Модель даних
 
-Database-per-service ([ADR-0001](architecture/adr/0001-database-per-service-postgresql-flyway.md)): зв'язки між
+Database-per-service ([ADR-0001](adr/0001-database-per-service-postgresql-flyway.md)): зв'язки між
 сервісами — лише логічні ідентифікатори (`plant_id`, `order_id`), без зовнішніх ключів між базами. Схему
 створюють тільки міграції Flyway `<service>/src/main/resources/db/migration`; Hibernate — `ddl-auto: validate`.
 
@@ -281,10 +288,12 @@ erDiagram
 
 ## 5. API-контракти
 
-Повні схеми запитів/відповідей — Swagger UI кожного бізнес-сервісу: `http://localhost:<port>/swagger-ui.html`
-(springdoc, генерується з коду, тому завжди актуальний). Нижче — перелік контрактів, на які покладаються
-інші компоненти та тести QA. Формат: JSON; помилки — `GlobalExceptionHandler` (400 валідація, 404 не знайдено,
-409 конфлікт).
+Формальний контракт клієнтського шляху (каталог → замовлення → трекінг, 6 операцій) — [`docs/api/openapi.yaml`](../api/openapi.yaml),
+API-first ([ADR-0005](adr/0005-api-first-openapi-contract.md)), інтерактивно — [довідник API](../api/reference.md).
+Схеми решти ендпоінтів — code-first Swagger UI кожного бізнес-сервісу `http://localhost:<port>/swagger-ui.html`
+(springdoc). Нижче — перелік **усіх** контрактів, на які покладаються інші компоненти та тести QA. Формат: JSON;
+помилки — спільний об'єкт `Error` ([API: формат помилок](../api/index.md#формат-помилок)): 400 валідація,
+404 не знайдено, 409 конфлікт, 503 недоступна залежність.
 
 ### 5.1. Синхронні REST-контракти (через gateway, якщо не вказано інше)
 
@@ -348,8 +357,8 @@ erDiagram
 
 | Тема | Рішення | Де деталі |
 |---|---|---|
-| Сховище даних | PostgreSQL на сервіс + Flyway | [ADR-0001](architecture/adr/0001-database-per-service-postgresql-flyway.md) |
-| Інтеграція | синхронно Feign для перевірок і читання стану (трекінг), асинхронно Kafka для саги | [ADR-0002](architecture/adr/0002-kafka-choreography-saga.md), [ADR-0003](architecture/adr/0003-synchronous-payment-read-for-tracking.md) |
+| Сховище даних | PostgreSQL на сервіс + Flyway | [ADR-0001](adr/0001-database-per-service-postgresql-flyway.md) |
+| Інтеграція | синхронно Feign для перевірок і читання стану (трекінг), асинхронно Kafka для саги | [ADR-0002](adr/0002-kafka-choreography-saga.md), [ADR-0003](adr/0003-synchronous-payment-read-for-tracking.md) |
 | Конфігурація | централізовано в config-service | [ISD, розділ 4](isd.md#4-середовища-та-змінні-оточення) |
 | Безпека | HTTP Basic у user-service; `INTERNAL_API_TOKEN` для `/internal/**`; секрети лише через змінні оточення | `docs/privacy-report.md` |
 | Журнали | маскування PII і секретів, correlation id | розділ 3.9 |

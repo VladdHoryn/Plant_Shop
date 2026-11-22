@@ -1,0 +1,31 @@
+# markdownlint-cli2 0.18.1 (Lab 11): style rules for the product documentation (the MkDocs knowledge base,
+# README, CHANGELOG). Process documentation (lab assignments and reports) is a historical record that is never
+# edited, so it is ignored, exactly like in mkdocs.yml exclude_docs.
+config:
+  default: true
+  MD013:                     # line length: the .editorconfig limit; tables and code blocks may be wider
+    line_length: 120
+    tables: false
+    code_blocks: false
+    headings: false
+  MD024:
+    siblings_only: true      # the same subheading under different parents (ADR "Контекст", CHANGELOG "Added")
+  MD033:                     # no HTML, except the plugin tag that renders the OpenAPI contract
+    allowed_elements: [swagger-ui]
+  MD041: false               # pages start with a front matter passport, the include pages have no own H1
+  MD060: false               # table column alignment: GitHub-style compact tables are the repository convention
+globs:
+  - "README.md"
+  - "CHANGELOG.md"
+  - "docs/**/*.md"
+ignores:
+  - "docs/lab-*.md"
+  - "docs/lab-*/**"
+  - "docs/*-report.md"
+  - "docs/reports/**"
+  - "docs/complexity/**"
+  - "docs/privacy-demo.md"
+  - "docs/goodhart-demo.md"
+  - "docs/gqm-metrics.md"
+  - "site/**"
+  - "sdk-client/**"

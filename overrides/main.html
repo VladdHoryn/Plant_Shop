@@ -1,0 +1,22 @@
+{#- Lab 11: the front matter passport of every page (owner / status / review_date) is rendered from the page
+    itself, so the site never shows a passport that differs from the Markdown file. -#}
+{% extends "base.html" %}
+
+{% block content %}
+  {% if page.meta and page.meta.status %}
+    {% set status = page.meta.status %}
+    {% set kind = "warning" if status == "deprecated" else ("note" if status == "published" else "abstract") %}
+    <div class="admonition {{ kind }} doc-passport">
+      <p class="admonition-title">Паспорт документа</p>
+      <p>
+        Власник: <strong>{{ page.meta.owner | d("не призначено") }}</strong> ·
+        статус: <strong>{{ status }}</strong> ·
+        наступний перегляд: <strong>{{ page.meta.review_date | d("—") }}</strong>
+        {% if page.meta.superseded_by %}
+          · актуальна версія: <code>docs/{{ page.meta.superseded_by }}</code>
+        {% endif %}
+      </p>
+    </div>
+  {% endif %}
+  {{ super() }}
+{% endblock %}

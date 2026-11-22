@@ -1,6 +1,7 @@
-# Lab 10: "code change = documentation change" (docs/maintenance.md).
-# doc-drift  - blocks the merge when an endpoint is missing from docs/sdd.md or README.md, or when the startup order
-#              of docker-compose.yml differs from docs/isd.md (scripts/doc-drift-check.sh).
+# Lab 10: "code change = documentation change" (docs/developer/maintenance.md).
+# doc-drift  - blocks the merge when an endpoint is missing from docs/architecture/sdd.md, an operation of
+#              docs/api/openapi.yaml does not exist in code, or the startup order of docker-compose.yml differs
+#              from docs/architecture/isd.md (scripts/doc-drift-check.sh).
 # currency   - report only: age and code-doc lag of every document (scripts/doc-currency.sh), needs the full history.
 name: docs-currency
 
