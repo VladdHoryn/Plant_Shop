@@ -1,0 +1,89 @@
+# Lab 11: Documentation as Code pipeline - "не збирається — не їде" (it does not build, it does not ship).
+# A documentation defect (dead link or anchor, page outside nav, broken Markdown, contract without descriptions)
+# stops the delivery exactly like a red test stops a code release: the build job exits with code 1 and the deploy
+# job never runs, so the published site keeps the last good version.
+# The same tools and versions run locally: ./scripts/docs-lint.sh and ./scripts/docs-build.sh.
+name: docs
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: lint and strict build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # 1. Checkout with the whole history: git-revision-date-localized reads the last commit of every page
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Python for MkDocs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tools/mkdocs/requirements.txt
+
+      # 3. mkdocs-material and the plugins, pinned in the same file the local Docker image uses
+      - name: Install MkDocs Material and plugins
+        run: pip install -r tools/mkdocs/requirements.txt
+
+      # 4. Markdown style (markdownlint-cli2 0.18.1, rules in .markdownlint-cli2.yaml)
+      - name: markdownlint
+        run: docker run --rm -v "$PWD:/workdir" davidanson/markdownlint-cli2:v0.18.1
+
+      # 5. API contract quality (Spectral 6.15.0, rules in .spectral.yaml): 0 errors or the job fails
+      - name: Spectral lint of docs/api/openapi.yaml
+        run: >
+          docker run --rm -v "$PWD:/work" -w /work stoplight/spectral:6.15.0
+          lint docs/api/openapi.yaml --ruleset .spectral.yaml --fail-severity error
+
+      # 6. Continuous currency audit: overdue review_date of the front matter passports (report, never blocks)
+      - name: review_date audit
+        run: ./scripts/doc-review-audit.sh | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # 7. Strict build: every warning is an error, exit code 1 stops the pipeline here
+      - name: mkdocs build --strict
+        run: mkdocs build --strict
+
+      # 8. Elective item: Javadoc reference from the code comments, published next to the site
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Javadoc
+        run: |
+          ./scripts/docs-javadoc.sh
+          cp -r target/reports/apidocs site/javadoc
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # 9. Publication on GitHub Pages: only a green build of master or the lab branch reaches the public site
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/lab/Lab_11')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
