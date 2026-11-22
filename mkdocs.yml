@@ -133,3 +133,8 @@ nav:
           - architecture/adr/0005-api-first-openapi-contract.md
           - architecture/adr/0006-uniform-problem-detail-errors.md
   - "Теги": tags.md
+  - "Архів (deprecated)":
+      - sdd.md
+      - isd.md
+      - maintenance.md
+      - handover.md
