@@ -1,0 +1,23 @@
+# GitHub Actions, workflow docs, run 45029784217 on commit e92558f (FAIL)
+# https://github.com/VladdHoryn/Plant_Shop/actions/runs/45029784217/job/137230599581
+# Job and step conclusions (GitHub REST API /actions/runs/45029784217/jobs):
+"conclusion": "failure", "name": "lint and strict build",
+"name": "Set up job", "conclusion": "success",
+"name": "Run actions/checkout@v4", "conclusion": "success",
+"name": "Run actions/setup-python@v5", "conclusion": "success",
+"name": "Install MkDocs Material and plugins", "conclusion": "success",
+"name": "markdownlint", "conclusion": "success",
+"name": "Spectral lint of docs/api/openapi.yaml", "conclusion": "success",
+"name": "review_date audit", "conclusion": "success",
+"name": "mkdocs build --strict", "conclusion": "failure",
+"name": "Run actions/setup-java@v4", "conclusion": "skipped",
+"name": "Javadoc", "conclusion": "skipped",
+"name": "Run actions/upload-pages-artifact@v3", "conclusion": "skipped",
+"name": "Post Run actions/setup-python@v5", "conclusion": "skipped",
+"name": "Post Run actions/checkout@v4", "conclusion": "success",
+"name": "Complete job", "conclusion": "success",
+"conclusion": "skipped", "name": "deploy",
+
+# Annotations of the failed job (/check-runs/137230599581/annotations):
+"Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+"Process completed with exit code 1.",

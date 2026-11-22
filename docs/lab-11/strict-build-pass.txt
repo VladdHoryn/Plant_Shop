@@ -1,0 +1,12 @@
+$ ./scripts/docs-lint.sh
+== 1. markdownlint
+Summary: 0 error(s)
+== 2. Spectral (docs/api/openapi.yaml)
+No results with a severity of 'error' found!
+== 3. review_date audit
+RESULT: PASS - every product document is within its review cycle
+docs-lint: PASS
+
+$ ./scripts/docs-build.sh  # mkdocs build --strict
+docs-build: PASS (strict)
+exit code: 0
