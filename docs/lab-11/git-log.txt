@@ -1,0 +1,12 @@
+* e1c855c (HEAD -> lab/Lab_11, tag: docs-v2.0, origin/lab/Lab_11) docs(ci): restore strict build pipeline, PASS
+* e92558f docs(ci): inject broken reference into strict build, FAIL
+* c9dad21 ci(docs): documentation pipeline with markdownlint, Spectral, strict build and GitHub Pages
+* 96cfd32 fix(api): answer 400 for null order items and overflowing pages, as the contract says
+* 8ecd82d docs(knowledge-base): keep the old passport addresses as deprecated redirects
+* 65656ac docs(knowledge-base): four-level documentation pyramid on MkDocs Material
+* 1715a1b (tag: docs-v1.0, lab/Lab_10) Delete comments
+* f3b0722 ci(maintenance): make mvnw and shell scripts executable on Linux runners
+* 974b044 docs(audit): lab 10 git history log
+* 20b6d83 docs(handover): handover package with bus factor declaration
+* 7e82c94 docs(maintenance): restore documentation currency, PASS
+* aef1513 docs(audit): simulate documentation decay, FAIL

@@ -1,0 +1,38 @@
+$ ./scripts/doc-review-audit.sh            # reference date: today
+Documentation review audit: reference date 2026-11-22
+
+| Document | Owner | Status | review_date | Days left | Signal |
+|---|---|---|---|---|---|
+| `README.md` | VladdHoryn | published | 2027-02-12 | 82 | OK |
+| `CHANGELOG.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/api/index.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/api/javadoc.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/api/privacy.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/api/reference.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/architecture/adr/0001-database-per-service-postgresql-flyway.md` | VladdHoryn | published | 2027-05-13 | 171 | OK |
+| `docs/architecture/adr/0002-kafka-choreography-saga.md` | VladdHoryn | published | 2027-05-13 | 171 | OK |
+| `docs/architecture/adr/0003-synchronous-payment-read-for-tracking.md` | VladdHoryn | published | 2027-05-13 | 171 | OK |
+| `docs/architecture/adr/0004-documentation-as-code-mkdocs.md` | VladdHoryn | in-review | 2027-05-21 | 179 | OK |
+| `docs/architecture/adr/0005-api-first-openapi-contract.md` | VladdHoryn | published | 2027-05-21 | 179 | OK |
+| `docs/architecture/adr/0006-uniform-problem-detail-errors.md` | VladdHoryn | in-review | 2027-02-20 | 90 | OK |
+| `docs/architecture/adr/README.md` | VladdHoryn | published | 2027-05-13 | 171 | OK |
+| `docs/architecture/audience-coverage.md` | VladdHoryn | published | 2027-05-13 | 171 | OK |
+| `docs/architecture/deployment.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/architecture/isd.md` | VladdHoryn | published | 2027-02-12 | 82 | OK |
+| `docs/architecture/sdd.md` | VladdHoryn | published | 2027-05-13 | 171 | OK |
+| `docs/developer/CONTRIBUTING.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/developer/changelog.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/developer/coding-standards.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/developer/handover.md` | VladdHoryn | published | 2027-02-12 | 82 | OK |
+| `docs/developer/local-setup.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/developer/maintenance.md` | VladdHoryn | published | 2027-02-20 | 90 | OK |
+| `docs/handover.md` | VladdHoryn | deprecated | 2027-05-21 | 179 | DEPRECATED -> developer/handover.md |
+| `docs/index.md` | VladdHoryn | published | 2027-02-12 | 82 | OK |
+| `docs/isd.md` | VladdHoryn | deprecated | 2027-05-21 | 179 | DEPRECATED -> architecture/isd.md |
+| `docs/maintenance.md` | VladdHoryn | deprecated | 2027-05-21 | 179 | DEPRECATED -> developer/maintenance.md |
+| `docs/sdd.md` | VladdHoryn | deprecated | 2027-05-21 | 179 | DEPRECATED -> architecture/sdd.md |
+| `docs/tags.md` | VladdHoryn | published | 2027-05-21 | 179 | OK |
+
+Documents: 29, overdue: 0, without passport: 0, deprecated: 4
+RESULT: PASS - every product document is within its review cycle
+exit code: 0

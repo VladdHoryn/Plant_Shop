@@ -1,0 +1,34 @@
+| Документ | Зв'язків (вхідні + вихідні) | Теги |
+|---|---|---|
+| `README.md` | 7 | #overview  |
+| `CHANGELOG.md` | 1 | #developer  |
+| `docs/api/index.md` | 10 | #api  |
+| `docs/api/javadoc.md` | 2 | #api #developer  |
+| `docs/api/privacy.md` | 3 | #api  |
+| `docs/api/reference.md` | 4 | #api  |
+| `docs/architecture/adr/0001-database-per-service-postgresql-flyway.md` | 7 | #architecture #adr  |
+| `docs/architecture/adr/0002-kafka-choreography-saga.md` | 8 | #architecture #adr  |
+| `docs/architecture/adr/0003-synchronous-payment-read-for-tracking.md` | 8 | #architecture #adr #api  |
+| `docs/architecture/adr/0004-documentation-as-code-mkdocs.md` | 3 | #architecture #adr #ops  |
+| `docs/architecture/adr/0005-api-first-openapi-contract.md` | 7 | #architecture #adr #api  |
+| `docs/architecture/adr/0006-uniform-problem-detail-errors.md` | 3 | #architecture #adr #api  |
+| `docs/architecture/adr/README.md` | 8 | #architecture #adr  |
+| `docs/architecture/audience-coverage.md` | 0 | #architecture  |
+| `docs/architecture/deployment.md` | 3 | #architecture #ops  |
+| `docs/architecture/isd.md` | 17 | #architecture #ops  |
+| `docs/architecture/sdd.md` | 32 | #architecture #api  |
+| `docs/developer/CONTRIBUTING.md` | 8 | #developer  |
+| `docs/developer/changelog.md` | 3 | #developer  |
+| `docs/developer/coding-standards.md` | 2 | #developer  |
+| `docs/developer/handover.md` | 2 | #developer #ops  |
+| `docs/developer/local-setup.md` | 7 | #developer #ops  |
+| `docs/developer/maintenance.md` | 6 | #developer #ops  |
+| `docs/handover.md` | 1 | #archive  |
+| `docs/index.md` | 3 | #overview  |
+| `docs/isd.md` | 1 | #archive  |
+| `docs/maintenance.md` | 1 | #archive  |
+| `docs/sdd.md` | 1 | #archive  |
+| `docs/tags.md` | 0 | - |
+
+Documents: 29, edges: 64, islands (no links at all): 2
+RESULT: FAIL - isolated documents

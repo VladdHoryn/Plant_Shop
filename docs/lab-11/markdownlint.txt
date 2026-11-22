@@ -1,0 +1,6 @@
+$ docker run --rm -v "$PWD:/workdir" davidanson/markdownlint-cli2:v0.18.1
+markdownlint-cli2 v0.18.1 (markdownlint v0.38.0)
+Finding: README.md CHANGELOG.md docs/**/*.md !docs/lab-*.md !docs/lab-*/** !docs/*-report.md !docs/reports/** !docs/complexity/** !docs/privacy-demo.md !docs/goodhart-demo.md !docs/gqm-metrics.md !site/** !sdk-client/**
+Linting: 29 file(s)
+Summary: 0 error(s)
+exit code: 0

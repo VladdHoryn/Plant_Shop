@@ -1,0 +1,31 @@
+# GitHub Actions, workflow docs, run 45029969461 on commit e1c855c (PASS)
+# https://github.com/VladdHoryn/Plant_Shop/actions/runs/45029969461
+# Job and step conclusions (GitHub REST API /actions/runs/45029969461/jobs):
+"conclusion": "success", "name": "lint and strict build",
+"name": "Set up job", "conclusion": "success",
+"name": "Run actions/checkout@v4", "conclusion": "success",
+"name": "Run actions/setup-python@v5", "conclusion": "success",
+"name": "Install MkDocs Material and plugins", "conclusion": "success",
+"name": "markdownlint", "conclusion": "success",
+"name": "Spectral lint of docs/api/openapi.yaml", "conclusion": "success",
+"name": "review_date audit", "conclusion": "success",
+"name": "mkdocs build --strict", "conclusion": "success",
+"name": "Run actions/setup-java@v4", "conclusion": "success",
+"name": "Javadoc", "conclusion": "success",
+"name": "Run actions/upload-pages-artifact@v3", "conclusion": "success",
+"name": "Post Run actions/setup-java@v4", "conclusion": "success",
+"name": "Post Run actions/setup-python@v5", "conclusion": "success",
+"name": "Post Run actions/checkout@v4", "conclusion": "success",
+"name": "Complete job", "conclusion": "success",
+"conclusion": "failure", "name": "deploy",
+"name": "Set up job", "conclusion": "success",
+"name": "Run actions/deploy-pages@v4", "conclusion": "failure",
+"name": "Complete job", "conclusion": "success",
+
+# Annotations of the deploy job (/check-runs/137231450777/annotations):
+"Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/deploy-pages@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+"Error: Failed to create deployment (status: 404) with build version e1c855c8d9a1b0d7bc74e2251f3896100e5b69d3. Request ID 2B1F:EB824:9A9DCC:FB7CC6:6B02F476 Ensure GitHub Pages has been enabled: https://github.com/VladdHoryn/Plant_Shop/settings/pages",
+"Creating Pages deployment failed",
+
+# GET https://api.github.com/repos/VladdHoryn/Plant_Shop/pages at 2026-11-22T13:57:40Z:
+HTTP 404

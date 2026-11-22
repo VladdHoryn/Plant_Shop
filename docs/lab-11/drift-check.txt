@@ -1,0 +1,9 @@
+$ ./scripts/doc-drift-check.sh
+== 1. Controllers vs. docs/architecture/sdd.md (API contracts)
+  endpoints in code: 30, undocumented in SDD: 0
+== 2. docs/api/openapi.yaml operations vs. controllers (contract drift)
+  contract operations: 6, missing in code: 0
+== 3. docker-compose.yml depends_on vs. docs/architecture/isd.md (startup order)
+  containers: 15, startup rows that differ from ISD: 0
+RESULT: PASS - SDD, OpenAPI contract and ISD match the code
+exit code: 0
