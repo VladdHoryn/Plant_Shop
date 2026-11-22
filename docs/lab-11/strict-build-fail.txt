@@ -1,0 +1,14 @@
+$ ./scripts/docs-lint.sh   # markdownlint + Spectral: the defect is valid Markdown
+== 1. markdownlint
+Summary: 0 error(s)
+== 2. Spectral (docs/api/openapi.yaml)
+No results with a severity of 'error' found!
+== 3. review_date audit
+RESULT: PASS - every product document is within its review cycle
+docs-lint: PASS
+
+$ ./scripts/docs-build.sh  # mkdocs build --strict
+WARNING -  Doc file 'developer/CONTRIBUTING.md' contains a link '../architecture/release-checklist.md', but the target 'architecture/release-checklist.md' is not found among documentation files.
+Aborted with 1 warnings in strict mode!
+docs-build: FAIL, exit code 1
+exit code: 1

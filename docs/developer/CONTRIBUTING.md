@@ -21,6 +21,7 @@ tags:
 4. Pull request заповнює шаблон `.github/pull_request_template.md`; зміни в `docs/`, `mkdocs.yml`,
    `README.md` і контракті API потребують схвалення власника (`.github/CODEOWNERS`).
 5. Злиття лише при зелених перевірках: `quality-gate`, `code-metrics`, `docs-currency`, `docs`.
+6. Перед релізом пройти [чек-лист релізу](../architecture/release-checklist.md).
 
 ## Definition of Done: docs-or-don't-merge
 
