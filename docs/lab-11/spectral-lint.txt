@@ -1,0 +1,8 @@
+$ docker run --rm -v "$PWD:/work" -w /work stoplight/spectral:6.15.0 lint docs/api/openapi.yaml --ruleset .spectral.yaml --fail-severity error -D
+No results with a severity of 'error' found!
+exit code: 0
+
+# The same run showing every severity (warnings and hints too):
+$ docker run --rm -v "$PWD:/work" -w /work stoplight/spectral:6.15.0 lint docs/api/openapi.yaml --ruleset .spectral.yaml
+No results with a severity of 'error' found!
+exit code: 0

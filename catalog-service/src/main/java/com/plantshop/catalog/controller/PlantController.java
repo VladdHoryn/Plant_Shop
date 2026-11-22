@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,14 +30,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlantController {
 
+    /** Largest row offset the database layer accepts (JPA setFirstResult takes an int). */
+    static final long MAX_OFFSET = Integer.MAX_VALUE;
+
     private final PlantService plantService;
 
+    /** 400 instead of a 500 when page * size overflows the offset (found by the Schemathesis contract test). */
     @GetMapping
     public Page<PlantResponse> search(@RequestParam(required = false) String name,
                                       @RequestParam(required = false) Long categoryId,
                                       @RequestParam(required = false) CareLevel careLevel,
                                       @RequestParam(required = false) BigDecimal maxPrice,
                                       @PageableDefault(size = 20, sort = "name") Pageable pageable) {
+        if (pageable.getOffset() > MAX_OFFSET) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "page * size must not exceed " + MAX_OFFSET);
+        }
         return plantService.search(name, categoryId, careLevel, maxPrice, pageable);
     }
 

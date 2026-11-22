@@ -14,6 +14,6 @@ public record CreateOrderRequest(
         @NotBlank @Email String customerEmail,
         @NotBlank @Size(max = 500) String shippingAddress,
         @NotNull PaymentMethod paymentMethod,
-        @NotEmpty List<@Valid OrderItemRequest> items
+        @NotEmpty List<@NotNull @Valid OrderItemRequest> items
 ) {
 }

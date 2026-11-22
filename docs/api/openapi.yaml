@@ -44,6 +44,7 @@ paths:
       description: |
         Returns one page of active plants that match all given filters (deactivated plants are hidden). Without
         filters returns the whole active catalog sorted by name. `name` is a case-insensitive substring match.
+        `page` × `size` above 2147483647 is rejected with 400.
       parameters:
         - name: name
           in: query

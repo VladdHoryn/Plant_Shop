@@ -1,0 +1,11 @@
+# Spectral ruleset self-test: a copy of docs/api/openapi.yaml with 3 injected defects
+# (empty description of getOrder, no example in OrderItemRequest, inline 404 instead of a shared response)
+$ docker run --rm -v $PWD:/work -w /work stoplight/spectral:6.15.0 lint bad.yaml --ruleset .spectral.yaml -D
+
+/work/bad.yaml
+ 146:15  error  plantshop-error-response-shared  #/paths/~1api~1catalog~1plants~1%7Bid%7D/get/responses/404 must be a $ref to #/components/responses/...  paths./api/catalog/plants/{id}.get.responses[404]
+ 222:20  error  operation-description            Operation "description" must be present and non-empty string.                                            paths./api/orders/{id}.get.description
+ 588:22  error  plantshop-schema-example         Schema OrderItemRequest.example has no example.                                                          components.schemas.OrderItemRequest
+
+✖ 3 problems (3 errors, 0 warnings, 0 infos, 0 hints)
+exit code: 1

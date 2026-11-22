@@ -1,0 +1,70 @@
+$ MAX_EXAMPLES=50 SEED=11 ./scripts/api-contract-test.sh     # after the fixes
+Schemathesis v4.1.0
+━━━━━━━━━━━━━━━━━━━
+
+
+ ✅  Loaded specification from docs/api/openapi.yaml (in 0.45s)                 
+
+     Base URL:         http://host.docker.internal:8080                         
+     Specification:    Open API 3.0.3                                           
+     Operations:       6 selected / 6 total                                     
+
+
+ ✅  API capabilities:                                                          
+
+     Supports NULL byte in headers:    ✘                                        
+
+ ✅  Examples (in 1.04s)                                                        
+                                                                                
+     ✅ 6 passed                                                                
+
+ ✅  Coverage (in 19.31s)                                                       
+                                                                                
+     ✅ 6 passed                                                                
+
+ ✅  Fuzzing (in 12.40s)                                                        
+                                                                                
+     ✅ 6 passed                                                                
+
+=================================== WARNINGS ===================================
+
+Missing test data: 3 operations repeatedly returned 404 Not Found, preventing tests from reaching your API's core logic
+
+  - GET /api/catalog/plants/{id}
+  - GET /api/orders/{id}
+  - GET /api/orders/{id}/tracking
+
+💡 Provide realistic parameter values in your config file so tests can access existing resources
+
+Schema validation mismatch: 4 operations mostly rejected generated data due to validation errors, indicating schema constraints don't match API validation
+
+  - GET /api/catalog/plants/{id}
+  - GET /api/orders/{id}
+  - GET /api/orders/{id}/tracking
+  + 1 more
+
+💡 Check your schema constraints - API validation may be stricter than documented
+
+=================================== SUMMARY ====================================
+
+API Operations:
+  Selected: 6/6
+  Tested: 6
+
+Test Phases:
+  ✅ Examples
+  ✅ Coverage
+  ✅ Fuzzing
+  ⏭  Stateful (not applicable)
+
+Warnings:
+  ⚠️ Missing valid test data: 3 operations repeatedly returned 404 responses
+  ⚠️ Schema validation mismatch: 4 operations mostly rejected generated data
+
+Test cases:
+  557 generated, 557 passed
+
+Seed: 11
+
+========================== No issues found in 32.79s ===========================
+exit code: 0

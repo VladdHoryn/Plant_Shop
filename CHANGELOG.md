@@ -33,6 +33,12 @@ tags:
   рівні піраміди (README лишився 5-хвилинним входом).
 - `doc-drift-check.sh`: перевірка 2 тепер звіряє операції OpenAPI з контролерами (замість переліку в README).
 
+### Fixed
+
+- Розбіжності коду з контрактом, знайдені contract-тестом Schemathesis: `POST /api/orders` з `"items": [null]`
+  повертав 500 замість 400 (додано `@NotNull` до елементів `items`); `GET /api/catalog/plants` з `page × size`
+  понад 2147483647 повертав 500 замість 400 (перевірка зсуву в `PlantController`).
+
 ### Deprecated
 
 - Старі адреси `docs/sdd.md`, `docs/isd.md`, `docs/maintenance.md`, `docs/handover.md` — заглушки зі

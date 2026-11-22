@@ -1,0 +1,12 @@
+$ docker run --rm -v "$PWD:/w" -w /w --entrypoint python plantshop/mkdocs:1.6.1-material9.7.6 scripts/openapi_code_first_diff.py docs/api/openapi.yaml docs/lab-11/springdoc-catalog-service.json docs/lab-11/springdoc-order-service.json
+Plant                -> PlantResponse            fields 11 / 11  OK
+Category             -> CategoryResponse         fields  3 /  3  OK
+PlantPage            -> PagedModelPlantResponse  fields  2 /  2  OK
+PageMetadata         -> PageMetadata             fields  4 /  4  OK
+CreateOrderRequest   -> CreateOrderRequest       fields  4 /  4  OK
+OrderItemRequest     -> OrderItemRequest         fields  2 /  2  OK
+Order                -> OrderResponse            fields  9 /  9  OK
+OrderItem            -> OrderItemResponse        fields  5 /  5  OK
+OrderTracking        -> OrderTrackingResponse    fields  6 /  6  OK
+RESULT: PASS - 0 schema(s) differ
+exit code: 0

@@ -1,0 +1,111 @@
+$ MAX_EXAMPLES=50 SEED=11 ./scripts/api-contract-test.sh
+Schemathesis v4.1.0
+━━━━━━━━━━━━━━━━━━━
+
+
+ ✅  Loaded specification from docs/api/openapi.yaml (in 0.76s)                 
+
+     Base URL:         http://host.docker.internal:8080                         
+     Specification:    Open API 3.0.3                                           
+     Operations:       6 selected / 6 total                                     
+
+
+ ✅  API capabilities:                                                          
+
+     Supports NULL byte in headers:    ✘                                        
+
+ ✅  Examples (in 2.46s)                                                        
+                                                                                
+     ✅ 6 passed                                                                
+
+ ❌  Coverage (in 19.59s)                                                       
+                                                                                
+     ✅ 5 passed  ❌ 1 failed                                                   
+
+ ❌  Fuzzing (in 8.82s)                                                         
+                                                                                
+     ✅ 5 passed  ❌ 1 failed                                                   
+
+=================================== FAILURES ===================================
+_______________________________ POST /api/orders _______________________________
+1. Test Case ID: b6bT0W
+
+- Server error
+
+- Undocumented HTTP status code
+
+    Received: 500
+    Documented: 202, 400, 409, 503
+
+[500] Internal Server Error:
+
+    `{"timestamp":"2026-11-22T12:37:39.795+00:00","status":500,"error":"Internal Server Error","path":"/api/orders"}`
+
+Reproduce with: 
+
+    curl -X POST -H 'Content-Type: application/json' -d '{"customerEmail": "jane@example.com", "shippingAddress": "12 Fern Street, Kyiv", "paymentMethod": "CARD", "items": [null]}' http://host.docker.internal:8080/api/orders
+
+___________________________ GET /api/catalog/plants ____________________________
+1. Test Case ID: dzBF9M
+
+- Server error
+
+- Undocumented HTTP status code
+
+    Received: 500
+    Documented: 200, 400, 503
+
+[500] Internal Server Error:
+
+    `{"timestamp":"2026-11-22T12:37:41.653+00:00","status":500,"error":"Internal Server Error","path":"/api/catalog/plants"}`
+
+Reproduce with: 
+
+    curl -X GET 'http://host.docker.internal:8080/api/catalog/plants?%13%C3%A1=%F4%87%B5%B3&maxPrice=2.225073858507e-311&name=%F4%85%BB%83%C3%9F%09o%15%C2%B1&=&size=197&page=339360973'
+
+=================================== WARNINGS ===================================
+
+Missing test data: 3 operations repeatedly returned 404 Not Found, preventing tests from reaching your API's core logic
+
+  - GET /api/catalog/plants/{id}
+  - GET /api/orders/{id}
+  - GET /api/orders/{id}/tracking
+
+💡 Provide realistic parameter values in your config file so tests can access existing resources
+
+Schema validation mismatch: 4 operations mostly rejected generated data due to validation errors, indicating schema constraints don't match API validation
+
+  - GET /api/catalog/plants/{id}
+  - GET /api/orders/{id}
+  - GET /api/orders/{id}/tracking
+  + 1 more
+
+💡 Check your schema constraints - API validation may be stricter than documented
+
+=================================== SUMMARY ====================================
+
+API Operations:
+  Selected: 6/6
+  Tested: 6
+
+Test Phases:
+  ✅ Examples
+  ❌ Coverage
+  ❌ Fuzzing
+  ⏭  Stateful (not applicable)
+
+Failures:
+  ❌ Server error: 2
+  ❌ Undocumented HTTP status code: 2
+
+Warnings:
+  ⚠️ Missing valid test data: 3 operations repeatedly returned 404 responses
+  ⚠️ Schema validation mismatch: 4 operations mostly rejected generated data
+
+Test cases:
+  470 generated, 2 found 4 unique failures
+
+Seed: 11
+
+============================= 4 failures in 30.90s =============================
+exit code: 1
